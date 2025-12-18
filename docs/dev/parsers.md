@@ -30,19 +30,21 @@ Reference: https://github.com/antlr/antlr4/blob/master/doc/python-target.md
 ## Workflow
 
 1. Put grammar sources under `grammars/` (e.g. ANTLR `.g4`).
-2. Run the generator:
+2. Run the generator (choose one):
+
+   Option A: use an ANTLR tool jar (recommended for deterministic tool pinning)
+
    - `ANTLR4_JAR=/path/to/antlr-4.13.2-complete.jar python scripts/generate_parsers.py`
      (or
      `python scripts/generate_parsers.py --antlr-jar /path/to/antlr-4.13.2-complete.jar`)
 
-- Alternatively, if you have an `antlr4` executable installed, you can use it
-  without configuring a jar:
-  - `python scripts/generate_parsers.py` (auto-detects `antlr4` on `PATH`)
-  - or `python scripts/generate_parsers.py --antlr4 /path/to/antlr4`
+   Option B: use an `antlr4` executable (often provided by `antlr4-tools`)
 
-3. Commit any regenerated output under `openehr_am/_generated/`.
-4. Sanity check:
-   - `git diff` should be clean after committing regenerated output.
+   - `python scripts/generate_parsers.py` (auto-detects `antlr4` on `PATH`)
+   - or `python scripts/generate_parsers.py --antlr4 /path/to/antlr4`
+
+3. Review the changes under `openehr_am/_generated/`.
+4. Commit regenerated output.
 
 ## Contributor prerequisites
 
@@ -66,9 +68,54 @@ Notes:
   paths).
 - The generator should be safe to run repeatedly (idempotent).
 
+## Regeneration steps (copy/paste)
+
+From the repo root:
+
+```bash
+python -m pip install -e '.[dev]'
+
+# If you use a jar:
+ANTLR4_JAR=/path/to/antlr-4.13.2-complete.jar python scripts/generate_parsers.py
+
+# If you use an antlr4 executable:
+python scripts/generate_parsers.py
+
+git status
+git diff
+```
+
+Important details:
+
+- The generator normalizes machine-specific headers in generated Python files
+  (ANTLR includes absolute paths by default), so output diffs should be stable
+  across machines.
+- `openehr_am/_generated/README.md` is preserved; everything else in
+  `openehr_am/_generated/` is replaced on regeneration.
+
+## Version matching (tool vs runtime)
+
+Per ANTLR’s Python target documentation, the **ANTLR tool version** used to
+generate code should match the installed **antlr4-python3-runtime** version. The
+generator enforces this when it can detect both versions.
+
+If you see an error like:
+
+```text
+ANTLR tool/runtime version mismatch
+```
+
+use a jar / `antlr4` that matches the runtime pinned in this repository.
+
 ## CI enforcement
 
-CI runs the generator and fails if `git diff` shows changes.
+CI runs the generator and fails if committed generated code drifts.
+
+Policy:
+
+- `openehr_am/_generated/` is committed.
+- CI re-runs `python scripts/generate_parsers.py`.
+- CI fails the job if `git diff` is non-empty afterwards.
 
 Locally, you can run the same check:
 
@@ -76,6 +123,22 @@ Locally, you can run the same check:
 ANTLR4_JAR=/path/to/antlr-4.13.2-complete.jar python scripts/generate_parsers.py
 git diff --exit-code
 ```
+
+If you use an `antlr4` executable instead of a jar:
+
+```bash
+python scripts/generate_parsers.py
+git diff --exit-code
+```
+
+## Troubleshooting
+
+- `No ANTLR tool configured`: provide `ANTLR4_JAR` / `--antlr-jar`, or ensure an
+  `antlr4` executable is on `PATH`.
+- `JVM launcher not found on PATH`: a JVM is required when generating via
+  `java -jar ...`.
+- `ANTLR generation failed`: check that your grammar changes compile; run the
+  generator again to see the error output from the ANTLR tool.
 
 ## Optional local pytest check
 

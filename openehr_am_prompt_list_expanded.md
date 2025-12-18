@@ -514,15 +514,15 @@ Add options:
 
 ## Phase 17 — Documentation (task-by-task)
 
-### 17.1 Quickstart doc
+### 17.1 Quickstart doc [x]
 
 Add `docs/quickstart.md` with real CLI and API examples, including `--json`.
 
-### 17.2 Architecture doc
+### 17.2 Architecture doc [x]
 
 Expand `docs/architecture.md` with module boundaries and pipeline.
 
-### 17.3 Parser dev doc
+### 17.3 Parser dev doc [x]
 
 Flesh out `docs/dev/parsers.md` with regeneration steps and CI drift policy.
 
