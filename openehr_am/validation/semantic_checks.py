@@ -232,6 +232,68 @@ def _defined_codes(term: ArchetypeTerminology | None) -> set[str]:
     return {td.code for td in term.term_definitions}
 
 
+def _iter_alnum_dot_tokens(text: str) -> Iterator[str]:
+    """Yield tokens consisting of alnum and dot.
+
+    Used for best-effort extraction of specialised node ids like `at0001.1`.
+    """
+
+    buf: list[str] = []
+
+    def flush() -> Iterator[str]:
+        nonlocal buf
+        if buf:
+            tok = "".join(buf)
+            buf = []
+            yield tok
+
+    for ch in text:
+        if ch.isalnum() or ch == ".":
+            buf.append(ch)
+            continue
+        yield from flush()
+
+    yield from flush()
+
+
+def _iter_path_like_tokens(text: str) -> Iterator[str]:
+    """Yield best-effort path-like tokens from a statement.
+
+    Supported forms:
+        - /path...
+        - "/path..."  (quotes stripped)
+        - '/path...'   (quotes stripped)
+    """
+
+    for raw in text.split():
+        # Keep brackets for `/attr[node_id]` segments; only strip common wrappers.
+        tok = raw.strip("\"'(),;")
+        if tok.startswith("/") and len(tok) > 1:
+            yield tok
+
+
+def _iter_rule_references(statement_text: str) -> Iterator[tuple[str, str]]:
+    """Yield (kind, value) references from rule statement text.
+
+    Kinds:
+        - "path": openEHR-style path strings starting with '/'
+        - "code": terminology node-ids (at/ac with optional .n suffixes)
+    """
+
+    paths = tuple(_iter_path_like_tokens(statement_text))
+    for p in paths:
+        yield "path", p
+
+    # Avoid double-reporting node ids already embedded in paths.
+    masked = statement_text
+    for p in paths:
+        masked = masked.replace(p, " ")
+
+    for tok in _iter_alnum_dot_tokens(masked):
+        if _is_node_id_like(tok):
+            yield "code", tok
+
+
 def check_referenced_terminology_codes_exist(ctx: ValidationContext) -> Iterable[Issue]:
     """AOM200: every referenced `atNNNN`/`acNNNN` exists in terminology."""
 
@@ -326,6 +388,75 @@ def check_template_overlay_exclusion_paths(ctx: ValidationContext) -> Iterable[I
                 path=p,
             )
         )
+
+    return tuple(issues)
+
+
+def check_rules_reference_known_paths_and_codes(
+    ctx: ValidationContext,
+) -> Iterable[Issue]:
+    """AOM290: rule references must point to known paths/codes (supported subset).
+
+    Supported subset:
+        - openEHR-style paths embedded as tokens starting with '/'
+        - terminology node ids (`atNNNN(.n)*` / `acNNNN(.n)*`) appearing in text
+
+    # Spec: https://specifications.openehr.org/releases/AM/latest/AOM2.html
+    """
+
+    artefact = ctx.artefact
+    if not isinstance(artefact, (Archetype, Template)):
+        return ()
+
+    if getattr(artefact, "rules", ()) == ():
+        return ()
+
+    defined = _defined_codes(artefact.terminology)
+
+    issues: list[Issue] = []
+    for stmt in artefact.rules:
+        span = getattr(stmt, "span", None)
+        file = span.file if span else None
+        line = span.start_line if span else None
+        col = span.start_col if span else None
+        end_line = span.end_line if span else None
+        end_col = span.end_col if span else None
+
+        for kind, value in _iter_rule_references(getattr(stmt, "text", "")):
+            if kind == "path":
+                if _path_resolves_in_definition(artefact.definition, path=value):
+                    continue
+                issues.append(
+                    Issue(
+                        code="AOM290",
+                        severity=Severity.WARN,
+                        message=f"Rule references invalid path '{value}'",
+                        file=file,
+                        line=line,
+                        col=col,
+                        end_line=end_line,
+                        end_col=end_col,
+                        path=value,
+                    )
+                )
+                continue
+
+            if kind == "code":
+                if value in defined:
+                    continue
+                issues.append(
+                    Issue(
+                        code="AOM290",
+                        severity=Severity.WARN,
+                        message=f"Rule references unknown terminology code '{value}'",
+                        file=file,
+                        line=line,
+                        col=col,
+                        end_line=end_line,
+                        end_col=end_col,
+                        node_id=value,
+                    )
+                )
 
     return tuple(issues)
 
@@ -842,4 +973,9 @@ register_semantic_check(
 register_semantic_check(
     check_template_overlay_exclusion_paths,
     name="aom280_template_overlay_exclusion_paths",
+)
+
+register_semantic_check(
+    check_rules_reference_known_paths_and_codes,
+    name="aom290_rules_reference_known_paths_and_codes",
 )

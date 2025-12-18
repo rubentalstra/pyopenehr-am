@@ -68,6 +68,7 @@ def test_aom_to_dict_is_deterministic_and_json_serializable() -> None:
         "languages",
         "definition",
         "terminology",
+        "rules",
         "span",
     ]
 

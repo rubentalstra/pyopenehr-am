@@ -400,6 +400,120 @@ def test_validate_semantic_aom280_valid_paths_ok() -> None:
     assert [i.code for i in issues if i.code == "AOM280"] == []
 
 
+def test_validate_semantic_aom290_invalid_rule_path_reference_emitted() -> None:
+    from openehr_am.antlr.span import SourceSpan
+    from openehr_am.aom.archetype import Archetype, RuleStatement
+    from openehr_am.aom.constraints import CAttribute, CComplexObject
+    from openehr_am.aom.terminology import ArchetypeTerminology, TermDefinition
+
+    root_span = SourceSpan(
+        file="rules.adl", start_line=1, start_col=1, end_line=1, end_col=10
+    )
+    stmt_span = SourceSpan(
+        file="rules.adl", start_line=20, start_col=1, end_line=20, end_col=30
+    )
+
+    definition = CComplexObject(
+        rm_type_name="OBSERVATION",
+        node_id="at0000",
+        attributes=(
+            CAttribute(
+                rm_attribute_name="data",
+                children=(
+                    CComplexObject(
+                        rm_type_name="HISTORY",
+                        node_id="at0001",
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    terminology = ArchetypeTerminology(
+        original_language="en",
+        term_definitions=(
+            TermDefinition(language="en", code="at0000", text="Root"),
+            TermDefinition(language="en", code="at0001", text="Child"),
+        ),
+    )
+
+    aom = Archetype(
+        archetype_id="openEHR-EHR-OBSERVATION.rules.v1",
+        concept="at0000",
+        original_language="en",
+        languages=("en",),
+        definition=definition,
+        terminology=terminology,
+        rules=(RuleStatement(text="assert /no_such_attr[at9999]", span=stmt_span),),
+        span=root_span,
+    )
+
+    issues = validate_semantic(aom)
+    aom290 = [i for i in issues if i.code == "AOM290"]
+    assert len(aom290) == 1
+    assert aom290[0].severity is Severity.WARN
+    assert aom290[0].path == "/no_such_attr[at9999]"
+    assert aom290[0].file == "rules.adl"
+    assert aom290[0].line == 20
+
+
+def test_validate_semantic_aom290_invalid_rule_code_reference_emitted() -> None:
+    from openehr_am.antlr.span import SourceSpan
+    from openehr_am.aom.archetype import Archetype, RuleStatement
+    from openehr_am.aom.constraints import CAttribute, CComplexObject
+    from openehr_am.aom.terminology import ArchetypeTerminology, TermDefinition
+
+    root_span = SourceSpan(
+        file="rules.adl", start_line=1, start_col=1, end_line=1, end_col=10
+    )
+    stmt_span = SourceSpan(
+        file="rules.adl", start_line=21, start_col=1, end_line=21, end_col=30
+    )
+
+    definition = CComplexObject(
+        rm_type_name="OBSERVATION",
+        node_id="at0000",
+        attributes=(
+            CAttribute(
+                rm_attribute_name="data",
+                children=(
+                    CComplexObject(
+                        rm_type_name="HISTORY",
+                        node_id="at0001",
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    terminology = ArchetypeTerminology(
+        original_language="en",
+        term_definitions=(
+            TermDefinition(language="en", code="at0000", text="Root"),
+            TermDefinition(language="en", code="at0001", text="Child"),
+        ),
+    )
+
+    aom = Archetype(
+        archetype_id="openEHR-EHR-OBSERVATION.rules.v1",
+        concept="at0000",
+        original_language="en",
+        languages=("en",),
+        definition=definition,
+        terminology=terminology,
+        rules=(RuleStatement(text="assert at9999", span=stmt_span),),
+        span=root_span,
+    )
+
+    issues = validate_semantic(aom)
+    aom290 = [i for i in issues if i.code == "AOM290"]
+    assert len(aom290) == 1
+    assert aom290[0].severity is Severity.WARN
+    assert aom290[0].node_id == "at9999"
+    assert aom290[0].file == "rules.adl"
+    assert aom290[0].line == 21
+
+
 def test_validate_semantic_aom210_allows_specialised_node_id_pattern() -> None:
     from openehr_am.antlr.span import SourceSpan
     from openehr_am.aom.archetype import Archetype

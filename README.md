@@ -88,11 +88,11 @@ See:
 
 This repo is **standards-driven**. Pin the exact spec releases you implement in:
 
-- `SPEC_BASELINE.md` (to be created/maintained)
+- [`SPEC_BASELINE.md`](SPEC_BASELINE.md)
 
 Curated links live in:
 
-- `openehr_am_resources.md`
+- [`openehr_am_resources.md`](openehr_am_resources.md)
 
 ---
 

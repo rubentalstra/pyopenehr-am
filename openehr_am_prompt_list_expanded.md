@@ -361,7 +361,7 @@ Validate language presence and basic structure. Emit `AOM270`. Add tests.
 Add basic checks for templates: excluded nodes exist, overlays reference valid
 paths. Emit `AOM280`. Add tests.
 
-### 10.8 Rules reference validity (basic)
+### 10.8 Rules reference validity (basic) [x]
 
 Validate that rule references point to known paths/codes for supported subset.
 Emit `AOM290`. Add tests.
