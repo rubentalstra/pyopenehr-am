@@ -292,7 +292,7 @@ Prefer slots/frozen where appropriate. Add tests.
 Implement helpers for archetype ids and node ids (`atNNNN`, `acNNNN`). Add
 tests.
 
-### 8.3 AST → AOM builder: header + terminology + minimal definition
+### 8.3 AST → AOM builder: header + terminology + minimal definition [x]
 
 Build AOM objects from ADL AST + cADL AST for the supported subset. Preserve
 source locations. Add tests.

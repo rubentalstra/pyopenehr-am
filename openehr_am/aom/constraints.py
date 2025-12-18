@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 from openehr_am.antlr.span import SourceSpan
 
-type MaybeInt = int | None
+type MaybeNumber = int | float | None
 
 
 @dataclass(slots=True, frozen=True)
@@ -22,10 +22,46 @@ class Interval:
         - Use `None` for unbounded sides.
     """
 
-    lower: MaybeInt = None
-    upper: MaybeInt = None
+    lower: MaybeNumber = None
+    upper: MaybeNumber = None
     lower_included: bool = True
     upper_included: bool = True
+    span: SourceSpan | None = None
+
+
+@dataclass(slots=True, frozen=True)
+class PrimitiveStringConstraint:
+    values: tuple[str, ...] | None = None
+    pattern: str | None = None
+    span: SourceSpan | None = None
+
+
+@dataclass(slots=True, frozen=True)
+class PrimitiveIntegerConstraint:
+    values: tuple[int, ...] | None = None
+    interval: Interval | None = None
+    span: SourceSpan | None = None
+
+
+@dataclass(slots=True, frozen=True)
+class PrimitiveRealConstraint:
+    values: tuple[float, ...] | None = None
+    interval: Interval | None = None
+    span: SourceSpan | None = None
+
+
+@dataclass(slots=True, frozen=True)
+class PrimitiveBooleanConstraint:
+    values: tuple[bool, ...] | None = None
+    span: SourceSpan | None = None
+
+
+type PrimitiveConstraint = (
+    PrimitiveStringConstraint
+    | PrimitiveIntegerConstraint
+    | PrimitiveRealConstraint
+    | PrimitiveBooleanConstraint
+)
 
 
 @dataclass(slots=True, frozen=True)
@@ -74,10 +110,15 @@ class CPrimitiveObject(CObject):
     refined when primitive constraint types are implemented.
     """
 
-    constraint: object | None = None
+    constraint: PrimitiveConstraint | None = None
 
 
 __all__ = [
+    "PrimitiveConstraint",
+    "PrimitiveStringConstraint",
+    "PrimitiveIntegerConstraint",
+    "PrimitiveRealConstraint",
+    "PrimitiveBooleanConstraint",
     "Interval",
     "Cardinality",
     "CObject",
