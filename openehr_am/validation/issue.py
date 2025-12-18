@@ -6,7 +6,6 @@ The entire toolkit reports recoverable problems as `Issue` objects.
 from dataclasses import dataclass
 from enum import StrEnum
 
-
 _ISSUE_CODE_RANGES: dict[str, tuple[int, int]] = {
     "ADL": (1, 199),
     "ODN": (100, 199),
