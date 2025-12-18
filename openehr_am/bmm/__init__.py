@@ -8,10 +8,12 @@ The loader/repository logic is intentionally separate from validation rules.
 
 from openehr_am.bmm.loader import load_bmm
 from openehr_am.bmm.model import Class, Model, Multiplicity, Package, Property, TypeRef
+from openehr_am.bmm.repository import ModelRepository
 
 __all__ = [
     "Class",
     "Model",
+    "ModelRepository",
     "Multiplicity",
     "Package",
     "Property",

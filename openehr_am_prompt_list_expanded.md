@@ -398,7 +398,7 @@ Multiplicity. Add tests.
 Implement `load_bmm(path)` mapping ODIN AST → BMM dataclasses (subset). Add
 tests with tiny fixture.
 
-### 12.3 ModelRepository loader for a directory
+### 12.3 ModelRepository loader for a directory [x]
 
 Implement `ModelRepository.load_from_dir(dir)` that loads multiple `.bmm`,
 resolves class refs, and provides `get_class(name)`. Add tests.
