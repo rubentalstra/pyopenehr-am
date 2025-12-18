@@ -1,0 +1,76 @@
+name: Feature request
+description: Suggest an enhancement or new capability.
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea.
+
+        This project is standards-driven (openEHR ADL2/AOM2/ODIN/BMM/OPT2) and prefers a small, stable public API.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem are you trying to solve?
+      placeholder: As a ..., I want ..., so that ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should the library do? Include a small API sketch if relevant.
+      placeholder: |
+        - New function/class: ...
+        - Behavior: ...
+        - Example: ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - ADL parsing
+        - ODIN parsing
+        - AOM building
+        - Validation
+        - BMM/RM
+        - OPT compilation
+        - Path parsing
+        - CLI
+        - Docs
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: spec
+    attributes:
+      label: Spec / references
+      description: Links to openEHR specs, issues, or other references that justify the feature.
+      placeholder: Paste URLs (preferred) or short citations.
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any alternatives or workarounds you’ve tried.
+    validations:
+      required: false
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope notes
+      description: Any constraints (performance, backwards compatibility, ergonomics).
+    validations:
+      required: false

@@ -1,0 +1,36 @@
+name: Other
+description: Anything that doesn’t fit bug/feature (question, maintenance, refactor proposal).
+title: "chore: "
+labels:
+  - triage
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What’s this about?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Type
+      options:
+        - Question
+        - Maintenance
+        - Refactor proposal
+        - Discussion
+        - Documentation
+        - Release process
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Any relevant details, links, or background.
+    validations:
+      required: false
