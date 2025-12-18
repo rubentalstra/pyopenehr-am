@@ -35,7 +35,14 @@ def render_issues(
         text = json.dumps(payload, ensure_ascii=False)
         # Print as plain text (no markup/highlighting) while still going through
         # Rich so record=True captures output for tests.
-        console.print(text, markup=False, highlight=False)
+        # Important: prevent Rich from inserting line wraps, which would break JSON.
+        console.print(
+            text,
+            markup=False,
+            highlight=False,
+            overflow="ignore",
+            crop=False,
+        )
         return
 
     for file, group in _group_by_file(issues_list).items():

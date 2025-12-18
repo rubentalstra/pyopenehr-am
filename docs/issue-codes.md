@@ -65,6 +65,8 @@ Codes are formatted as:
 | OPT750  | ERROR    | Integrity | Broken internal reference after compilation       | OPT2                      |
 | PATH900 | ERROR    | Path      | Path parse failure                                | Path rules                |
 | PATH910 | ERROR    | Path      | Path resolves to no nodes                         | Path resolver             |
+| CLI010  | ERROR    | IO        | Cannot write output file                          | Internal                  |
+| CLI011  | ERROR    | IO        | Invalid archetype repository directory            | Internal                  |
 
 ## Contributor checklist for new codes
 
