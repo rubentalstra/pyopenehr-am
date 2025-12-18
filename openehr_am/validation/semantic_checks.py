@@ -460,6 +460,70 @@ def check_interval_invariants(ctx: ValidationContext) -> Iterable[Issue]:
     return tuple(issues)
 
 
+def check_value_set_integrity(ctx: ValidationContext) -> Iterable[Issue]:
+    """AOM260: validate value set references and emptiness rules.
+
+    Rules (basic):
+    - A value set must not be empty.
+    - Every member code referenced by a value set must exist in terminology.
+
+    # Spec: https://specifications.openehr.org/releases/AM/latest/AOM2.html#_archetype_terminology_class
+    """
+
+    artefact = ctx.artefact
+    if not isinstance(artefact, (Archetype, Template)):
+        return ()
+
+    term = artefact.terminology
+    if term is None:
+        return ()
+
+    defined = _defined_codes(term)
+    issues: list[Issue] = []
+
+    def emit(*, message: str, span: SourceSpan | None, path: str, node_id: str | None):
+        issues.append(
+            Issue(
+                code="AOM260",
+                severity=Severity.ERROR,
+                message=message,
+                file=span.file if span else None,
+                line=span.start_line if span else None,
+                col=span.start_col if span else None,
+                end_line=span.end_line if span else None,
+                end_col=span.end_col if span else None,
+                path=path,
+                node_id=node_id,
+            )
+        )
+
+    for vs in term.value_sets:
+        vs_path = f"/terminology/value_sets/{vs.id}"
+
+        if len(vs.members) == 0:
+            emit(
+                message=f"Value set '{vs.id}' must not be empty",
+                span=vs.span,
+                path=vs_path,
+                node_id=vs.id,
+            )
+            continue
+
+        for member in vs.members:
+            if member in defined:
+                continue
+            emit(
+                message=(
+                    f"Value set '{vs.id}' references undefined terminology code '{member}'"
+                ),
+                span=vs.span,
+                path=vs_path,
+                node_id=member,
+            )
+
+    return tuple(issues)
+
+
 register_semantic_check(
     check_referenced_terminology_codes_exist,
     name="aom200_referenced_codes_exist_in_terminology",
@@ -483,4 +547,9 @@ register_semantic_check(
 register_semantic_check(
     check_interval_invariants,
     name="aom250_interval_invariants",
+)
+
+register_semantic_check(
+    check_value_set_integrity,
+    name="aom260_value_set_integrity",
 )

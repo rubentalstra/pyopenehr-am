@@ -348,7 +348,7 @@ Implement check: detect duplicates in scopes (basic). Emit `AOM240`. Add tests.
 
 Check min<=max and invariants. Emit `AOM250`. Add tests.
 
-### 10.5 Value sets integrity
+### 10.5 Value sets integrity [x]
 
 Validate value set references and emptiness rules. Emit `AOM260`. Add tests.
 

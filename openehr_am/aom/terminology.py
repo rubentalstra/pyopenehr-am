@@ -42,12 +42,29 @@ class TermBinding:
 
 
 @dataclass(slots=True, frozen=True)
+class ValueSet:
+    """A terminology value set.
+
+    Notes:
+        This is a minimal representation used by validators.
+    """
+
+    id: str
+    members: tuple[str, ...] = ()
+    span: SourceSpan | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        return aom_to_dict(self)
+
+
+@dataclass(slots=True, frozen=True)
 class ArchetypeTerminology:
     """Terminology bundle for an archetype/template."""
 
     original_language: str
     term_definitions: tuple[TermDefinition, ...] = ()
     term_bindings: tuple[TermBinding, ...] = ()
+    value_sets: tuple[ValueSet, ...] = ()
 
     span: SourceSpan | None = None
 
@@ -59,4 +76,5 @@ __all__ = [
     "ArchetypeTerminology",
     "TermBinding",
     "TermDefinition",
+    "ValueSet",
 ]

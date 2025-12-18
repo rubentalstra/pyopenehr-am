@@ -529,3 +529,95 @@ def test_validate_semantic_aom250_invalid_primitive_interval_emitted() -> None:
     assert [i.code for i in issues] == ["AOM250"]
     assert issues[0].line == 25
     assert issues[0].path == "/definition/count/constraint"
+
+
+def test_validate_semantic_aom260_empty_value_set_emitted() -> None:
+    from openehr_am.antlr.span import SourceSpan
+    from openehr_am.aom.archetype import Archetype
+    from openehr_am.aom.constraints import CComplexObject
+    from openehr_am.aom.terminology import (
+        ArchetypeTerminology,
+        TermDefinition,
+        ValueSet,
+    )
+
+    root_span = SourceSpan(
+        file="vs_empty.adl", start_line=10, start_col=1, end_line=10, end_col=10
+    )
+    vs_span = SourceSpan(
+        file="vs_empty.adl", start_line=40, start_col=1, end_line=40, end_col=10
+    )
+
+    definition = CComplexObject(
+        rm_type_name="OBSERVATION",
+        node_id="at0000",
+        span=root_span,
+        attributes=(),
+    )
+
+    terminology = ArchetypeTerminology(
+        original_language="en",
+        term_definitions=(TermDefinition(language="en", code="at0000", text="Root"),),
+        value_sets=(ValueSet(id="ac0001", members=(), span=vs_span),),
+    )
+
+    aom = Archetype(
+        archetype_id="openEHR-EHR-OBSERVATION.vs_empty.v1",
+        concept="at0000",
+        definition=definition,
+        terminology=terminology,
+        span=root_span,
+    )
+
+    issues = validate_semantic(aom)
+    assert [i.code for i in issues] == ["AOM260"]
+    assert issues[0].line == 40
+    assert issues[0].path == "/terminology/value_sets/ac0001"
+
+
+def test_validate_semantic_aom260_value_set_member_must_exist_emitted() -> None:
+    from openehr_am.antlr.span import SourceSpan
+    from openehr_am.aom.archetype import Archetype
+    from openehr_am.aom.constraints import CComplexObject
+    from openehr_am.aom.terminology import (
+        ArchetypeTerminology,
+        TermDefinition,
+        ValueSet,
+    )
+
+    root_span = SourceSpan(
+        file="vs_ref.adl", start_line=10, start_col=1, end_line=10, end_col=10
+    )
+    vs_span = SourceSpan(
+        file="vs_ref.adl", start_line=40, start_col=1, end_line=40, end_col=10
+    )
+
+    definition = CComplexObject(
+        rm_type_name="OBSERVATION",
+        node_id="at0000",
+        span=root_span,
+        attributes=(),
+    )
+
+    terminology = ArchetypeTerminology(
+        original_language="en",
+        term_definitions=(
+            TermDefinition(language="en", code="at0000", text="Root"),
+            TermDefinition(language="en", code="at0001", text="Defined"),
+        ),
+        value_sets=(ValueSet(id="ac0001", members=("at0001", "at9999"), span=vs_span),),
+    )
+
+    aom = Archetype(
+        archetype_id="openEHR-EHR-OBSERVATION.vs_ref.v1",
+        concept="at0000",
+        definition=definition,
+        terminology=terminology,
+        span=root_span,
+    )
+
+    issues = validate_semantic(aom)
+    assert [i.code for i in issues] == ["AOM260"]
+    assert issues[0].node_id == "at9999"
+    assert issues[0].line == 40
+    assert issues[0].path == "/terminology/value_sets/ac0001"
