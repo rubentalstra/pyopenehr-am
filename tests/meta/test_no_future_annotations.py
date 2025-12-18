@@ -1,10 +1,10 @@
-from __future__ import annotations
-
 from pathlib import Path
+
+from tests.repo_root import repo_root
 
 
 def test_no_future_annotations_import_in_openehr_am() -> None:
-    package_root = Path(__file__).resolve().parents[1] / "openehr_am"
+    package_root = repo_root(Path(__file__).resolve()) / "openehr_am"
 
     offenders: list[Path] = []
     needle = "from __future__ import annotations"

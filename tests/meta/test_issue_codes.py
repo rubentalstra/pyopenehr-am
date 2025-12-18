@@ -2,13 +2,13 @@ import re
 from pathlib import Path
 
 from openehr_am.validation.issue import validate_issue_code
+from tests.repo_root import repo_root
 
 _CODE_RE = re.compile(r"\b(?:ADL|ODN|AOM|BMM|OPT|PATH|CLI)\d{3}\b")
 
 
 def _repo_root() -> Path:
-    # tests/ is at repo_root/tests/
-    return Path(__file__).resolve().parents[1]
+    return repo_root(Path(__file__).resolve())
 
 
 def _iter_python_source_files(root: Path) -> list[Path]:

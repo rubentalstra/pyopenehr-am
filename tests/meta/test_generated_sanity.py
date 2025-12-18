@@ -4,13 +4,15 @@ from pathlib import Path
 
 import pytest
 
+from tests.repo_root import repo_root
+
 _GRAMMAR_NAME_RE = re.compile(
     r"^\s*(?:lexer\s+|parser\s+)?grammar\s+([A-Za-z_]\w*)\s*;\s*$"
 )
 
 
 def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[1]
+    return repo_root(Path(__file__).resolve())
 
 
 def _grammar_names(grammars: list[Path]) -> list[str]:
