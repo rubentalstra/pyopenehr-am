@@ -1,8 +1,4 @@
 from pathlib import Path
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from openehr_am.aom.archetype import Template
 
 
 def _archetype_adl(archetype_id: str, *, parent_archetype_id: str | None = None) -> str:
@@ -17,6 +13,28 @@ def _archetype_adl(archetype_id: str, *, parent_archetype_id: str | None = None)
         "description\n<>\n\n"
         "terminology\n<>\n\n"
         "definition\n-- TODO\n"
+    )
+
+
+def _archetype_adl_with_definition(
+    archetype_id: str,
+    *,
+    definition_cadl: str,
+    parent_archetype_id: str | None = None,
+) -> str:
+    specialise = f"\nspecialise\n{parent_archetype_id}\n" if parent_archetype_id else ""
+    cadl = definition_cadl.strip("\n") + "\n"
+    return (
+        "archetype\n"
+        f"{archetype_id}\n"
+        f"{specialise}\n"
+        "language\n"
+        'original_language = <"en">\n'
+        'language = <"en">\n\n'
+        "description\n<>\n\n"
+        "terminology\n<>\n\n"
+        "definition\n"
+        f"{cadl}"
     )
 
 
@@ -44,9 +62,9 @@ def _template_with_slot_adl(template_id: str, *, include_pattern: str) -> str:
     )
 
 
-def _parse_template_from_adl(text: str, *, filename: str) -> Template:
+def _parse_template_from_adl(text: str, *, filename: str):
     from openehr_am.adl import parse_adl
-    from openehr_am.aom.archetype import Template
+    from openehr_am.aom.archetype import Template as AomTemplate
     from openehr_am.aom.builder import build_aom_from_adl
     from openehr_am.validation.issue import Severity
 
@@ -55,7 +73,7 @@ def _parse_template_from_adl(text: str, *, filename: str) -> Template:
     assert not any(i.severity is Severity.ERROR for i in parse_issues)
 
     aom, build_issues = build_aom_from_adl(artefact)
-    assert isinstance(aom, Template)
+    assert isinstance(aom, AomTemplate)
     assert not any(i.severity is Severity.ERROR for i in build_issues)
     return aom
 
@@ -141,3 +159,102 @@ def test_compile_opt_slot_filling_match_succeeds(tmp_path: Path) -> None:
     assert not any(i.code == "OPT720" for i in issues)
     assert opt is not None
     assert wanted in opt.component_archetype_ids
+
+
+def test_compile_opt_specialisation_flattening_merges_child_over_parent(
+    tmp_path: Path,
+) -> None:
+    from openehr_am.aom.archetype import Template
+    from openehr_am.opt.compiler import compile_opt
+    from openehr_am.opt.model import OptCComplexObject
+
+    parent_id = "openEHR-EHR-COMPOSITION.parent.v1"
+    child_id = "openEHR-EHR-COMPOSITION.child.v1"
+
+    parent_def = (
+        "COMPOSITION matches {\n"
+        "  content matches {\n"
+        "    OBSERVATION[at0001] matches { }\n"
+        "  }\n"
+        "}\n"
+    )
+    child_def = (
+        "COMPOSITION matches {\n"
+        "  content matches {\n"
+        "    OBSERVATION[at0001] matches {\n"
+        "      data matches { ITEM_TREE matches { } }\n"
+        "    }\n"
+        "  }\n"
+        "}\n"
+    )
+
+    (tmp_path / "parent.adl").write_text(
+        _archetype_adl_with_definition(parent_id, definition_cadl=parent_def),
+        encoding="utf-8",
+    )
+    (tmp_path / "child.adl").write_text(
+        _archetype_adl_with_definition(
+            child_id,
+            definition_cadl=child_def,
+            parent_archetype_id=parent_id,
+        ),
+        encoding="utf-8",
+    )
+
+    template = Template(template_id="openEHR-EHR-COMPOSITION.example_template.v1")
+    opt, issues = compile_opt(template, archetype_dir=tmp_path)
+
+    assert opt is not None
+    assert issues == []
+    assert opt.definition is not None
+
+    root = opt.definition
+    content = next(a for a in root.attributes if a.rm_attribute_name == "content")
+    obs = next(c for c in content.children if c.node_id == "at0001")
+    assert isinstance(obs, OptCComplexObject)
+    data = next(a for a in obs.attributes if a.rm_attribute_name == "data")
+    assert data.children
+
+
+def test_compile_opt_specialisation_flattening_conflict_emits_opt730(
+    tmp_path: Path,
+) -> None:
+    from openehr_am.aom.archetype import Template
+    from openehr_am.opt.compiler import compile_opt
+
+    parent_id = "openEHR-EHR-COMPOSITION.parent.v1"
+    child_id = "openEHR-EHR-COMPOSITION.child.v1"
+
+    parent_def = (
+        "COMPOSITION matches {\n"
+        "  content matches {\n"
+        "    OBSERVATION[at0001] matches { }\n"
+        "  }\n"
+        "}\n"
+    )
+    child_def = (
+        "COMPOSITION matches {\n"
+        "  content matches {\n"
+        "    EVALUATION[at0001] matches { }\n"
+        "  }\n"
+        "}\n"
+    )
+
+    (tmp_path / "parent.adl").write_text(
+        _archetype_adl_with_definition(parent_id, definition_cadl=parent_def),
+        encoding="utf-8",
+    )
+    (tmp_path / "child.adl").write_text(
+        _archetype_adl_with_definition(
+            child_id,
+            definition_cadl=child_def,
+            parent_archetype_id=parent_id,
+        ),
+        encoding="utf-8",
+    )
+
+    template = Template(template_id="openEHR-EHR-COMPOSITION.example_template.v1")
+    opt, issues = compile_opt(template, archetype_dir=tmp_path)
+
+    assert opt is None
+    assert any(i.code == "OPT730" for i in issues)

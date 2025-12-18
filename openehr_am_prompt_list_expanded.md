@@ -457,7 +457,7 @@ Add tests.
 
 Implement slot filling for a subset; emit `OPT720` if no match. Add tests.
 
-### 14.5 OPT compilation: specialization flattening (basic)
+### 14.5 OPT compilation: specialization flattening (basic) [x]
 
 Implement minimal flattening rules; emit `OPT730` on conflict. Add tests.
 

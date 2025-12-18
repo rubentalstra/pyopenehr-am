@@ -22,6 +22,10 @@ from openehr_am.aom.archetype import Template
 from openehr_am.aom.constraints import CArchetypeSlot, CComplexObject, CObject
 from openehr_am.aom.repository import ArchetypeRepository
 from openehr_am.opt.dependencies import dependency_order_for_archetypes
+from openehr_am.opt.flattening import (
+    aom_definition_to_opt,
+    flatten_specialisation_definition,
+)
 from openehr_am.opt.model import OperationalTemplate
 from openehr_am.validation.issue import Issue, Severity
 
@@ -99,6 +103,21 @@ def compile_opt(
     # Best-effort root: the most dependent archetype (last in dependency order).
     root_archetype_id = order[-1] if order else None
 
+    definition = None
+    if root_archetype_id is not None:
+        root = repo.get(root_archetype_id)
+        if root is not None and root.definition is not None:
+            flattened, flat_issues = flatten_specialisation_definition(root, repo)
+            issues.extend(flat_issues)
+            if any(i.severity is Severity.ERROR for i in issues):
+                return None, issues
+            if flattened is not None:
+                definition = aom_definition_to_opt(
+                    flattened,
+                    root_path="/",
+                    source_archetype_id=root_archetype_id,
+                )
+
     opt = OperationalTemplate(
         template_id=template.template_id,
         concept=template.concept,
@@ -106,7 +125,7 @@ def compile_opt(
         language=template.languages[0] if template.languages else None,
         root_archetype_id=root_archetype_id,
         component_archetype_ids=order,
-        definition=None,
+        definition=definition,
         span=template.span,
     )
 
