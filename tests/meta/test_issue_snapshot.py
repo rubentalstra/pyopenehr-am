@@ -1,9 +1,8 @@
 from pathlib import Path
 
+from openehr_am.validation.issue import Issue, Severity
 from tests.repo_root import repo_root
 from tests.support.issue_snapshot import format_issues
-
-from openehr_am.validation.issue import Issue, Severity
 
 
 def test_format_issues_normalizes_paths_and_sorts() -> None:

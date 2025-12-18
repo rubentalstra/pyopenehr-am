@@ -3,13 +3,12 @@ from pathlib import Path
 
 import pytest
 
-from tests.repo_root import repo_root
-from tests.support.issue_snapshot import format_issues
-
 from openehr_am import parse_archetype, parse_template, validate
 from openehr_am.odin.parser import parse_odin
 from openehr_am.validation.issue import Issue, Severity
 from openehr_am.validation.issue_collector import IssueCollector
+from tests.repo_root import repo_root
+from tests.support.issue_snapshot import format_issues
 
 
 @dataclass(slots=True, frozen=True)
@@ -102,8 +101,8 @@ def test_corpus_files_parse_and_validate(path: Path) -> None:
     has_error = any(i.severity is Severity.ERROR for i in res.issues)
 
     if path.name.startswith("ok_"):
-        assert res.parsed_ok, (
-            f"Expected parse OK for {path.name}\n" + format_issues(list(res.issues), root=root)
+        assert res.parsed_ok, f"Expected parse OK for {path.name}\n" + format_issues(
+            list(res.issues), root=root
         )
         assert not has_error, (
             f"Expected no ERROR issues for {path.name}\n"
