@@ -102,7 +102,7 @@ Configure **pyright** (recommended) or **mypy** for Python 3.14. Ensure CI runs
 it. Prefer modern typing features (PEP 695 `type` aliases where helpful), but
 keep it readable.
 
-### 0.7 Add versioning
+### 0.7 Add versioning [x]
 
 Add `openehr_am/__about__.py` (or similar) holding `__version__`. Expose
 `__version__` in `openehr_am/__init__.py`. Add a test that checks `__version__`

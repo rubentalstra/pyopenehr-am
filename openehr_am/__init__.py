@@ -3,6 +3,6 @@
 This package is intentionally standards-driven and keeps a small public API.
 """
 
-__version__ = "0.0.0"
+from openehr_am.__about__ import __version__
 
 __all__ = ["__version__"]
