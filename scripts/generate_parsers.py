@@ -174,6 +174,47 @@ def _sync_generated_tree(*, tmp_out: Path, generated_dir: Path) -> None:
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, dst)
 
+    _normalize_generated_python_headers(generated_dir)
+
+
+_GENERATED_FROM_RE = re.compile(r"^(# Generated from )(.+?)( by ANTLR .*)$")
+
+
+def _normalize_generated_python_headers(generated_dir: Path) -> None:
+    """Make generated Python output deterministic across machines.
+
+    ANTLR emits absolute paths to grammar files in the first-line header comment,
+    which causes noisy diffs between contributors and CI. We rewrite that header
+    to use a stable, repo-relative `grammars/...` path when possible.
+    """
+
+    for py in generated_dir.glob("*.py"):
+        # Skip our own deterministic scaffold marker.
+        if py.name == "__init__.py":
+            continue
+
+        text = py.read_text(encoding="utf-8")
+        lines = text.splitlines(keepends=True)
+        if not lines:
+            continue
+
+        m = _GENERATED_FROM_RE.match(lines[0].rstrip("\n"))
+        if not m:
+            continue
+
+        prefix, raw_path, suffix = m.groups()
+        normalized = raw_path.replace("\\\\", "/")
+        anchor = "/grammars/"
+        idx = normalized.rfind(anchor)
+        if idx == -1:
+            continue
+
+        stable = normalized[idx + 1 :]
+        new_first = f"{prefix}{stable}{suffix}\n"
+        if lines[0] != new_first:
+            lines[0] = new_first
+            py.write_text("".join(lines), encoding="utf-8")
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(
