@@ -461,7 +461,7 @@ Implement slot filling for a subset; emit `OPT720` if no match. Add tests.
 
 Implement minimal flattening rules; emit `OPT730` on conflict. Add tests.
 
-### 14.6 OPT integrity checks
+### 14.6 OPT integrity checks [x]
 
 Implement `validate_opt(opt)` integrity checks; emit `OPT750`. Add tests.
 
