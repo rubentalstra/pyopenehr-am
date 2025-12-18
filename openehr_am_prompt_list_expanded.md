@@ -210,7 +210,7 @@ Issues. Add tests for malformed input.
 Implement visitor/transformer from ANTLR parse tree to ODIN AST. Handle strings,
 numbers, booleans, lists, objects, keyed lists. Add tests for each.
 
-### 4.4 ODIN serializer (MVP)
+### 4.4 ODIN serializer (MVP) [x]
 
 Implement `to_odin(node) -str` for debugging and round-trip tests. Add
 round-trip tests.
