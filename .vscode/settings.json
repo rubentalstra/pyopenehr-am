@@ -1,5 +1,10 @@
 {
   "github.copilot.chat.codeGeneration.useInstructionFiles": true,
   "chat.useNestedAgentsMdFiles": true,
-  "chat.useAgentsMdFile": true
+  "chat.useAgentsMdFile": true,
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
 }
