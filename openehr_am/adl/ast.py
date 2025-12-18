@@ -12,8 +12,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Literal
 
-from openehr_am.antlr.span import SourceSpan
 from openehr_am.adl.cadl_ast import CadlObjectNode
+from openehr_am.antlr.span import SourceSpan
 from openehr_am.odin.ast import OdinNode
 
 
