@@ -267,6 +267,139 @@ def test_validate_semantic_aom230_specialisation_depth_mismatch_emitted() -> Non
     assert issues[0].line == 20
 
 
+def test_validate_semantic_aom280_invalid_excluded_path_emitted() -> None:
+    from openehr_am.antlr.span import SourceSpan
+    from openehr_am.aom.archetype import Template
+    from openehr_am.aom.constraints import CAttribute, CComplexObject
+
+    root_span = SourceSpan(
+        file="t.adlt", start_line=10, start_col=1, end_line=10, end_col=10
+    )
+
+    definition = CComplexObject(
+        rm_type_name="COMPOSITION",
+        node_id="at0000",
+        attributes=(
+            CAttribute(
+                rm_attribute_name="content",
+                children=(
+                    CComplexObject(
+                        rm_type_name="SECTION",
+                        node_id="at0001",
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    tpl = Template(
+        template_id="openEHR-EHR-TEMPLATE.test.v1",
+        concept="at0000",
+        definition=definition,
+        excluded_paths=("/content[at9999]",),
+        span=root_span,
+    )
+
+    issues = validate_semantic(tpl)
+
+    aom280 = [i for i in issues if i.code == "AOM280"]
+    assert len(aom280) == 1
+    assert aom280[0].severity == Severity.ERROR
+    assert aom280[0].path == "/content[at9999]"
+    assert aom280[0].file == "t.adlt"
+
+
+def test_validate_semantic_aom280_invalid_overlay_path_emitted() -> None:
+    from openehr_am.antlr.span import SourceSpan
+    from openehr_am.aom.archetype import Template
+    from openehr_am.aom.constraints import CAttribute, CComplexObject
+
+    root_span = SourceSpan(
+        file="t.adlt", start_line=10, start_col=1, end_line=10, end_col=10
+    )
+
+    definition = CComplexObject(
+        rm_type_name="COMPOSITION",
+        node_id="at0000",
+        attributes=(
+            CAttribute(
+                rm_attribute_name="content",
+                children=(
+                    CComplexObject(
+                        rm_type_name="SECTION",
+                        node_id="at0001",
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    tpl = Template(
+        template_id="openEHR-EHR-TEMPLATE.test.v1",
+        concept="at0000",
+        definition=definition,
+        overlay_paths=("/items[at0002]",),
+        span=root_span,
+    )
+
+    issues = validate_semantic(tpl)
+
+    aom280 = [i for i in issues if i.code == "AOM280"]
+    assert len(aom280) == 1
+    assert aom280[0].severity == Severity.ERROR
+    assert aom280[0].path == "/items[at0002]"
+    assert aom280[0].file == "t.adlt"
+
+
+def test_validate_semantic_aom280_valid_paths_ok() -> None:
+    from openehr_am.antlr.span import SourceSpan
+    from openehr_am.aom.archetype import Template
+    from openehr_am.aom.constraints import CAttribute, CComplexObject
+
+    root_span = SourceSpan(
+        file="ok.adlt", start_line=10, start_col=1, end_line=10, end_col=10
+    )
+
+    definition = CComplexObject(
+        rm_type_name="COMPOSITION",
+        node_id="at0000",
+        attributes=(
+            CAttribute(
+                rm_attribute_name="content",
+                children=(
+                    CComplexObject(
+                        rm_type_name="SECTION",
+                        node_id="at0001",
+                        attributes=(
+                            CAttribute(
+                                rm_attribute_name="items",
+                                children=(
+                                    CComplexObject(
+                                        rm_type_name="ELEMENT",
+                                        node_id="at0002",
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    tpl = Template(
+        template_id="openEHR-EHR-TEMPLATE.ok.v1",
+        concept="at0000",
+        definition=definition,
+        excluded_paths=("/content[at0001]",),
+        overlay_paths=("/content[at0001]/items[at0002]",),
+        span=root_span,
+    )
+
+    issues = validate_semantic(tpl)
+    assert [i.code for i in issues if i.code == "AOM280"] == []
+
+
 def test_validate_semantic_aom210_allows_specialised_node_id_pattern() -> None:
     from openehr_am.antlr.span import SourceSpan
     from openehr_am.aom.archetype import Archetype

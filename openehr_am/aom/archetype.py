@@ -48,6 +48,13 @@ class Template:
     definition: CComplexObject | None = None
     terminology: ArchetypeTerminology | None = None
 
+    # Template-specific directives.
+    #
+    # These are currently modeled as plain openEHR-style paths so validation and
+    # compilation can remain independent of any particular parsing strategy.
+    excluded_paths: tuple[str, ...] = ()
+    overlay_paths: tuple[str, ...] = ()
+
     span: SourceSpan | None = None
 
     def to_dict(self) -> dict[str, object]:

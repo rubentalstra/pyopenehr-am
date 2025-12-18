@@ -117,6 +117,115 @@ def _specialisation_depth(value: str) -> int | None:
     return depth
 
 
+def _parse_open_ehr_path(path: str) -> tuple[tuple[str, str | None], ...] | None:
+    """Parse a minimal openEHR-style path.
+
+    Supported forms:
+        - /definition
+        - /definition/attr
+        - /definition/attr[node_id]/child_attr[child_id]
+        - /attr[node_id]/child_attr[child_id]  (implicit /definition)
+
+    Returns:
+        Tuple of (attribute_name, node_id_or_none) segments, excluding the
+        optional leading 'definition'. Returns None on parse failure.
+
+    Notes:
+        This is intentionally minimal and permissive; it must not raise.
+    """
+
+    if not path:
+        return None
+
+    if not path.startswith("/"):
+        return None
+
+    raw_segs = [seg for seg in path.split("/") if seg]
+    if not raw_segs:
+        return None
+
+    if raw_segs[0] == "definition":
+        raw_segs = raw_segs[1:]
+
+    if not raw_segs:
+        # "/definition" refers to the root.
+        return ()
+
+    segs: list[tuple[str, str | None]] = []
+    for seg in raw_segs:
+        if "[" not in seg:
+            if "]" in seg:
+                return None
+            segs.append((seg, None))
+            continue
+
+        if not seg.endswith("]"):
+            return None
+        name, rest = seg.split("[", 1)
+        node_id = rest[:-1]
+
+        if name == "" or node_id == "":
+            return None
+
+        segs.append((name, node_id))
+
+    return tuple(segs)
+
+
+def _path_resolves_in_definition(
+    definition: CComplexObject | None, *, path: str
+) -> bool:
+    """Return True if `path` can be followed in the given definition tree."""
+
+    if definition is None:
+        return False
+
+    parsed = _parse_open_ehr_path(path)
+    if parsed is None:
+        return False
+
+    current: CObject = definition
+    for attr_name, node_id in parsed:
+        if not isinstance(current, CComplexObject):
+            return False
+
+        attr: CAttribute | None = None
+        for a in current.attributes:
+            if a.rm_attribute_name == attr_name:
+                attr = a
+                break
+
+        if attr is None:
+            return False
+
+        if node_id is None:
+            # If this is a leaf segment, the presence of the attribute is enough.
+            # Otherwise, we need to descend into some child.
+            if attr.children == ():
+                return False
+            # Pick the first complex child to continue (minimal resolver).
+            next_obj: CObject | None = None
+            for child in attr.children:
+                if isinstance(child, CComplexObject):
+                    next_obj = child
+                    break
+            if next_obj is None:
+                return False
+            current = next_obj
+            continue
+
+        next_obj2: CObject | None = None
+        for child in attr.children:
+            if child.node_id == node_id:
+                next_obj2 = child
+                break
+        if next_obj2 is None:
+            return False
+        current = next_obj2
+
+    return True
+
+
 def _defined_codes(term: ArchetypeTerminology | None) -> set[str]:
     if term is None:
         return set()
@@ -159,6 +268,62 @@ def check_referenced_terminology_codes_exist(ctx: ValidationContext) -> Iterable
                 end_line=span.end_line if span else None,
                 end_col=span.end_col if span else None,
                 node_id=code,
+            )
+        )
+
+    return tuple(issues)
+
+
+def check_template_overlay_exclusion_paths(ctx: ValidationContext) -> Iterable[Issue]:
+    """AOM280: template overlay/exclusion references must resolve.
+
+    # Spec: https://specifications.openehr.org/releases/AM/latest/AOM2.html
+    """
+
+    artefact = ctx.artefact
+    if not isinstance(artefact, Template):
+        return ()
+
+    issues: list[Issue] = []
+
+    span = artefact.span
+    file = span.file if span else None
+    line = span.start_line if span else None
+    col = span.start_col if span else None
+    end_line = span.end_line if span else None
+    end_col = span.end_col if span else None
+
+    for p in artefact.excluded_paths:
+        if _path_resolves_in_definition(artefact.definition, path=p):
+            continue
+        issues.append(
+            Issue(
+                code="AOM280",
+                severity=Severity.ERROR,
+                message=f"Template exclusion path '{p}' does not resolve",
+                file=file,
+                line=line,
+                col=col,
+                end_line=end_line,
+                end_col=end_col,
+                path=p,
+            )
+        )
+
+    for p in artefact.overlay_paths:
+        if _path_resolves_in_definition(artefact.definition, path=p):
+            continue
+        issues.append(
+            Issue(
+                code="AOM280",
+                severity=Severity.ERROR,
+                message=f"Template overlay path '{p}' does not resolve",
+                file=file,
+                line=line,
+                col=col,
+                end_line=end_line,
+                end_col=end_col,
+                path=p,
             )
         )
 
@@ -672,4 +837,9 @@ register_semantic_check(
 register_semantic_check(
     check_language_presence_and_basic_structure,
     name="aom270_language_presence_and_basic_structure",
+)
+
+register_semantic_check(
+    check_template_overlay_exclusion_paths,
+    name="aom280_template_overlay_exclusion_paths",
 )

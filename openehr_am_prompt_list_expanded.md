@@ -356,7 +356,7 @@ Validate value set references and emptiness rules. Emit `AOM260`. Add tests.
 
 Validate language presence and basic structure. Emit `AOM270`. Add tests.
 
-### 10.7 Template overlays/exclusions (basic)
+### 10.7 Template overlays/exclusions (basic) [x]
 
 Add basic checks for templates: excluded nodes exist, overlays reference valid
 paths. Emit `AOM280`. Add tests.
