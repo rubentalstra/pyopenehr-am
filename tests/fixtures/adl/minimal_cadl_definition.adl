@@ -1,0 +1,30 @@
+archetype
+openEHR-EHR-OBSERVATION.test.v1
+
+language
+original_language = <"en">
+language = <"en">
+
+description
+<>
+
+terminology
+<>
+
+definition
+OBSERVATION[at0000] matches {
+    data matches {
+        HISTORY[at0001] matches {
+            occurrences matches {0..1}
+        }
+    }
+
+    items matches {
+        cardinality matches {0..*; ordered; unique}
+        ELEMENT[at0002]
+    }
+
+    count matches {
+        Integer matches {0..10}
+    }
+}

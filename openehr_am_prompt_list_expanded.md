@@ -247,7 +247,7 @@ Create `openehr_am/adl/cadl_ast.py` with syntax-level nodes: object nodes
 (rm_type_name, node_id), attributes with children, occurrences/cardinality,
 primitive constraints. Add tests.
 
-### 6.2 Parse cADL blocks into cADL AST (MVP)
+### 6.2 Parse cADL blocks into cADL AST (MVP) [x]
 
 Extend ADL parsing to parse a minimal supported subset of `definition` into cADL
 AST. Add tests.

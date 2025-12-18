@@ -13,6 +13,7 @@ from enum import StrEnum
 from typing import Literal
 
 from openehr_am.antlr.span import SourceSpan
+from openehr_am.adl.cadl_ast import CadlObjectNode
 from openehr_am.odin.ast import OdinNode
 
 
@@ -59,7 +60,7 @@ class AdlArtefact:
     terminology: OdinNode | None = None
 
     # Placeholders for sections not modelled yet
-    definition: AdlSectionPlaceholder | None = None
+    definition: AdlSectionPlaceholder | CadlObjectNode | None = None
     rules: AdlSectionPlaceholder | None = None
 
     # Spans

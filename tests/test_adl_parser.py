@@ -1,4 +1,5 @@
 from openehr_am.adl import ArtefactKind, parse_adl
+from openehr_am.adl.cadl_ast import CadlIntegerConstraint, CadlObjectNode
 from openehr_am.validation.issue import Severity
 from tests.fixture_loader import load_fixture_text
 
@@ -64,3 +65,50 @@ def test_parse_adl_invalid_odin_in_description_shifts_issue_line() -> None:
     assert issues[0].code == "ODN100"
     assert issues[0].file == "bad_odin.adl"
     assert issues[0].line == 8
+
+
+def test_parse_adl_parses_minimal_definition_subset_into_cadl_ast() -> None:
+    text = load_fixture_text("adl", "minimal_cadl_definition.adl")
+
+    artefact, issues = parse_adl(text, filename="cadl.adl")
+
+    assert issues == []
+    assert artefact is not None
+
+    assert isinstance(artefact.definition, CadlObjectNode)
+    assert artefact.definition.rm_type_name == "OBSERVATION"
+    assert artefact.definition.node_id == "at0000"
+
+    # data matches { HISTORY[at0001] matches { occurrences matches {0..1} } }
+    data_attr = next(
+        a for a in artefact.definition.attributes if a.rm_attribute_name == "data"
+    )
+    assert data_attr.children[0].rm_type_name == "HISTORY"
+    assert data_attr.children[0].node_id == "at0001"
+    assert data_attr.children[0].occurrences is not None
+    assert data_attr.children[0].occurrences.lower == 0
+    assert data_attr.children[0].occurrences.upper == 1
+
+    # items matches { cardinality matches {0..*; ordered; unique} ELEMENT[at0002] }
+    items_attr = next(
+        a for a in artefact.definition.attributes if a.rm_attribute_name == "items"
+    )
+    assert items_attr.cardinality is not None
+    assert items_attr.cardinality.lower == 0
+    assert items_attr.cardinality.upper is None
+    assert items_attr.cardinality.upper_unbounded is True
+    assert items_attr.cardinality.is_ordered is True
+    assert items_attr.cardinality.is_unique is True
+    assert items_attr.children[0].rm_type_name == "ELEMENT"
+    assert items_attr.children[0].node_id == "at0002"
+
+    # count matches { Integer matches {0..10} }
+    count_attr = next(
+        a for a in artefact.definition.attributes if a.rm_attribute_name == "count"
+    )
+    integer_obj = count_attr.children[0]
+    assert integer_obj.rm_type_name == "Integer"
+    assert isinstance(integer_obj.primitive, CadlIntegerConstraint)
+    assert integer_obj.primitive.interval is not None
+    assert integer_obj.primitive.interval.lower == 0
+    assert integer_obj.primitive.interval.upper == 10
