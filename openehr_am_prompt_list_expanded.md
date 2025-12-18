@@ -439,7 +439,7 @@ Add simple caching to avoid reparsing unchanged files. Add tests.
 
 ## Phase 14 — OPT2 model + compilation (expand)
 
-### 14.1 OPT dataclasses
+### 14.1 OPT dataclasses [x]
 
 Implement `openehr_am/opt/model.py` dataclasses for an OperationalTemplate
 subset + flattened constraints. Add tests.

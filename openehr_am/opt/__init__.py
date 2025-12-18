@@ -10,10 +10,36 @@ from openehr_am.opt.dependencies import (
     dependency_order_for_archetypes,
     detect_dependency_cycles,
 )
+from openehr_am.opt.model import (
+    OperationalTemplate,
+    OptBooleanConstraint,
+    OptCardinality,
+    OptCAttribute,
+    OptCComplexObject,
+    OptCObject,
+    OptCPrimitiveObject,
+    OptIntegerConstraint,
+    OptInterval,
+    OptPrimitiveConstraint,
+    OptRealConstraint,
+    OptStringConstraint,
+)
 
 __all__ = [
     "DependencyGraph",
     "build_archetype_dependency_graph",
     "detect_dependency_cycles",
     "dependency_order_for_archetypes",
+    "OperationalTemplate",
+    "OptInterval",
+    "OptCardinality",
+    "OptStringConstraint",
+    "OptIntegerConstraint",
+    "OptRealConstraint",
+    "OptBooleanConstraint",
+    "OptPrimitiveConstraint",
+    "OptCObject",
+    "OptCAttribute",
+    "OptCComplexObject",
+    "OptCPrimitiveObject",
 ]
