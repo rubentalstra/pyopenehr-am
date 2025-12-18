@@ -524,6 +524,121 @@ def check_value_set_integrity(ctx: ValidationContext) -> Iterable[Issue]:
     return tuple(issues)
 
 
+def check_language_presence_and_basic_structure(
+    ctx: ValidationContext,
+) -> Iterable[Issue]:
+    """AOM270: validate language presence and basic structure.
+
+    Basic rules (warnings):
+    - `original_language` should be present.
+    - `languages` should not be empty.
+    - if both are present, `original_language` should be a member of `languages`.
+    - if terminology exists, its `original_language` should be present and should
+      match the artefact-level `original_language`.
+    - if `languages` are declared, term definitions should use only those
+      languages.
+
+    # Spec: https://specifications.openehr.org/releases/AM/latest/AOM2.html#_languages_and_translation
+    """
+
+    artefact = ctx.artefact
+    if not isinstance(artefact, (Archetype, Template)):
+        return ()
+
+    issues: list[Issue] = []
+
+    def emit(
+        *,
+        message: str,
+        span: SourceSpan | None,
+        path: str,
+    ) -> None:
+        issues.append(
+            Issue(
+                code="AOM270",
+                severity=Severity.WARN,
+                message=message,
+                file=span.file if span else None,
+                line=span.start_line if span else None,
+                col=span.start_col if span else None,
+                end_line=span.end_line if span else None,
+                end_col=span.end_col if span else None,
+                path=path,
+            )
+        )
+
+    original_language = artefact.original_language
+    languages = artefact.languages
+
+    if original_language is None or original_language.strip() == "":
+        emit(
+            message="Missing original_language",
+            span=artefact.span,
+            path="/original_language",
+        )
+
+    if len(languages) == 0:
+        emit(
+            message="No languages declared",
+            span=artefact.span,
+            path="/languages",
+        )
+    elif original_language is not None and original_language.strip() != "":
+        if original_language not in languages:
+            emit(
+                message=(
+                    f"original_language '{original_language}' is not present in languages {languages}"
+                ),
+                span=artefact.span,
+                path="/languages",
+            )
+
+    term = artefact.terminology
+    if term is None:
+        return tuple(issues)
+
+    if term.original_language.strip() == "":
+        emit(
+            message="Terminology missing original_language",
+            span=term.span,
+            path="/terminology/original_language",
+        )
+
+    if (
+        original_language is not None
+        and original_language.strip() != ""
+        and term.original_language.strip() != ""
+        and term.original_language != original_language
+    ):
+        emit(
+            message=(
+                "Terminology original_language "
+                f"'{term.original_language}' differs from artefact original_language '{original_language}'"
+            ),
+            span=term.span,
+            path="/terminology/original_language",
+        )
+
+    if len(languages) != 0:
+        for td in term.term_definitions:
+            if td.language.strip() == "":
+                emit(
+                    message=f"Term definition '{td.code}' has empty language",
+                    span=td.span,
+                    path=f"/terminology/term_definitions/{td.code}/language",
+                )
+            elif td.language not in languages:
+                emit(
+                    message=(
+                        f"Term definition '{td.code}' language '{td.language}' is not declared in languages {languages}"
+                    ),
+                    span=td.span,
+                    path=f"/terminology/term_definitions/{td.code}/language",
+                )
+
+    return tuple(issues)
+
+
 register_semantic_check(
     check_referenced_terminology_codes_exist,
     name="aom200_referenced_codes_exist_in_terminology",
@@ -552,4 +667,9 @@ register_semantic_check(
 register_semantic_check(
     check_value_set_integrity,
     name="aom260_value_set_integrity",
+)
+
+register_semantic_check(
+    check_language_presence_and_basic_structure,
+    name="aom270_language_presence_and_basic_structure",
 )

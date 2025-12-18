@@ -83,6 +83,8 @@ def test_validate_semantic_aom200_missing_terminology_codes_emitted_deterministi
     aom = Archetype(
         archetype_id="openEHR-EHR-OBSERVATION.test.v1",
         concept="at0000",
+        original_language="en",
+        languages=("en",),
         definition=definition,
         terminology=terminology,
         span=root_span,
@@ -146,6 +148,8 @@ def test_validate_semantic_aom200_no_missing_codes_ok() -> None:
     aom = Archetype(
         archetype_id="openEHR-EHR-OBSERVATION.ok.v1",
         concept="at0000",
+        original_language="en",
+        languages=("en",),
         definition=definition,
         terminology=terminology,
         span=root_span,
@@ -194,6 +198,8 @@ def test_validate_semantic_aom210_invalid_node_id_format_emitted() -> None:
     aom = Archetype(
         archetype_id="openEHR-EHR-OBSERVATION.bad.v1",
         concept="at0000",
+        original_language="en",
+        languages=("en",),
         definition=definition,
         terminology=terminology,
         span=root_span,
@@ -248,6 +254,8 @@ def test_validate_semantic_aom230_specialisation_depth_mismatch_emitted() -> Non
     aom = Archetype(
         archetype_id="openEHR-EHR-OBSERVATION.spec.v1",
         concept="at0000",
+        original_language="en",
+        languages=("en",),
         definition=definition,
         terminology=terminology,
         span=root_span,
@@ -301,6 +309,8 @@ def test_validate_semantic_aom210_allows_specialised_node_id_pattern() -> None:
     aom = Archetype(
         archetype_id="openEHR-EHR-OBSERVATION.ok2.v1",
         concept="at0000.1",
+        original_language="en",
+        languages=("en",),
         definition=definition,
         terminology=terminology,
         span=root_span,
@@ -352,6 +362,8 @@ def test_validate_semantic_aom240_duplicate_attribute_name_emitted() -> None:
     aom = Archetype(
         archetype_id="openEHR-EHR-OBSERVATION.dup_attr.v1",
         concept="at0000",
+        original_language="en",
+        languages=("en",),
         definition=definition,
         terminology=terminology,
         span=root_span,
@@ -414,6 +426,8 @@ def test_validate_semantic_aom240_duplicate_sibling_node_id_emitted() -> None:
     aom = Archetype(
         archetype_id="openEHR-EHR-OBSERVATION.dup_id.v1",
         concept="at0000",
+        original_language="en",
+        languages=("en",),
         definition=definition,
         terminology=terminology,
         span=root_span,
@@ -455,6 +469,8 @@ def test_validate_semantic_aom250_invalid_occurrences_interval_emitted() -> None
     aom = Archetype(
         archetype_id="openEHR-EHR-OBSERVATION.inv_occ.v1",
         concept="at0000",
+        original_language="en",
+        languages=("en",),
         definition=definition,
         terminology=terminology,
         span=root_span,
@@ -520,6 +536,8 @@ def test_validate_semantic_aom250_invalid_primitive_interval_emitted() -> None:
     aom = Archetype(
         archetype_id="openEHR-EHR-OBSERVATION.inv_prim.v1",
         concept="at0000",
+        original_language="en",
+        languages=("en",),
         definition=definition,
         terminology=terminology,
         span=root_span,
@@ -564,6 +582,8 @@ def test_validate_semantic_aom260_empty_value_set_emitted() -> None:
     aom = Archetype(
         archetype_id="openEHR-EHR-OBSERVATION.vs_empty.v1",
         concept="at0000",
+        original_language="en",
+        languages=("en",),
         definition=definition,
         terminology=terminology,
         span=root_span,
@@ -611,6 +631,8 @@ def test_validate_semantic_aom260_value_set_member_must_exist_emitted() -> None:
     aom = Archetype(
         archetype_id="openEHR-EHR-OBSERVATION.vs_ref.v1",
         concept="at0000",
+        original_language="en",
+        languages=("en",),
         definition=definition,
         terminology=terminology,
         span=root_span,
@@ -621,3 +643,95 @@ def test_validate_semantic_aom260_value_set_member_must_exist_emitted() -> None:
     assert issues[0].node_id == "at9999"
     assert issues[0].line == 40
     assert issues[0].path == "/terminology/value_sets/ac0001"
+
+
+def test_validate_semantic_aom270_original_language_not_in_languages_emitted() -> None:
+    from openehr_am.antlr.span import SourceSpan
+    from openehr_am.aom.archetype import Archetype
+    from openehr_am.aom.constraints import CComplexObject
+    from openehr_am.aom.terminology import ArchetypeTerminology, TermDefinition
+
+    root_span = SourceSpan(
+        file="lang_mismatch.adl", start_line=10, start_col=1, end_line=10, end_col=10
+    )
+    term_span = SourceSpan(
+        file="lang_mismatch.adl", start_line=40, start_col=1, end_line=40, end_col=10
+    )
+
+    definition = CComplexObject(
+        rm_type_name="OBSERVATION",
+        node_id="at0000",
+        span=root_span,
+        attributes=(),
+    )
+
+    terminology = ArchetypeTerminology(
+        original_language="nl",
+        term_definitions=(TermDefinition(language="nl", code="at0000", text="Root"),),
+        span=term_span,
+    )
+
+    aom = Archetype(
+        archetype_id="openEHR-EHR-OBSERVATION.lang_mismatch.v1",
+        concept="at0000",
+        original_language="en",
+        languages=("nl",),
+        definition=definition,
+        terminology=terminology,
+        span=root_span,
+    )
+
+    issues = validate_semantic(aom)
+
+    # We don't assert exact ordering; ordering is centrally deterministic.
+    assert [i.code for i in issues] == ["AOM270", "AOM270"]
+    by_path = {i.path: i for i in issues}
+    assert by_path["/languages"].severity == Severity.WARN
+    assert by_path["/terminology/original_language"].severity == Severity.WARN
+
+
+def test_validate_semantic_aom270_missing_original_language_and_languages_emitted() -> (
+    None
+):
+    from openehr_am.antlr.span import SourceSpan
+    from openehr_am.aom.archetype import Archetype
+    from openehr_am.aom.constraints import CComplexObject
+    from openehr_am.aom.terminology import ArchetypeTerminology, TermDefinition
+
+    root_span = SourceSpan(
+        file="lang_missing.adl", start_line=10, start_col=1, end_line=10, end_col=10
+    )
+    term_span = SourceSpan(
+        file="lang_missing.adl", start_line=40, start_col=1, end_line=40, end_col=10
+    )
+
+    definition = CComplexObject(
+        rm_type_name="OBSERVATION",
+        node_id="at0000",
+        span=root_span,
+        attributes=(),
+    )
+
+    terminology = ArchetypeTerminology(
+        original_language="",
+        term_definitions=(TermDefinition(language="en", code="at0000", text="Root"),),
+        span=term_span,
+    )
+
+    aom = Archetype(
+        archetype_id="openEHR-EHR-OBSERVATION.lang_missing.v1",
+        concept="at0000",
+        original_language=None,
+        languages=(),
+        definition=definition,
+        terminology=terminology,
+        span=root_span,
+    )
+
+    issues = validate_semantic(aom)
+    assert [i.code for i in issues] == ["AOM270", "AOM270", "AOM270"]
+    assert {i.path for i in issues} == {
+        "/original_language",
+        "/languages",
+        "/terminology/original_language",
+    }

@@ -352,7 +352,7 @@ Check min<=max and invariants. Emit `AOM250`. Add tests.
 
 Validate value set references and emptiness rules. Emit `AOM260`. Add tests.
 
-### 10.6 Language/original_language integrity
+### 10.6 Language/original_language integrity [x]
 
 Validate language presence and basic structure. Emit `AOM270`. Add tests.
 
