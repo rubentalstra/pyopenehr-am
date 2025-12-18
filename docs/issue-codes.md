@@ -24,6 +24,7 @@ Codes are formatted as:
 - BMM500–BMM699: BMM + RM validation
 - OPT700–OPT899: OPT compilation + integrity
 - PATH900–PATH999: path parsing/resolution
+- CLI001–CLI199: CLI usage/IO errors (rare)
 
 ## Registry
 

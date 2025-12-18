@@ -149,7 +149,7 @@ Implement `Severity` enum and `Issue` dataclass: code, severity, message, file,
 line, col, end_line, end_col, path, node_id, plus `.to_dict()` and `.pretty()`
 methods. Add tests for formatting and JSON-serializable dict output.
 
-### 2.2 Issue code validation helper
+### 2.2 Issue code validation helper [x]
 
 Implement `validate_issue_code(code: str) -bool` enforcing prefixes/ranges. Add
 tests. Align with `docs/issue-codes.md`.

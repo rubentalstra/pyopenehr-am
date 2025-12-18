@@ -7,6 +7,55 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 
+_ISSUE_CODE_RANGES: dict[str, tuple[int, int]] = {
+    "ADL": (1, 199),
+    "ODN": (100, 199),
+    "AOM": (200, 499),
+    "BMM": (500, 699),
+    "OPT": (700, 899),
+    "PATH": (900, 999),
+    "CLI": (1, 199),
+}
+
+
+def validate_issue_code(code: str) -> bool:
+    """Return True if `code` matches the project Issue-code scheme.
+
+    This enforces the prefix set and recommended numeric ranges documented in
+    `docs/issue-codes.md`.
+    """
+
+    if not code:
+        return False
+
+    # Split into alpha prefix + 3 digit suffix, without regex.
+    prefix_end = 0
+    for ch in code:
+        if ch.isalpha():
+            prefix_end += 1
+            continue
+        break
+
+    prefix = code[:prefix_end]
+    digits = code[prefix_end:]
+
+    if not prefix or not digits:
+        return False
+
+    if prefix != prefix.upper():
+        return False
+
+    if prefix not in _ISSUE_CODE_RANGES:
+        return False
+
+    if len(digits) != 3 or not digits.isdigit():
+        return False
+
+    number = int(digits)
+    low, high = _ISSUE_CODE_RANGES[prefix]
+    return low <= number <= high
+
+
 class Severity(StrEnum):
     """Issue severity.
 
