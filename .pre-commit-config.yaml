@@ -1,0 +1,23 @@
+# See https://pre-commit.com for more information
+# Run locally:
+#   pre-commit install
+#   pre-commit run --all-files
+#
+# Note: tests are configured to run on pre-push to keep commits fast.
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.9
+    hooks:
+      - id: ruff-format
+      - id: ruff
+        args: [--fix]
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest (pre-push)
+        entry: pytest -q
+        language: system
+        pass_filenames: false
+        stages: [pre-push]

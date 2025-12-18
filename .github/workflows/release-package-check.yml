@@ -1,0 +1,50 @@
+name: Release package check
+
+on:
+    release:
+        types: [published]
+
+permissions:
+    contents: write
+
+concurrency:
+    group: release-package-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    package:
+        name: build + twine check (py3.14)
+        runs-on: ubuntu-latest
+
+        env:
+            PIP_DISABLE_PIP_VERSION_CHECK: "1"
+            PYTHONUTF8: "1"
+
+        steps:
+            - name: Checkout tag
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.event.release.tag_name }}
+
+            - name: Set up Python
+              uses: actions/setup-python@v6
+              with:
+                  python-version: "3.14"
+                  cache: pip
+                  cache-dependency-path: pyproject.toml
+
+            - name: Install
+              run: |
+                  python -m pip install --upgrade pip
+                  python -m pip install -e ".[release]"
+
+            - name: Build sdist/wheel
+              run: python -m build
+
+            - name: Twine check
+              run: python -m twine check --strict dist/*
+
+            - name: Upload release assets
+              uses: softprops/action-gh-release@v2
+              with:
+                  files: dist/*
