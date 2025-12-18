@@ -439,29 +439,29 @@ Add simple caching to avoid reparsing unchanged files. Add tests.
 
 ## Phase 14 — OPT2 model + compilation (expand)
 
-### 14.1 OPT dataclasses
+### 14.1 OPT dataclasses [x]
 
 Implement `openehr_am/opt/model.py` dataclasses for an OperationalTemplate
 subset + flattened constraints. Add tests.
 
-### 14.2 OPT JSON export (deterministic)
+### 14.2 OPT JSON export (deterministic) [x]
 
 Implement deterministic `to_dict()` and JSON export for OPT. Add tests.
 
-### 14.3 OPT compilation: resolve included archetypes
+### 14.3 OPT compilation: resolve included archetypes [x]
 
 Implement `compile_opt` resolving included archetypes; emit `OPT700` if missing.
 Add tests.
 
-### 14.4 OPT compilation: slot filling (basic)
+### 14.4 OPT compilation: slot filling (basic) [x]
 
 Implement slot filling for a subset; emit `OPT720` if no match. Add tests.
 
-### 14.5 OPT compilation: specialization flattening (basic)
+### 14.5 OPT compilation: specialization flattening (basic) [x]
 
 Implement minimal flattening rules; emit `OPT730` on conflict. Add tests.
 
-### 14.6 OPT integrity checks
+### 14.6 OPT integrity checks [x]
 
 Implement `validate_opt(opt)` integrity checks; emit `OPT750`. Add tests.
 

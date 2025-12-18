@@ -10,6 +10,7 @@ Design notes:
 
 from openehr_am.adl.ast import AdlArtefact, AdlRulesSection, ArtefactKind
 from openehr_am.adl.cadl_ast import (
+    CadlArchetypeSlotPattern,
     CadlAttributeNode,
     CadlBooleanConstraint,
     CadlCardinality,
@@ -24,6 +25,8 @@ from openehr_am.adl.cadl_ast import (
 )
 from openehr_am.aom.archetype import Archetype, RuleStatement, Template
 from openehr_am.aom.constraints import (
+    ArchetypeSlotPattern,
+    CArchetypeSlot,
     Cardinality,
     CAttribute,
     CComplexObject,
@@ -196,6 +199,16 @@ def _build_cadl_object(node: CadlObjectNode) -> CObject:
             span=node.span,
         )
 
+    if node.slot is not None:
+        return CArchetypeSlot(
+            rm_type_name=node.rm_type_name,
+            node_id=node.node_id,
+            occurrences=occurrences,
+            includes=tuple(_build_slot_pattern(p) for p in node.slot.includes),
+            excludes=tuple(_build_slot_pattern(p) for p in node.slot.excludes),
+            span=node.span,
+        )
+
     attributes = tuple(_build_cadl_attribute(a) for a in node.attributes)
     return CComplexObject(
         rm_type_name=node.rm_type_name,
@@ -204,6 +217,10 @@ def _build_cadl_object(node: CadlObjectNode) -> CObject:
         attributes=attributes,
         span=node.span,
     )
+
+
+def _build_slot_pattern(node: CadlArchetypeSlotPattern) -> ArchetypeSlotPattern:
+    return ArchetypeSlotPattern(kind=node.kind, value=node.value, span=node.span)
 
 
 def _build_cadl_attribute(node: CadlAttributeNode) -> CAttribute:

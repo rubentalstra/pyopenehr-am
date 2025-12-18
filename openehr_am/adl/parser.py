@@ -28,6 +28,8 @@ from openehr_am.adl.ast import (
     ArtefactKind,
 )
 from openehr_am.adl.cadl_ast import (
+    CadlArchetypeSlot,
+    CadlArchetypeSlotPattern,
     CadlAttributeNode,
     CadlBooleanConstraint,
     CadlCardinality,
@@ -302,6 +304,9 @@ _CADL_KEYWORDS = {
     "cardinality",
     "ordered",
     "unique",
+    "archetype_slot",
+    "include",
+    "exclude",
     "true",
     "false",
 }
@@ -612,6 +617,7 @@ class _CadlParser:
         occurrences: CadlOccurrences | None = None
         attributes: list[CadlAttributeNode] = []
         primitive: CadlPrimitiveConstraint | None = None
+        slot: CadlArchetypeSlot | None = None
 
         if (
             self._peek().kind == "KEYWORD"
@@ -652,6 +658,13 @@ class _CadlParser:
                     occurrences = self._parse_occurrences()
                     continue
 
+                if (
+                    self._peek().kind == "KEYWORD"
+                    and self._peek().value.casefold() == "archetype_slot"
+                ):
+                    slot = self._parse_archetype_slot()
+                    continue
+
                 # Attribute: IDENT matches { ... }
                 if self._peek().kind == "IDENT":
                     attributes.append(self._parse_attribute())
@@ -672,6 +685,7 @@ class _CadlParser:
                 occurrences=occurrences,
                 attributes=tuple(attributes),
                 primitive=None,
+                slot=slot,
                 span=span,
                 rm_type_name_span=rm_span,
                 node_id_span=node_id_span,
@@ -685,9 +699,99 @@ class _CadlParser:
             occurrences=None,
             attributes=(),
             primitive=None,
+            slot=None,
             span=span,
             rm_type_name_span=rm_span,
             node_id_span=node_id_span,
+        )
+
+    def _parse_archetype_slot(self) -> CadlArchetypeSlot:
+        slot_tok = self._expect("KEYWORD", value_casefold="archetype_slot")
+
+        # Minimal subset: archetype_slot matches { include/exclude matches { <patterns> } }
+        if self._peek().kind != "KEYWORD" or self._peek().value.casefold() != "matches":
+            raise _CadlParseError(
+                message="Expected 'matches' after 'archetype_slot'",
+                line=self._peek().start_line,
+                col=self._peek().start_col,
+            )
+        self._advance()
+        lbrace = self._expect("LBRACE")
+
+        includes: list[CadlArchetypeSlotPattern] = []
+        excludes: list[CadlArchetypeSlotPattern] = []
+
+        while self._peek().kind != "RBRACE":
+            if self._peek().kind == "EOF":
+                raise _CadlParseError(
+                    message="Unterminated archetype_slot matches block",
+                    line=lbrace.start_line,
+                    col=lbrace.start_col,
+                )
+
+            if self._peek().kind != "KEYWORD" or self._peek().value.casefold() not in {
+                "include",
+                "exclude",
+            }:
+                tok = self._peek()
+                raise _CadlParseError(
+                    message=(
+                        "Unexpected token in archetype_slot body: "
+                        f"{tok.kind} {tok.value!r}"
+                    ),
+                    line=tok.start_line,
+                    col=tok.start_col,
+                )
+
+            mode_tok = self._advance()
+            self._expect("KEYWORD", value_casefold="matches")
+            self._expect("LBRACE")
+
+            patterns: list[CadlArchetypeSlotPattern] = []
+            while self._peek().kind != "RBRACE":
+                tok = self._peek()
+                if tok.kind in {"STRING", "IDENT"}:
+                    value_tok = self._advance()
+                    patterns.append(
+                        CadlArchetypeSlotPattern(
+                            kind="exact",
+                            value=value_tok.value,
+                            span=self._span_from(value_tok, value_tok),
+                        )
+                    )
+                elif tok.kind == "REGEX":
+                    value_tok = self._advance()
+                    patterns.append(
+                        CadlArchetypeSlotPattern(
+                            kind="regex",
+                            value=value_tok.value,
+                            span=self._span_from(value_tok, value_tok),
+                        )
+                    )
+                else:
+                    raise _CadlParseError(
+                        message=f"Expected pattern in slot matches set, got {tok.kind}",
+                        line=tok.start_line,
+                        col=tok.start_col,
+                    )
+
+                if self._peek().kind == "COMMA":
+                    self._advance()
+                    continue
+
+            self._expect("RBRACE")
+
+            if mode_tok.value.casefold() == "include":
+                includes.extend(patterns)
+            else:
+                excludes.extend(patterns)
+
+        rbrace = self._expect("RBRACE")
+        span = self._span_from(slot_tok, rbrace)
+        return CadlArchetypeSlot(
+            includes=tuple(includes),
+            excludes=tuple(excludes),
+            span=span,
         )
 
     def _parse_attribute(self) -> CadlAttributeNode:

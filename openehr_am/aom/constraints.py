@@ -138,6 +138,28 @@ class CPrimitiveObject(CObject):
     constraint: PrimitiveConstraint | None = None
 
 
+@dataclass(slots=True, frozen=True)
+class ArchetypeSlotPattern:
+    """Include/exclude pattern for archetype slot filling (minimal subset)."""
+
+    kind: str  # "exact" | "regex"
+    value: str
+    span: SourceSpan | None = None
+
+
+@dataclass(slots=True, frozen=True)
+class CArchetypeSlot(CObject):
+    """Archetype slot node.
+
+    Notes:
+        This is a minimal representation to support basic slot filling during
+        OPT compilation.
+    """
+
+    includes: tuple[ArchetypeSlotPattern, ...] = ()
+    excludes: tuple[ArchetypeSlotPattern, ...] = ()
+
+
 __all__ = [
     "PrimitiveConstraint",
     "PrimitiveStringConstraint",
@@ -150,4 +172,6 @@ __all__ = [
     "CAttribute",
     "CComplexObject",
     "CPrimitiveObject",
+    "ArchetypeSlotPattern",
+    "CArchetypeSlot",
 ]
