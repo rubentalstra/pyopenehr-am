@@ -269,7 +269,7 @@ Implement occurrences/cardinality parsing and validation in AST form. Add tests.
 Extend ADL parser to capture `rules` section with source locations. Don’t
 implement evaluation. Add tests.
 
-### 7.2 Expression AST (minimal)
+### 7.2 Expression AST (minimal) [x]
 
 Create `openehr_am/adl/expr_ast.py` for minimal expression AST. Add tests.
 
