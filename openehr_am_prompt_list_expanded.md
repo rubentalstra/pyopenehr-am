@@ -412,7 +412,7 @@ Validate referenced RM types exist. Emit `BMM500`. Add tests.
 Validate referenced RM attributes exist on the RM type. Emit `BMM510`. Add
 tests.
 
-### 12.6 RM conformance: multiplicity compatibility (basic)
+### 12.6 RM conformance: multiplicity compatibility (basic) [x]
 
 Validate multiplicity doesn’t exceed RM constraints (subset). Emit `BMM520`. Add
 tests.
