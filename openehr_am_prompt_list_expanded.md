@@ -225,7 +225,7 @@ Implement `openehr_am/adl/ast.py` capturing: artefact kind, artefact id,
 language/original_language, description + terminology ODIN AST, definition
 placeholder, rules placeholder. Include source spans and tests.
 
-### 5.2 ADL parser: header + ODIN sections
+### 5.2 ADL parser: header + ODIN sections [x]
 
 Implement `parse_adl(text, filename=None) -(AdlAst|None, issues)` that parses
 header id and ODIN blocks (language/description/terminology). Leave
