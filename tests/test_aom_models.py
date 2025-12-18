@@ -1,12 +1,13 @@
 import dataclasses
+
 import pytest
 
 from openehr_am.aom import (
     Archetype,
     ArchetypeTerminology,
+    Cardinality,
     CAttribute,
     CComplexObject,
-    Cardinality,
     Interval,
     Template,
     TermBinding,
@@ -55,6 +56,7 @@ def test_archetype_wires_definition_and_terminology() -> None:
 
     assert arch.definition is definition
     assert arch.terminology is terminology
+    assert arch.definition is not None
     assert arch.definition.attributes[0].rm_attribute_name == "items"
 
 

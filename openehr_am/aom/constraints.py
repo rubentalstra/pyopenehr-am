@@ -10,7 +10,6 @@ from dataclasses import dataclass
 
 from openehr_am.antlr.span import SourceSpan
 
-
 type MaybeInt = int | None
 
 

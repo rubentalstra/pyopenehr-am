@@ -287,7 +287,7 @@ Implement AOM dataclasses under `openehr_am/aom/` for Archetype/Template,
 terminology, and a constraint skeleton (CComplexObject, CAttribute, etc.).
 Prefer slots/frozen where appropriate. Add tests.
 
-### 8.2 Implement identifiers and parsing helpers
+### 8.2 Implement identifiers and parsing helpers [x]
 
 Implement helpers for archetype ids and node ids (`atNNNN`, `acNNNN`). Add
 tests.
