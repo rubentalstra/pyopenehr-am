@@ -1,58 +1,58 @@
-# Copilot Instructions — openEHR AM Toolkit (Pure Python)
+# Copilot Instructions — pyopenehr-am (Python 3.14+, Pure Python)
 
 These instructions apply to **all Copilot Chat requests** in this repository.
 
-## What this repo is
-A **pure-Python** SDK that other developers can embed to build legacy → openEHR migration tooling. This repo provides the reusable primitives:
-- Parse **ADL2** (archetypes/templates) and embedded **ODIN**
-- Build **AOM2** semantic models
-- Validate (syntax + AOM2 semantic validity + RM conformance via **BMM** schemas)
-- Compile templates/archetypes to **OPT2** (Operational Template)
-- (Later) validate instance data (composition JSON/object) against OPT
+## North star
+Build a **standards-driven**, **pure-Python** toolkit for openEHR artefacts (ADL2/AOM2/ODIN/BMM/OPT2) that other teams can embed.
 
-## Hard constraints (must follow)
-- **Pure Python only.** No Java/.NET wrappers, no JPype/JNI, no calling external “reference implementations”.
-- **Standards-driven.** When implementing a rule/structure, add a short comment with the relevant spec URL.
-- Keep the public API **small, stable, and typed**.
-- Prefer **incremental, reviewable diffs** and always include tests.
+## Target runtime
+- Python **3.14+ only**. No compatibility shims for older Python.
+- Default semantics in 3.14 include **deferred evaluation of annotations**; do not opt out by adding `from __future__ import annotations`.
+- Use `annotationlib.get_annotations()` if you need runtime access to evaluated annotations.
 
-## Internal architecture (compiler pipeline)
-Implement the package like a compiler:
+## Hard constraints
+- Pure Python only (no wrappers around existing Java/.NET implementations).
+- All invalid input must be handled gracefully by returning `Issue` objects.
+- Keep public API small and stable; avoid leaking internal parse-tree objects.
+
+## Architecture
+Treat the library like a compiler:
 **Parse → Build AOM → Validate → Compile OPT → (Optional) Validate Instances**
 
-- “Compile OPT” means compiling a template + archetypes into an Operational Template representation for runtime validation.
-- “Validate Instances” means validating the output data produced by migration code (userland) against an OPT.
-
-## Repository structure (expected)
-- `openehr_am/odin/` — ODIN parsing + AST
-- `openehr_am/adl/` — ADL2 parsing + AST (cADL + RULES parsing)
-- `openehr_am/aom/` — AOM2 dataclasses (semantic object model)
-- `openehr_am/bmm/` — BMM loader + ModelRepository (RM schemas)
-- `openehr_am/validation/` — layered validators + check registry
-- `openehr_am/opt/` — OPT2 model + compiler
-- `openehr_am/path/` — openEHR path parsing + resolution helpers
-- `openehr_am/_generated/` — generated parser code (DO NOT edit by hand)
+### Layer responsibilities
+- Parsing (`adl/`, `odin/`): text → syntax AST with source spans.
+- Semantic building (`aom/`): syntax AST → semantic AOM model.
+- Validation (`validation/`): rule checks (syntax/semantic/RM/OPT) returning Issues.
+- RM schemas (`bmm/`): load BMM and expose type/class/property lookup.
+- Compilation (`opt/`): template + archetype set → OPT operational form.
+- Paths (`path/`): parse/normalize/resolve openEHR paths.
 
 ## Diagnostics (non-negotiable)
-All recoverable problems must be returned as `Issue` objects (not exceptions), including:
-- stable `code` (e.g., `ADL001`, `AOM014`, `BMM003`, `OPT010`)
-- `severity` (`INFO|WARN|ERROR`)
-- best-effort `file`, `line`, `col`
-- optional `path` and `node_id`
+Use `Issue` objects with:
+- `code` (stable, documented in `docs/issue-codes.md`)
+- `severity` (INFO/WARN/ERROR)
+- best-effort location (`file`, `line`, `col`, optional end span)
+- optional `path`, `node_id`
 
-Exceptions are only for programmer errors or unrecoverable I/O.
+Exceptions are for programmer errors or irrecoverable I/O only.
 
-## Issue codes and rule provenance
-- Maintain the canonical list of codes in `docs/issue-codes.md`.
-- Every new validation rule must:
-  1) choose or add an Issue code in that file, and
-  2) include a short `# Spec:` comment pointing to the relevant openEHR spec URL.
+## Validation rules
+- Every new rule needs:
+  1) an Issue code in `docs/issue-codes.md`
+  2) a `# Spec:` URL comment (short, no big quotes)
+  3) tests asserting the code is emitted
 
-## How to respond when generating code
-When the user asks to “implement X”, respond with:
-1) **Plan (brief)**: what changes and why
-2) **Files**: list files to add/modify
-3) **Patch**: code file-by-file
-4) **How to test**: commands to run (`pytest`, etc.)
+## ANTLR generated code
+- Generated parser output under `openehr_am/_generated/` is committed.
+- Never edit generated code by hand.
+- If grammars change, rerun the generator script and commit the new output.
 
-Avoid huge rewrites; keep diffs small and composable.
+## How to respond when asked to implement code
+Always provide:
+1) Plan (brief)
+2) Files to add/modify
+3) Patch file-by-file
+4) Tests + commands to run
+5) Notes on spec provenance and Issue codes (if applicable)
+
+Keep diffs small and incremental.

@@ -10,8 +10,6 @@ Use this template when adding new validation rules under
 - **Issue code(s):** (e.g., `AOM200`)
 - **Default severity:** WARN / ERROR
 - **Spec provenance:** paste the spec URL(s) that justify the rule
-  - Example:
-    `https://specifications.openehr.org/releases/AM/Release-2.1.0/AOM2.html`
 - **What it checks:** 1–2 sentences
 - **False positives risk:** low / medium / high
 - **Autofix possible:** yes / no (if yes, describe a safe fix)
@@ -21,48 +19,42 @@ Use this template when adding new validation rules under
 - [ ] Add Issue code(s) to `docs/issue-codes.md` if not already present
 - [ ] Implement the check as a small function returning `list[Issue]`
 - [ ] Register the check in the validation registry for the correct layer
-- [ ] Add at least:
-  - [ ] a happy-path test (no issues)
-  - [ ] a failing test asserting the Issue code(s)
-  - [ ] a location/path assertion if available (line/col or node id)
+- [ ] Add tests:
+  - [ ] happy path (no issues)
+  - [ ] failing path asserting the Issue code(s)
+  - [ ] location/path assertion if available (line/col, node id, path)
 
-## 3) Code skeleton (example)
+## 3) Code skeleton
 
 ```python
-# openehr_am/validation/aom/terminology.py
-
-from __future__ import annotations
-
+from dataclasses import dataclass
 from openehr_am.validation.issue import Issue, Severity
 
-def check_terminology_references_defined(ctx) -> list[Issue]:
+def check_example(ctx) -> list[Issue]:
     issues: list[Issue] = []
 
-    # Spec: https://specifications.openehr.org/releases/AM/Release-2.1.0/AOM2.html
-    # Rationale: referenced at-codes must exist in terminology definitions.
+    # Spec: https://specifications.openehr.org/...
+    # Rationale: short explanation
 
-    for ref in ctx.iter_referenced_term_codes():
-        if not ctx.terminology.has_code(ref.code):
-            issues.append(Issue(
-                code="AOM200",
-                severity=Severity.ERROR,
-                message=f"Terminology code '{ref.code}' is referenced but not defined.",
-                file=ref.file,
-                line=ref.line,
-                col=ref.col,
-                path=ref.path,
-                node_id=ref.node_id,
-            ))
+    if ctx.something_is_wrong():
+        issues.append(Issue(
+            code="AOM200",
+            severity=Severity.ERROR,
+            message="Explain what is wrong.",
+            file=ctx.file,
+            line=ctx.line,
+            col=ctx.col,
+            path=ctx.path,
+            node_id=ctx.node_id,
+        ))
 
     return issues
 ```
 
-## 4) Test skeleton (example)
+## 4) Test skeleton
 
 ```python
-# tests/test_aom_terminology_references.py
-
-def test_missing_terminology_code_emits_AOM200():
-    issues = validate_archetype_text(BROKEN_ARCHETYPE_TEXT, level="semantic")
+def test_example_emits_AOM200():
+    issues = validate_archetype_text(BROKEN_TEXT, level="semantic")
     assert any(i.code == "AOM200" for i in issues)
 ```

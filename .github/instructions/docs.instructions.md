@@ -1,12 +1,11 @@
 ---
 name: Documentation standards
-description: Writing standards for docs and markdown files
+description: Docs style and required references
 applyTo: "docs/**/*.md,**/*.md"
 ---
 # Documentation standards
 
-- Be concise and practical; prefer steps and examples.
-- Use consistent terms: ADL2, AOM2, ODIN, BMM, OPT2.
-- Link to official spec URLs when describing standards behavior.
-- Avoid copying large blocks of spec text; summarize in your own words.
-- For public API docs, include a minimal working snippet.
+- Be concise, step-oriented, and practical.
+- Always link to official openEHR spec URLs when describing normative behavior.
+- Avoid quoting large chunks of specs; summarize in your own words.
+- Keep terminology consistent: ADL2, ODIN, AOM2, BMM, OPT2.
