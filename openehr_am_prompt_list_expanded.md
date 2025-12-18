@@ -305,23 +305,23 @@ Add deterministic `to_dict()` helpers for AOM objects (debug). Add tests.
 
 ## Phase 9 — Validation framework (registry + layers)
 
-### 9.1 Validation context + registry
+### 9.1 Validation context + registry [x]
 
 Implement a validation registry that runs checks by layer: `syntax`, `semantic`,
 `rm`, `opt`. Add `ValidationContext` carrying artefact + optional RM repo. Add
 tests.
 
-### 9.2 Syntax validation wrapper
+### 9.2 Syntax validation wrapper [x]
 
 Implement `validate_syntax(text/path)` that calls parsers and returns Issues.
 Add tests.
 
-### 9.3 Semantic validation runner
+### 9.3 Semantic validation runner [x]
 
 Implement `validate_semantic(aom_obj)` calling registered semantic checks. Add
 tests with a stub check.
 
-### 9.4 Enforce Issue codes documentation
+### 9.4 Enforce Issue codes documentation [x]
 
 Add a test that checks Issue codes used in code are present in
 `docs/issue-codes.md` (simple grep heuristic ok initially). Add docs.

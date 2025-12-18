@@ -1,4 +1,28 @@
+import re
+from pathlib import Path
+
 from openehr_am.validation.issue import validate_issue_code
+
+_CODE_RE = re.compile(r"\b(?:ADL|ODN|AOM|BMM|OPT|PATH|CLI)\d{3}\b")
+
+
+def _repo_root() -> Path:
+    # tests/ is at repo_root/tests/
+    return Path(__file__).resolve().parents[1]
+
+
+def _iter_python_source_files(root: Path) -> list[Path]:
+    src_root = root / "openehr_am"
+    paths: list[Path] = []
+    for p in src_root.rglob("*.py"):
+        if "_generated" in p.parts:
+            continue
+        paths.append(p)
+    return sorted(paths)
+
+
+def _extract_codes(text: str) -> set[str]:
+    return set(_CODE_RE.findall(text))
 
 
 def test_validate_issue_code_accepts_known_prefixes_and_ranges() -> None:
@@ -45,3 +69,22 @@ def test_validate_issue_code_rejects_wrong_format_or_range() -> None:
     assert not validate_issue_code("CLI999")
 
     assert not validate_issue_code("XYZ123")  # unknown prefix
+
+
+def test_issue_codes_used_in_source_are_documented() -> None:
+    root = _repo_root()
+
+    documented = _extract_codes(
+        (root / "docs" / "issue-codes.md").read_text(encoding="utf-8")
+    )
+
+    used: set[str] = set()
+    for path in _iter_python_source_files(root):
+        used |= _extract_codes(path.read_text(encoding="utf-8"))
+
+    # Only enforce “used ⊆ documented”. The docs can mention future codes.
+    missing = sorted(used - documented)
+    assert not missing, (
+        "Issue codes used in source but missing from docs/issue-codes.md: "
+        + ", ".join(missing)
+    )
