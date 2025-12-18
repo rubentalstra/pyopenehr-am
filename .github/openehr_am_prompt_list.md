@@ -13,7 +13,7 @@ Each prompt is designed to produce **reviewable diffs** with tests.
 ### 0.1 Repo scaffold + tooling
 
 Create the initial project scaffold for a pure-Python package named
-`openehr_am`. Add `pyproject.toml` with Python 3.11+, dependencies for `pytest`
+`openehr_am`. Add `pyproject.toml` with Python 3.12+, dependencies for `pytest`
 and `ruff`, and a Typer-based CLI entrypoint placeholder (`openehr-am --help`).
 Create `openehr_am/__init__.py`. Add one trivial test to confirm imports work.
 Provide file-by-file patches and test commands.
