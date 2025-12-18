@@ -426,7 +426,7 @@ tests.
 Implement `ArchetypeRepository` that loads `.adl` files from a directory, parses
 them, and indexes by archetype id. Add tests.
 
-### 13.2 Dependency graph and cycle detection
+### 13.2 Dependency graph and cycle detection [x]
 
 Implement dependency extraction and detect cycles. Emit `OPT705` for cycles. Add
 tests.

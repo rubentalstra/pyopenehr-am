@@ -70,6 +70,7 @@ def build_aom_from_adl(
             return (
                 Archetype(
                     archetype_id=artefact.artefact_id,
+                    parent_archetype_id=artefact.parent_archetype_id,
                     concept=definition.node_id if definition is not None else None,
                     original_language=artefact.original_language,
                     languages=(artefact.language,) if artefact.language else (),

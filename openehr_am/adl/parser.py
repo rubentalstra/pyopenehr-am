@@ -126,6 +126,11 @@ def parse_adl(
 
     section_map = _find_sections(lines)
 
+    parent_archetype_id, parent_archetype_id_span, parent_issues = (
+        _parse_specialise_section(lines, section_map, filename=filename)
+    )
+    issues.extend(parent_issues)
+
     language_node, _language_span, language_issues = _parse_odin_section(
         lines,
         section_map,
@@ -170,6 +175,7 @@ def parse_adl(
     artefact = AdlArtefact(
         kind=kind,
         artefact_id=artefact_id,
+        parent_archetype_id=parent_archetype_id,
         original_language=original_language,
         language=language,
         description=description_node,
@@ -185,6 +191,7 @@ def parse_adl(
         language_span=None,
         description_span=description_span,
         terminology_span=terminology_span,
+        parent_archetype_id_span=parent_archetype_id_span,
     )
 
     # Basic structural expectations.
@@ -211,6 +218,67 @@ def parse_adl(
                 artefact = replace(artefact, language_span=item.key_span)
 
     return artefact, issues
+
+
+def _parse_specialise_section(
+    lines: list[str],
+    section_map: dict[str, int],
+    *,
+    filename: str | None,
+) -> tuple[str | None, SourceSpan | None, list[Issue]]:
+    """Parse ADL `specialise`/`specialize` section.
+
+    This is best-effort and does not attempt semantic validation.
+
+    # Spec: https://specifications.openehr.org/releases/AM/latest/ADL2.html
+    """
+
+    # Prefer British spelling if both appear.
+    name = "specialise" if "specialise" in section_map else "specialize"
+    if name not in section_map:
+        return None, None, []
+
+    rng = _section_content_range(lines, section_map, name)
+    if rng is None:
+        return None, None, []
+
+    start_idx, end_idx = rng
+    for idx in range(start_idx, end_idx):
+        raw = lines[idx].rstrip("\n")
+        stripped = raw.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("--"):
+            continue
+
+        # Span for the token within the line.
+        start_col = (len(raw) - len(raw.lstrip(" \t"))) + 1
+        end_col = start_col + len(stripped) - 1
+        span = SourceSpan(
+            file=filename,
+            start_line=idx + 1,
+            start_col=start_col,
+            end_line=idx + 1,
+            end_col=end_col,
+        )
+        return stripped, span, []
+
+    # Header exists but no content.
+    header_line = section_map[name] + 1
+    return (
+        None,
+        None,
+        [
+            Issue(
+                code="ADL010",
+                severity=Severity.ERROR,
+                message=f"Empty section content: {name}",
+                file=filename,
+                line=header_line,
+                col=1,
+            )
+        ],
+    )
 
 
 # -----------------------
@@ -900,6 +968,8 @@ class _CadlParser:
 
 
 _SECTION_NAMES = {
+    "specialise",
+    "specialize",
     "language",
     "description",
     "terminology",
