@@ -219,20 +219,20 @@ round-trip tests.
 
 ## Phase 5 — ADL2 parsing (incremental)
 
-### 5.1 ADL AST skeleton
+### 5.1 ADL AST skeleton [x]
 
 Implement `openehr_am/adl/ast.py` capturing: artefact kind, artefact id,
 language/original_language, description + terminology ODIN AST, definition
 placeholder, rules placeholder. Include source spans and tests.
 
-### 5.2 ADL parser: header + ODIN sections
+### 5.2 ADL parser: header + ODIN sections [x]
 
 Implement `parse_adl(text, filename=None) -(AdlAst|None, issues)` that parses
 header id and ODIN blocks (language/description/terminology). Leave
 definition/rules as TODO but don’t crash. Add tests with minimal archetype and
 template samples.
 
-### 5.3 Add ADL fixtures folder
+### 5.3 Add ADL fixtures folder [x]
 
 Create `tests/fixtures/adl/` with tiny valid/invalid ADL snippets used by tests.
 Add a fixture loader helper.

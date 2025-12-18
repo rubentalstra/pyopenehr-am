@@ -1,0 +1,11 @@
+archetype
+openEHR-EHR-OBSERVATION.test.v1
+
+language
+original_language = <"en">
+
+description
+@
+
+terminology
+<>
