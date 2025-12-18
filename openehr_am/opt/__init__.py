@@ -4,6 +4,7 @@ This package contains utilities for compiling templates and archetypes into an
 Operational Template (OPT2).
 """
 
+from openehr_am.opt.compiler import compile_opt
 from openehr_am.opt.dependencies import (
     DependencyGraph,
     build_archetype_dependency_graph,
@@ -44,4 +45,5 @@ __all__ = [
     "OptCComplexObject",
     "OptCPrimitiveObject",
     "opt_to_json",
+    "compile_opt",
 ]

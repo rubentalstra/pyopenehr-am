@@ -448,7 +448,7 @@ subset + flattened constraints. Add tests.
 
 Implement deterministic `to_dict()` and JSON export for OPT. Add tests.
 
-### 14.3 OPT compilation: resolve included archetypes
+### 14.3 OPT compilation: resolve included archetypes [x]
 
 Implement `compile_opt` resolving included archetypes; emit `OPT700` if missing.
 Add tests.
