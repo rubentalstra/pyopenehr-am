@@ -47,9 +47,12 @@ openehr-am = "openehr_am.cli.main:main"
 [project.urls]
 Homepage = "https://github.com/rubentalstra/pyopenehr-am"
 Repository = "https://github.com/rubentalstra/pyopenehr-am"
+Source = "https://github.com/rubentalstra/pyopenehr-am.git"
 Issues = "https://github.com/rubentalstra/pyopenehr-am/issues"
 Documentation = "https://github.com/rubentalstra/pyopenehr-am/tree/main/docs"
 Changelog = "https://github.com/rubentalstra/pyopenehr-am/releases"
+Security = "https://github.com/rubentalstra/pyopenehr-am/blob/main/SECURITY.md"
+PyPI = "https://pypi.org/project/pyopenehr-am/"
 
 [tool.hatch.version]
 path = "openehr_am/__about__.py"
