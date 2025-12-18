@@ -264,16 +264,16 @@ Implement occurrences/cardinality parsing and validation in AST form. Add tests.
 
 ## Phase 7 — RULES / expression parsing (parse-only first)
 
-### 7.1 Rules section capture (syntax only)
+### 7.1 Rules section capture (syntax only) [x]
 
 Extend ADL parser to capture `rules` section with source locations. Don’t
 implement evaluation. Add tests.
 
-### 7.2 Expression AST (minimal)
+### 7.2 Expression AST (minimal) [x]
 
 Create `openehr_am/adl/expr_ast.py` for minimal expression AST. Add tests.
 
-### 7.3 Parse expressions into Expression AST (MVP)
+### 7.3 Parse expressions into Expression AST (MVP) [x]
 
 Parse a small expression subset into Expression AST. Add tests.
 
