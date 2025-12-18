@@ -5,10 +5,10 @@ This script is intended for contributors only.
 Policy:
 - Grammar sources live in `grammars/`.
 - Generated Python code is committed under `openehr_am/_generated/`.
-- End-users installing the package should NOT need Java or ANTLR.
+- End-users installing the package should NOT need the ANTLR generator.
 
 Prerequisites (contributors):
-- Java (a `java` executable on PATH)
+- A JVM (a launcher on PATH)
 - ANTLR tool jar (e.g. `antlr-4.13.2-complete.jar`)
 
 See `docs/dev/parsers.md` for details.
@@ -16,10 +16,12 @@ See `docs/dev/parsers.md` for details.
 
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
+from importlib import metadata
 from pathlib import Path
 
 
@@ -31,6 +33,11 @@ def _find_java() -> str | None:
     return shutil.which("java")
 
 
+def _find_antlr4() -> str | None:
+    # Often provided by `antlr4-tools` or OS packages.
+    return shutil.which("antlr4")
+
+
 def _resolve_antlr_jar(*, cli_value: str | None) -> Path | None:
     raw = cli_value or os.environ.get("ANTLR4_JAR")
     if not raw:
@@ -39,6 +46,60 @@ def _resolve_antlr_jar(*, cli_value: str | None) -> Path | None:
     if not jar.exists() or not jar.is_file():
         raise ValueError(f"ANTLR jar not found: {jar}")
     return jar
+
+
+_ANTLR_JAR_VERSION_RE = re.compile(r"antlr-(\d+\.\d+\.\d+)-complete\.jar$")
+
+
+def _antlr_runtime_version() -> str | None:
+    try:
+        return metadata.version("antlr4-python3-runtime")
+    except metadata.PackageNotFoundError:
+        return None
+
+
+def _antlr_tool_version_from_jar(antlr_jar: Path) -> str | None:
+    m = _ANTLR_JAR_VERSION_RE.search(antlr_jar.name)
+    if not m:
+        return None
+    return m.group(1)
+
+
+_ANTLR_TOOL_VERSION_LINE_RE = re.compile(
+    r"ANTLR\s+Parser\s+Generator\s+(\d+\.\d+\.\d+)"
+)
+
+
+def _antlr_tool_version_from_antlr4_cmd(antlr4_cmd: str) -> str | None:
+    # `antlr4 -version` typically prints e.g. "ANTLR Parser Generator 4.13.2".
+    try:
+        proc = subprocess.run(
+            [antlr4_cmd, "-version"],
+            check=True,
+            text=True,
+            capture_output=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+    text = (proc.stdout or "") + "\n" + (proc.stderr or "")
+    for line in text.splitlines():
+        m = _ANTLR_TOOL_VERSION_LINE_RE.search(line)
+        if m:
+            return m.group(1)
+    return None
+
+
+def _require_matching_versions(*, tool: str | None, runtime: str | None) -> None:
+    # Per ANTLR docs: tool and runtime must match to avoid subtle failures.
+    if tool is None or runtime is None:
+        return
+    if tool != runtime:
+        raise ValueError(
+            "ANTLR tool/runtime version mismatch: "
+            f"tool={tool!r} runtime={runtime!r}. "
+            "Use the same ANTLR version for code generation and antlr4-python3-runtime."
+        )
 
 
 def _ensure_generated_package_scaffold(tmp_out: Path) -> None:
@@ -52,8 +113,9 @@ def _ensure_generated_package_scaffold(tmp_out: Path) -> None:
 
 def _run_antlr(
     *,
-    java: str,
-    antlr_jar: Path,
+    java: str | None,
+    antlr_jar: Path | None,
+    antlr4_cmd: str | None,
     grammars: list[Path],
     grammars_dir: Path,
     out_dir: Path,
@@ -62,10 +124,7 @@ def _run_antlr(
     # - sorted grammar list
     # - exact output dir
     # - pinned language target
-    cmd: list[str] = [
-        java,
-        "-jar",
-        str(antlr_jar),
+    base_args: list[str] = [
         "-Dlanguage=Python3",
         "-encoding",
         "UTF-8",
@@ -81,7 +140,15 @@ def _run_antlr(
         *[str(p) for p in grammars],
     ]
 
-    subprocess.run(cmd, check=True)
+    if antlr4_cmd is not None:
+        subprocess.run([antlr4_cmd, *base_args], check=True)
+        return
+
+    if java is None or antlr_jar is None:
+        raise ValueError(
+            "ANTLR tool not configured. Provide --antlr-jar / ANTLR4_JAR or install an `antlr4` command."
+        )
+    subprocess.run([java, "-jar", str(antlr_jar), *base_args], check=True)
 
 
 def _sync_generated_tree(*, tmp_out: Path, generated_dir: Path) -> None:
@@ -122,6 +189,13 @@ def main() -> int:
             "Alternatively set ANTLR4_JAR."
         ),
     )
+    parser.add_argument(
+        "--antlr4",
+        help=(
+            "Path to an `antlr4` executable (if installed). If omitted, the generator "
+            "uses --antlr-jar/ANTLR4_JAR when provided, otherwise it will try to find `antlr4` on PATH."
+        ),
+    )
     args = parser.parse_args()
 
     repo_root = Path(__file__).resolve().parents[1]
@@ -144,29 +218,61 @@ def main() -> int:
         print("scripts/generate_parsers.py: no *.g4 grammars; nothing to generate")
         return 0
 
+    # Determine tool selection.
+    antlr4_cmd = Path(args.antlr4).expanduser() if args.antlr4 else None
+    if antlr4_cmd is not None:
+        if not antlr4_cmd.exists():
+            print(
+                f"scripts/generate_parsers.py: antlr4 executable not found: {antlr4_cmd}",
+                file=sys.stderr,
+            )
+            return 2
+        antlr4 = str(antlr4_cmd)
+        antlr_jar = None
+    else:
+        try:
+            antlr_jar = _resolve_antlr_jar(cli_value=args.antlr_jar)
+        except ValueError as exc:
+            print(f"scripts/generate_parsers.py: {exc}", file=sys.stderr)
+            return 2
+
+        antlr4 = None
+        if antlr_jar is None:
+            antlr4 = _find_antlr4()
+
+    if antlr_jar is None and antlr4 is None:
+        print(
+            "scripts/generate_parsers.py: No ANTLR tool configured. "
+            "Set ANTLR4_JAR or pass --antlr-jar, or install an `antlr4` executable. "
+            "See docs/dev/parsers.md.",
+            file=sys.stderr,
+        )
+        return 2
+
+    runtime_ver = _antlr_runtime_version()
+    tool_ver: str | None
+    if antlr_jar is not None:
+        tool_ver = _antlr_tool_version_from_jar(antlr_jar)
+    else:
+        tool_ver = _antlr_tool_version_from_antlr4_cmd(antlr4) if antlr4 else None
+
     try:
-        antlr_jar = _resolve_antlr_jar(cli_value=args.antlr_jar)
+        _require_matching_versions(tool=tool_ver, runtime=runtime_ver)
     except ValueError as exc:
         print(f"scripts/generate_parsers.py: {exc}", file=sys.stderr)
         return 2
 
-    if antlr_jar is None:
-        print(
-            "scripts/generate_parsers.py: ANTLR tool jar not configured. "
-            "Set ANTLR4_JAR or pass --antlr-jar. "
-            "See docs/dev/parsers.md.",
-            file=sys.stderr,
-        )
-        return 2
-
-    java = _find_java()
-    if java is None:
-        print(
-            "scripts/generate_parsers.py: Java not found on PATH (missing `java`). "
-            "See docs/dev/parsers.md.",
-            file=sys.stderr,
-        )
-        return 2
+    java = None
+    if antlr_jar is not None:
+        java = _find_java()
+        if java is None:
+            print(
+                "scripts/generate_parsers.py: JVM launcher not found on PATH. "
+                "The ANTLR code generator is a JVM tool and requires a JVM to regenerate parsers. "
+                "See docs/dev/parsers.md.",
+                file=sys.stderr,
+            )
+            return 2
 
     with tempfile.TemporaryDirectory(prefix="openehr_am_antlr_") as tmp:
         tmp_out = Path(tmp) / "out"
@@ -176,6 +282,7 @@ def main() -> int:
             _run_antlr(
                 java=java,
                 antlr_jar=antlr_jar,
+                antlr4_cmd=antlr4,
                 grammars=grammars,
                 grammars_dir=grammars_dir,
                 out_dir=tmp_out,

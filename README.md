@@ -32,7 +32,7 @@ A Python package that provides:
 
 - Not a “one-click database migrator”
 - Not mapping logic for any specific vendor/hospital schema
-- Not a wrapper around existing Java/.NET reference implementations (this repo
+- Not a wrapper around existing non-Python reference implementations (this repo
   is **pure Python only**)
 
 ---

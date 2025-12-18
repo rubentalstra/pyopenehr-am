@@ -28,7 +28,7 @@ Validate Instances**
 
 ## Non-negotiables
 
-- **Pure Python only**: no wrapping Java/.NET reference implementations, no
+- **Pure Python only**: no wrapping non-Python reference implementations, no
   JPype/JNI.
 - **Diagnostics**: return structured `Issue` objects for all recoverable
   problems (no exceptions for invalid artefacts).

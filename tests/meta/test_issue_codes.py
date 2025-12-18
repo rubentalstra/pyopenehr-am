@@ -4,7 +4,7 @@ from pathlib import Path
 from openehr_am.validation.issue import validate_issue_code
 from tests.repo_root import repo_root
 
-_CODE_RE = re.compile(r"\b(?:ADL|ODN|AOM|BMM|OPT|PATH|CLI)\d{3}\b")
+_CODE_RE = re.compile(r"\b(?:ADL|ODN|AQL|AOM|BMM|OPT|PATH|CLI)\d{3}\b")
 
 
 def _repo_root() -> Path:
@@ -32,6 +32,9 @@ def test_validate_issue_code_accepts_known_prefixes_and_ranges() -> None:
     assert validate_issue_code("ODN100")
     assert validate_issue_code("ODN199")
 
+    assert validate_issue_code("AQL100")
+    assert validate_issue_code("AQL199")
+
     assert validate_issue_code("AOM200")
     assert validate_issue_code("AOM499")
 
@@ -57,6 +60,9 @@ def test_validate_issue_code_rejects_wrong_format_or_range() -> None:
 
     assert not validate_issue_code("ODN099")
     assert not validate_issue_code("ODN200")
+
+    assert not validate_issue_code("AQL099")
+    assert not validate_issue_code("AQL200")
 
     assert not validate_issue_code("AOM199")
     assert not validate_issue_code("AOM500")

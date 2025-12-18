@@ -9,6 +9,7 @@ from enum import StrEnum
 _ISSUE_CODE_RANGES: dict[str, tuple[int, int]] = {
     "ADL": (1, 199),
     "ODN": (100, 199),
+    "AQL": (100, 199),
     "AOM": (200, 499),
     "BMM": (500, 699),
     "OPT": (700, 899),

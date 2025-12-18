@@ -5,236 +5,50 @@ Public entrypoint: :func:`parse_path`.
 This is a parsing-layer module: it must never raise for invalid path input.
 Instead it returns `Issue` objects.
 
+Implementation note:
+    This parser is implemented using an ANTLR4-generated lexer+parser targeting
+    Python.
+
 # Spec: https://specifications.openehr.org/releases/BASE/latest/architecture_overview.html#_paths
 """
 
-from dataclasses import dataclass
+import importlib
+from dataclasses import replace
+from typing import Protocol
 
+from openehr_am.antlr.runtime import construct_lexer_parser
 from openehr_am.antlr.span import SourceSpan
 from openehr_am.path.ast import Path, PathPredicate, PathSegment
 from openehr_am.validation.issue import Issue, Severity
+from openehr_am.validation.issue_collector import IssueCollector
 
 
-class _ParseError(Exception):
-    def __init__(
-        self, message: str, *, line: int | None = None, col: int | None = None
-    ):
-        super().__init__(message)
-        self.message = message
-        self.line = line
-        self.col = col
+class _TokenLike(Protocol):
+    line: int
+    column: int
+    text: str | None
 
 
-@dataclass(slots=True)
-class _Cursor:
-    text: str
-    i: int = 0
-    line: int = 1
-    col: int = 1
-
-    def eof(self) -> bool:
-        return self.i >= len(self.text)
-
-    def peek(self) -> str:
-        if self.eof():
-            return ""
-        return self.text[self.i]
-
-    def advance(self) -> str:
-        ch = self.peek()
-        if not ch:
-            return ""
-        self.i += 1
-        if ch == "\n":
-            self.line += 1
-            self.col = 1
-        else:
-            self.col += 1
-        return ch
-
-
-def _is_ident_start(ch: str) -> bool:
-    return ch.isalpha() or ch == "_"
-
-
-def _is_ident_cont(ch: str) -> bool:
-    return ch.isalnum() or ch == "_"
-
-
-class _Parser:
-    def __init__(self, text: str, *, filename: str | None):
-        self._c = _Cursor(text)
-        self._filename = filename
-
-    def _span(
-        self,
-        *,
-        start_line: int,
-        start_col: int,
-        end_line: int,
-        end_col: int,
-    ) -> SourceSpan:
-        return SourceSpan(
-            file=self._filename,
-            start_line=start_line,
-            start_col=start_col,
-            end_line=end_line,
-            end_col=end_col,
-        )
-
-    def parse(self) -> Path:
-        if self._c.eof():
-            raise _ParseError("empty path", line=1, col=1)
-
-        if self._c.peek() != "/":
-            raise _ParseError(
-                "path must start with '/'", line=self._c.line, col=self._c.col
-            )
-
-        path_start_line, path_start_col = self._c.line, self._c.col
-        self._c.advance()  # '/'
-
-        if self._c.eof():
-            # '/' alone is not accepted (use '/definition' for root).
-            raise _ParseError(
-                "path has no segments", line=self._c.line, col=self._c.col
-            )
-
-        segments: list[PathSegment] = []
-
-        while True:
-            if self._c.peek() == "/":
-                raise _ParseError(
-                    "empty path segment", line=self._c.line, col=self._c.col
-                )
-
-            seg = self._parse_segment()
-            segments.append(seg)
-
-            if self._c.eof():
-                break
-
-            if self._c.peek() != "/":
-                raise _ParseError(
-                    f"unexpected character {self._c.peek()!r}",
-                    line=self._c.line,
-                    col=self._c.col,
-                )
-
-            # Consume '/' and continue; disallow trailing '/'.
-            self._c.advance()
-            if self._c.eof():
-                raise _ParseError(
-                    "path must not end with '/'", line=self._c.line, col=self._c.col
-                )
-
-        path_end_line, path_end_col = self._c.line, self._c.col
-
-        # Optional leading '/definition' is not part of the semantic segments.
-        if (
-            segments
-            and segments[0].name == "definition"
-            and segments[0].predicate is None
-        ):
-            segments = segments[1:]
-
-        return Path(
-            segments=tuple(segments),
-            span=self._span(
-                start_line=path_start_line,
-                start_col=path_start_col,
-                end_line=path_end_line,
-                end_col=path_end_col,
-            ),
-        )
-
-    def _parse_segment(self) -> PathSegment:
-        start_line, start_col = self._c.line, self._c.col
-
-        name = self._parse_ident()
-
-        predicate: PathPredicate | None = None
-        if self._c.peek() == "[":
-            predicate = self._parse_predicate()
-
-        end_line, end_col = self._c.line, self._c.col
-        return PathSegment(
-            name=name,
-            predicate=predicate,
-            span=self._span(
-                start_line=start_line,
-                start_col=start_col,
-                end_line=end_line,
-                end_col=end_col,
-            ),
-        )
-
-    def _parse_ident(self) -> str:
-        ch = self._c.peek()
-        if not _is_ident_start(ch):
-            raise _ParseError(
-                "expected attribute name",
-                line=self._c.line,
-                col=self._c.col,
-            )
-
-        start = self._c.i
-        self._c.advance()
-        while True:
-            ch2 = self._c.peek()
-            if not ch2 or not _is_ident_cont(ch2):
-                break
-            self._c.advance()
-
-        return self._c.text[start : self._c.i]
-
-    def _parse_predicate(self) -> PathPredicate:
-        if self._c.peek() != "[":
-            raise _ParseError("internal error: expected '['")
-
-        start_line, start_col = self._c.line, self._c.col
-        self._c.advance()  # '['
-
-        pred_start_line, pred_start_col = self._c.line, self._c.col
-
-        buf: list[str] = []
-        while True:
-            if self._c.eof():
-                raise _ParseError(
-                    "unterminated predicate", line=self._c.line, col=self._c.col
-                )
-
-            ch = self._c.peek()
-            if ch == "]":
-                break
-            if ch == "/":
-                raise _ParseError(
-                    "'/' not allowed inside predicate",
-                    line=self._c.line,
-                    col=self._c.col,
-                )
-
-            buf.append(self._c.advance())
-
-        if not buf:
-            raise _ParseError(
-                "empty predicate", line=pred_start_line, col=pred_start_col
-            )
-
-        # Consume closing ']'.
-        self._c.advance()
-
-        end_line, end_col = self._c.line, self._c.col
-        pred_text = "".join(buf)
-        return PathPredicate(
-            text=pred_text,
-            span=self._span(
-                start_line=start_line,
-                start_col=start_col,
-                end_line=end_line,
-                end_col=end_col,
-            ),
-        )
+def _span_from_tokens(
+    start: _TokenLike,
+    stop: _TokenLike,
+    *,
+    filename: str | None,
+) -> SourceSpan:
+    # ANTLR: line is 1-based, column is 0-based.
+    start_line = int(getattr(start, "line", 1))
+    start_col = int(getattr(start, "column", 0)) + 1
+    end_line = int(getattr(stop, "line", start_line))
+    stop_col0 = int(getattr(stop, "column", 0))
+    stop_text = getattr(stop, "text", "") or ""
+    end_col = stop_col0 + len(stop_text) + 1
+    return SourceSpan(
+        file=filename,
+        start_line=start_line,
+        start_col=start_col,
+        end_line=end_line,
+        end_col=end_col,
+    )
 
 
 def _strip_wrapping_quotes(value: str) -> str:
@@ -269,18 +83,81 @@ def parse_path(
     raw = text
     stripped = _strip_wrapping_quotes(text.strip())
 
+    issues = IssueCollector()
     try:
-        parser = _Parser(stripped, filename=filename)
-        node = parser.parse()
-        return node, []
-    except _ParseError as e:
-        issue = Issue(
-            code="PATH900",
-            severity=Severity.ERROR,
-            message=e.message,
-            file=filename,
-            line=e.line,
-            col=e.col,
-            path=raw,
+        lexer_mod = importlib.import_module("openehr_am._generated.OpenEHRPathLexer")
+        parser_mod = importlib.import_module("openehr_am._generated.OpenEHRPathParser")
+        OpenEHRPathLexer = getattr(lexer_mod, "OpenEHRPathLexer")
+        OpenEHRPathParser = getattr(parser_mod, "OpenEHRPathParser")
+    except Exception as exc:  # pragma: no cover
+        # Programmer/deployment error (generated code missing). Surface as a
+        # programmer error rather than misclassifying as invalid user input.
+        raise RuntimeError(
+            "Missing generated ANTLR parser for openEHR paths. "
+            "Run scripts/generate_parsers.py and commit openehr_am/_generated outputs."
+        ) from exc
+
+    _lexer, parser = construct_lexer_parser(
+        stripped,
+        lexer_class=OpenEHRPathLexer,
+        parser_class=OpenEHRPathParser,
+        issues=issues,
+        file=filename,
+        issue_code="PATH900",
+    )
+
+    tree = parser.path()
+    if len(issues) > 0 or parser.getNumberOfSyntaxErrors() > 0:
+        # Preserve API contract: invalid input returns Issues, never raises.
+        out = [replace(issue, path=raw) for issue in issues.issues]
+        if not out:
+            out = [
+                Issue(
+                    code="PATH900",
+                    severity=Severity.ERROR,
+                    message="Invalid path",
+                    file=filename,
+                    line=1,
+                    col=1,
+                    path=raw,
+                )
+            ]
+        # Historically, parse_path emits a single PATH900 for invalid input.
+        return None, [out[0]]
+
+    # Build syntax AST.
+    segments: list[PathSegment] = []
+
+    for seg_ctx in tree.segment():
+        ident = seg_ctx.IDENT().getSymbol()
+        name = ident.text
+
+        predicate_ctx = seg_ctx.predicate()
+        predicate: PathPredicate | None = None
+        if predicate_ctx is not None:
+            pred_raw = predicate_ctx.PREDICATE().getSymbol().text
+            # PREDICATE includes surrounding brackets.
+            pred_text = pred_raw[1:-1]
+            predicate = PathPredicate(
+                text=pred_text,
+                span=_span_from_tokens(
+                    predicate_ctx.start,
+                    predicate_ctx.stop,
+                    filename=filename,
+                ),
+            )
+
+        segments.append(
+            PathSegment(
+                name=name,
+                predicate=predicate,
+                span=_span_from_tokens(seg_ctx.start, seg_ctx.stop, filename=filename),
+            )
         )
-        return None, [issue]
+
+    # Optional leading '/definition' is not part of the semantic segments.
+    if segments and segments[0].name == "definition" and segments[0].predicate is None:
+        segments = segments[1:]
+
+    span = _span_from_tokens(tree.start, tree.stop, filename=filename)
+    return Path(segments=tuple(segments), span=span), []

@@ -25,9 +25,9 @@ class IssueCollectingErrorListener:
     """ANTLR error listener that records lexer/parser errors as Issues.
 
     Note:
-        We intentionally avoid importing `antlr4` at module import time to keep
-        this package importable in environments where the dependency is not
-        installed (e.g., some static analysis setups). The ANTLR Python runtime
+        We intentionally avoid importing `antlr4` at module import time so the
+        project remains importable/type-checkable in environments that do not
+        have optional runtime dependencies installed. The ANTLR Python runtime
         accepts listeners via `addErrorListener()` using duck-typing.
     """
 
@@ -92,7 +92,7 @@ def construct_lexer_parser(
         Callers typically create a parse entrypoint and then inspect `issues`.
     """
 
-    # Import dynamically to avoid hard dependency for static analysis.
+    # Import dynamically to avoid a hard dependency at module import time.
     antlr4 = importlib.import_module("antlr4")
     InputStream = getattr(antlr4, "InputStream")
     CommonTokenStream = getattr(antlr4, "CommonTokenStream")

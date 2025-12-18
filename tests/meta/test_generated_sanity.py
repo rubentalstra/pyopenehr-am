@@ -34,7 +34,7 @@ def _grammar_names(grammars: list[Path]) -> list[str]:
 def test_generated_outputs_present_for_grammars() -> None:
     """Optional local sanity check for committed generated output.
 
-    This is intentionally lightweight and does not run Java/ANTLR.
+    This is intentionally lightweight and does not run the ANTLR generator.
 
     - Skips if there are no grammar sources under grammars/.
     - Fails if openehr_am/_generated/ is missing expected files for those grammars.

@@ -11,7 +11,7 @@ Build a **standards-driven**, **pure-Python** toolkit for openEHR artefacts (ADL
 - Use `annotationlib.get_annotations()` if you need runtime access to evaluated annotations.
 
 ## Hard constraints
-- Pure Python only (no wrappers around existing Java/.NET implementations).
+- Pure Python only (no wrappers around existing non-Python reference implementations).
 - All invalid input must be handled gracefully by returning `Issue` objects.
 - Keep public API small and stable; avoid leaking internal parse-tree objects.
 

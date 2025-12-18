@@ -31,6 +31,12 @@ jobs:
           cache: pip
           cache-dependency-path: pyproject.toml
 
+      - name: Set up JVM
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
       - name: Install
         run: |
           python -m pip install --upgrade pip
