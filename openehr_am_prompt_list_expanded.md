@@ -108,7 +108,7 @@ Add `openehr_am/__about__.py` (or similar) holding `__version__`. Expose
 `__version__` in `openehr_am/__init__.py`. Add a test that checks `__version__`
 exists.
 
-### 0.8 Enforce “no future annotations” policy
+### 0.8 Enforce “no future annotations” policy [x]
 
 Add a simple lint/test guard that prevents `from __future__ import annotations`
 anywhere in `openehr_am/` (since Python 3.14+ is the baseline). Add a test that
