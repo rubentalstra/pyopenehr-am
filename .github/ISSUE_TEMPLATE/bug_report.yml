@@ -1,0 +1,101 @@
+name: Bug report
+description: Report something that is broken or incorrect.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug.
+
+        Please include enough detail to reproduce. If this relates to validation, include the emitted `Issue.code` values.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened, and what did you expect to happen?
+      placeholder: Clear and concise description.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Minimal steps to reproduce.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: input
+    attributes:
+      label: Input artefact(s)
+      description: Provide the smallest possible ADL/ODIN/AQL/path input that reproduces the bug.
+      placeholder: Paste snippets here, or link to a minimal repo/fixture.
+    validations:
+      required: false
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual output
+      description: Paste the exact output/logs/traceback.
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected output
+      description: What output (or Issues) did you expect?
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Package version / commit
+      description: Version of `pyopenehr-am` you’re using (or commit SHA).
+      placeholder: e.g. 0.1.0 / 1a2b3c4
+    validations:
+      required: false
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: e.g. 3.14.0
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - ADL parsing
+        - ODIN parsing
+        - AOM building
+        - Validation
+        - OPT compilation
+        - Path parsing
+        - CLI
+        - Docs
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Any extra details that might help.
+    validations:
+      required: false
