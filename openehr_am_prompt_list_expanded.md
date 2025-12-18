@@ -96,7 +96,7 @@ and note “Python 3.14+ only”.
 Configure `ruff` in `pyproject.toml` with sane defaults. Ensure lint/format
 excludes `openehr_am/_generated/`. Add a “lint” instruction to README.
 
-### 0.6 Add typing checker (Python 3.14)
+### 0.6 Add typing checker (Python 3.14) [x]
 
 Configure **pyright** (recommended) or **mypy** for Python 3.14. Ensure CI runs
 it. Prefer modern typing features (PEP 695 `type` aliases where helpful), but

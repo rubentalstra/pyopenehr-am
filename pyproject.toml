@@ -14,7 +14,7 @@ authors = [{ name = "rubentalstra" }]
 dependencies = ["rich>=14.2.0", "typer>=0.20.0"]
 
 [project.optional-dependencies]
-dev = ["pytest>=9.0.2", "ruff>=0.14.9"]
+dev = ["pyright>=1.1.407", "pytest>=9.0.2", "ruff>=0.14.9"]
 
 [project.scripts]
 openehr-am = "openehr_am.cli.main:main"
