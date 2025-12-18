@@ -72,26 +72,26 @@ and `rich`. Create `openehr_am/__init__.py`. Add `openehr_am/cli/` package with
 `app.py` exposing a Typer app and `main.py` entrypoint. Add one trivial test to
 confirm imports work. Provide file-by-file patches and test commands.
 
-### 0.2 Add README + project docs skeleton
+### 0.2 Add README + project docs skeleton [x]
 
 Add `README.md` (concise), plus `docs/` folder with `docs/architecture.md` and
 `docs/dev/`. Ensure docs mention “Python 3.14+ only”, “pure Python only”, and
 the compiler pipeline architecture. Add “Development” instructions:
 `pip install -e ".[dev]"` and `pytest`.
 
-### 0.3 Pin spec baseline file
+### 0.3 Pin spec baseline file [x]
 
 Add `SPEC_BASELINE.md` that pins the exact openEHR spec URLs you target (ADL2,
 AOM2, ODIN, BMM, OPT2) and the chosen release versions. Add a note: “Spec
 baseline changes require a minor version bump.”
 
-### 0.4 Add repo hygiene files
+### 0.4 Add repo hygiene files [x]
 
 Add `.gitignore`, `.editorconfig`, `CONTRIBUTING.md`, and `CODE_OF_CONDUCT.md`.
 Keep `CONTRIBUTING.md` aligned with the Issue-code and “Spec provenance” policy,
 and note “Python 3.14+ only”.
 
-### 0.5 Add ruff config and formatting policy
+### 0.5 Add ruff config and formatting policy [x]
 
 Configure `ruff` in `pyproject.toml` with sane defaults. Ensure lint/format
 excludes `openehr_am/_generated/`. Add a “lint” instruction to README.
