@@ -305,7 +305,7 @@ Add deterministic `to_dict()` helpers for AOM objects (debug). Add tests.
 
 ## Phase 9 — Validation framework (registry + layers)
 
-### 9.1 Validation context + registry
+### 9.1 Validation context + registry [x]
 
 Implement a validation registry that runs checks by layer: `syntax`, `semantic`,
 `rm`, `opt`. Add `ValidationContext` carrying artefact + optional RM repo. Add
