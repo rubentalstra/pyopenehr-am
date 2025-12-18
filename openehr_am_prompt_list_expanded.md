@@ -281,23 +281,23 @@ Parse a small expression subset into Expression AST. Add tests.
 
 ## Phase 8 — AOM2 semantic model (dataclasses)
 
-### 8.1 Implement core AOM dataclasses
+### 8.1 Implement core AOM dataclasses [x]
 
 Implement AOM dataclasses under `openehr_am/aom/` for Archetype/Template,
 terminology, and a constraint skeleton (CComplexObject, CAttribute, etc.).
 Prefer slots/frozen where appropriate. Add tests.
 
-### 8.2 Implement identifiers and parsing helpers
+### 8.2 Implement identifiers and parsing helpers [x]
 
 Implement helpers for archetype ids and node ids (`atNNNN`, `acNNNN`). Add
 tests.
 
-### 8.3 AST → AOM builder: header + terminology + minimal definition
+### 8.3 AST → AOM builder: header + terminology + minimal definition [x]
 
 Build AOM objects from ADL AST + cADL AST for the supported subset. Preserve
 source locations. Add tests.
 
-### 8.4 Add debug serializers
+### 8.4 Add debug serializers [x]
 
 Add deterministic `to_dict()` helpers for AOM objects (debug). Add tests.
 

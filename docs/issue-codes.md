@@ -37,6 +37,7 @@ Codes are formatted as:
 | ODN100  | ERROR    | Parse     | ODIN parse failure                                | ODIN grammar              |
 | ODN110  | WARN     | Structure | ODIN key duplication                              | ODIN rules                |
 | AOM200  | ERROR    | Semantics | Terminology code referenced but not defined       | AOM2 terminology validity |
+| AOM205  | ERROR    | Semantics | AOM build failed / unsupported artefact shape     | Internal builder          |
 | AOM210  | ERROR    | Semantics | Invalid node id format                            | AOM2 node id rules        |
 | AOM230  | ERROR    | Semantics | Specialisation level mismatch                     | AOM2 specialization       |
 | AOM240  | ERROR    | Semantics | Duplicate node id / duplicate path                | AOM2 uniqueness           |
