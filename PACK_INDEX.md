@@ -12,6 +12,7 @@ This drop-in pack contains:
 
 ## Docs
 
+- `SECURITY.md`
 - `docs/architecture.md`
 - `docs/issue-codes.md`
 - `docs/validation-rule-template.md`

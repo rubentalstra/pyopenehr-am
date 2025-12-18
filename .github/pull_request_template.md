@@ -1,10 +1,10 @@
 ## Summary
 
-- What does this change do?
+- What does this change do (1–3 bullets)?
 
 ## Why
 
-- Why is this needed?
+- Why is this needed? What problem does it solve?
 
 ## Type of change
 
@@ -14,26 +14,40 @@
 - [ ] Documentation
 - [ ] Build / CI
 
+## Compatibility / risk
+
+- Breaking change? If yes, what is the migration path?
+- Risky areas (parsing, validation, OPT compilation, CLI behavior):
+
 ## Standards / spec provenance
 
-- Spec link(s):
-- Notes:
+- Spec link(s) (normative):
+- Notes (what part of the spec drove the change):
 
-## Diagnostics (Issues)
+## Diagnostics (Issue codes)
 
-If this PR adds or changes validation rules:
+If this PR adds or changes validation rules or diagnostics:
 
-- [ ] Added a stable Issue code to docs/issue-codes.md
-- [ ] Added `# Spec: <URL>` near the rule implementation
-- [ ] Added tests asserting the Issue code is emitted
+- [ ] Added/updated stable Issue code(s) in `docs/issue-codes.md`
+- [ ] Added a short `# Spec: <URL>` comment near the rule implementation
+- [ ] Added tests asserting the Issue code(s) are emitted
 
-## Tests
+## Docs
 
-- What did you run?
-  - [ ] `pytest`
-  - [ ] `ruff check .`
-  - [ ] `ruff format .`
+- [ ] Updated docs/README if user-facing behavior changed
+
+## Security
+
+- Security-sensitive report? Please use the private process in `SECURITY.md`.
+- Notes (if this change touches parsing of untrusted inputs):
+
+## Tests / checks
+
+- [ ] `pytest`
+- [ ] `ruff check .`
+- [ ] `ruff format .`
+- [ ] `pyright`
 
 ## Notes for reviewers
 
-- Anything subtle or risky?
+- Anything subtle, surprising, or hard to test?
