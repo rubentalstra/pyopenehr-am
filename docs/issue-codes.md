@@ -52,6 +52,7 @@ Codes are formatted as:
 | AOM290  | WARN     | Semantics | Rules reference invalid path/code                 | GDL2/RULES subset         |
 | AOM242  | ERROR    | Structure | Duplicate archetype id across ADL files           | Internal repository       |
 | BMM500  | ERROR    | RM        | Unknown RM type referenced                        | BMM                       |
+| BMM505  | ERROR    | IO        | Invalid BMM repository directory                  | Internal                  |
 | BMM510  | ERROR    | RM        | Unknown RM attribute referenced                   | BMM                       |
 | BMM520  | ERROR    | RM        | Multiplicity mismatch                             | BMM                       |
 | BMM530  | WARN     | Structure | Unsupported / ignored BMM field                   | BMM loader (subset)       |
