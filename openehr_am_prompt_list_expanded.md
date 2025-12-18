@@ -453,7 +453,7 @@ Implement deterministic `to_dict()` and JSON export for OPT. Add tests.
 Implement `compile_opt` resolving included archetypes; emit `OPT700` if missing.
 Add tests.
 
-### 14.4 OPT compilation: slot filling (basic)
+### 14.4 OPT compilation: slot filling (basic) [x]
 
 Implement slot filling for a subset; emit `OPT720` if no match. Add tests.
 

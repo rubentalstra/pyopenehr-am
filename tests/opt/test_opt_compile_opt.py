@@ -1,4 +1,8 @@
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from openehr_am.aom.archetype import Template
 
 
 def _archetype_adl(archetype_id: str, *, parent_archetype_id: str | None = None) -> str:
@@ -14,6 +18,46 @@ def _archetype_adl(archetype_id: str, *, parent_archetype_id: str | None = None)
         "terminology\n<>\n\n"
         "definition\n-- TODO\n"
     )
+
+
+def _template_with_slot_adl(template_id: str, *, include_pattern: str) -> str:
+    # Minimal cADL subset supported by the hand-written parser.
+    # Slot subset: archetype_slot matches { include matches { <pattern> } }
+    return (
+        "template\n"
+        f"{template_id}\n\n"
+        "language\n"
+        'original_language = <"en">\n'
+        'language = <"en">\n\n'
+        "description\n<>\n\n"
+        "terminology\n<>\n\n"
+        "definition\n"
+        "COMPOSITION matches {\n"
+        "  content matches {\n"
+        "    OBSERVATION matches {\n"
+        "      archetype_slot matches {\n"
+        f"        include matches {{ {include_pattern} }}\n"
+        "      }\n"
+        "    }\n"
+        "  }\n"
+        "}\n"
+    )
+
+
+def _parse_template_from_adl(text: str, *, filename: str) -> Template:
+    from openehr_am.adl import parse_adl
+    from openehr_am.aom.archetype import Template
+    from openehr_am.aom.builder import build_aom_from_adl
+    from openehr_am.validation.issue import Severity
+
+    artefact, parse_issues = parse_adl(text, filename=filename)
+    assert artefact is not None
+    assert not any(i.severity is Severity.ERROR for i in parse_issues)
+
+    aom, build_issues = build_aom_from_adl(artefact)
+    assert isinstance(aom, Template)
+    assert not any(i.severity is Severity.ERROR for i in build_issues)
+    return aom
 
 
 def test_compile_opt_orders_included_archetypes(tmp_path: Path) -> None:
@@ -54,3 +98,46 @@ def test_compile_opt_missing_dependency_emits_opt700(tmp_path: Path) -> None:
 
     assert opt is None
     assert any(i.code == "OPT700" for i in issues)
+
+
+def test_compile_opt_slot_filling_no_match_emits_opt720(tmp_path: Path) -> None:
+    from openehr_am.opt.compiler import compile_opt
+
+    # Repo has an archetype, but it doesn't match the slot's include.
+    (tmp_path / "one.adl").write_text(
+        _archetype_adl("openEHR-EHR-OBSERVATION.unrelated.v1"), encoding="utf-8"
+    )
+
+    template = _parse_template_from_adl(
+        _template_with_slot_adl(
+            "openEHR-EHR-COMPOSITION.template_with_slot.v1",
+            include_pattern='"openEHR-EHR-OBSERVATION.missing.v1"',
+        ),
+        filename=str(tmp_path / "template.adl"),
+    )
+
+    opt, issues = compile_opt(template, archetype_dir=tmp_path)
+
+    assert opt is None
+    assert any(i.code == "OPT720" for i in issues)
+
+
+def test_compile_opt_slot_filling_match_succeeds(tmp_path: Path) -> None:
+    from openehr_am.opt.compiler import compile_opt
+
+    wanted = "openEHR-EHR-OBSERVATION.wanted.v1"
+    (tmp_path / "wanted.adl").write_text(_archetype_adl(wanted), encoding="utf-8")
+
+    template = _parse_template_from_adl(
+        _template_with_slot_adl(
+            "openEHR-EHR-COMPOSITION.template_with_slot.v1",
+            include_pattern=f'"{wanted}"',
+        ),
+        filename=str(tmp_path / "template.adl"),
+    )
+
+    opt, issues = compile_opt(template, archetype_dir=tmp_path)
+
+    assert not any(i.code == "OPT720" for i in issues)
+    assert opt is not None
+    assert wanted in opt.component_archetype_ids

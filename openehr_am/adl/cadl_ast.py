@@ -257,6 +257,33 @@ type CadlPrimitiveConstraint = (
 
 
 @dataclass(slots=True, frozen=True)
+class CadlArchetypeSlotPattern:
+    """A single include/exclude pattern for archetype slot matching.
+
+    Notes:
+        - `kind="exact"` means literal equality match against archetype_id.
+        - `kind="regex"` means Python `re` fullmatch against archetype_id.
+    """
+
+    kind: str  # "exact" | "regex"
+    value: str
+    span: SourceSpan | None = None
+
+
+@dataclass(slots=True, frozen=True)
+class CadlArchetypeSlot:
+    """Archetype slot constraints (minimal subset).
+
+    This is a minimal representation used by basic OPT slot filling.
+    """
+
+    includes: tuple[CadlArchetypeSlotPattern, ...] = ()
+    excludes: tuple[CadlArchetypeSlotPattern, ...] = ()
+
+    span: SourceSpan | None = None
+
+
+@dataclass(slots=True, frozen=True)
 class CadlObjectNode:
     """Constraint object node.
 
@@ -276,6 +303,8 @@ class CadlObjectNode:
     attributes: CadlAttributes = ()
     primitive: CadlPrimitiveConstraint | None = None
 
+    slot: CadlArchetypeSlot | None = None
+
     span: SourceSpan | None = None
     rm_type_name_span: SourceSpan | None = None
     node_id_span: SourceSpan | None = None
@@ -290,6 +319,8 @@ class CadlObjectNode:
 
         for attribute in self.attributes:
             issues.extend(attribute.validate(code=code))
+
+        # Slot blocks are currently validated at compile time.
 
         return issues
 
@@ -328,6 +359,8 @@ type CadlNode = CadlObjectNode | CadlAttributeNode | CadlPrimitiveConstraint
 
 
 __all__ = [
+    "CadlArchetypeSlot",
+    "CadlArchetypeSlotPattern",
     "CadlAttributeNode",
     "CadlBooleanConstraint",
     "CadlCardinality",
