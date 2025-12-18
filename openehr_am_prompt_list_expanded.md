@@ -118,7 +118,7 @@ scans for it and fails if found.
 
 ## Phase 1 — CI and “generated parser code” discipline
 
-### 1.1 CI: lint + tests + typing
+### 1.1 CI: lint + tests + typing [x]
 
 Add GitHub Actions workflow(s) to run: ruff, tests, and type checking on
 push/PR. Keep CI fast and deterministic. Ensure it runs with Python 3.14.
