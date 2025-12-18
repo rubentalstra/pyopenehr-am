@@ -1,7 +1,7 @@
 # pyopenehr-am
 
-Pure-Python (Python 3.14+) openEHR **ADL2 / AOM2 / ODIN / BMM / OPT2** toolkit
-for parsing, validation, and template compilation.
+Pure-Python (**Python 3.14+ only**) openEHR **ADL2 / AOM2 / ODIN / BMM / OPT2**
+toolkit for parsing, validation, and template compilation.
 
 This project is intended as a **developer SDK**: teams can embed it in their own
 codebases to build migration pipelines from legacy formats into openEHR, while
@@ -33,7 +33,7 @@ A Python package that provides:
 - Not a “one-click database migrator”
 - Not mapping logic for any specific vendor/hospital schema
 - Not a wrapper around existing Java/.NET reference implementations (this repo
-  is **pure Python**)
+  is **pure Python only**)
 
 ---
 

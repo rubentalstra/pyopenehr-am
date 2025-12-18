@@ -1,8 +1,12 @@
 # Architecture
 
-pyopenehr-am is organized as a compiler-style pipeline:
+pyopenehr-am is **pure Python only** and targets **Python 3.14+ only**.
+
+The library is organized as a compiler-style pipeline:
 
 **Parse → Build AOM → Validate → Compile OPT → (Optional) Validate Instances**
+
+For background on the standards, see https://specifications.openehr.org/
 
 ## Layers
 

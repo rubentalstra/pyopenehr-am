@@ -63,7 +63,7 @@ OPT / CLI), context stays cleaner and results are more consistent.
 
 ## Phase 0 — Repo bootstrap and standards baseline
 
-### 0.1 Repo scaffold + packaging basics
+### 0.1 Repo scaffold + packaging basics [x]
 
 Create the initial project scaffold for a pure-Python package named `openehr_am`
 targeting **Python 3.14+ only**. Add `pyproject.toml` (PEP 621) with
