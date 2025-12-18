@@ -134,7 +134,7 @@ Create:
 - CI job: run generator and fail if `git diff` is non-empty. Add
   `docs/dev/parsers.md` documenting regeneration steps and the policy.
 
-### 1.3 Optional: pre-commit hooks
+### 1.3 Optional: pre-commit hooks [x]
 
 Add `pre-commit` config (recommended) to run ruff + tests locally. Document
 usage.
