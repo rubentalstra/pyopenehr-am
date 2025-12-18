@@ -49,3 +49,25 @@ def test_parse_path_failure_emits_path900(text: str):
     assert len(issues) == 1
     assert issues[0].code == "PATH900"
     assert issues[0].severity.value == "ERROR"
+
+
+@pytest.mark.parametrize(
+    ("raw", "canonical"),
+    [
+        ("/definition/data[at0001]/events[at0002]", "/data[at0001]/events[at0002]"),
+        ("/data[at0001]/events", "/data[at0001]/events"),
+        ("'/definition/items[at0001.1]'", "/items[at0001.1]"),
+    ],
+)
+def test_parse_path_roundtrip_to_string(raw: str, canonical: str):
+    node1, issues1 = parse_path(raw)
+    assert issues1 == []
+    assert node1 is not None
+
+    assert node1.to_string() == canonical
+
+    node2, issues2 = parse_path(node1.to_string())
+    assert issues2 == []
+    assert node2 is not None
+
+    assert node2.to_string() == canonical

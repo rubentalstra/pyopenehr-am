@@ -380,7 +380,7 @@ parse failure. Add tests.
 Resolve paths against your AOM constraint tree (subset). Emit `PATH910` when
 resolves to no nodes. Add tests.
 
-### 11.3 Normalization and string round-trip
+### 11.3 Normalization and string round-trip [x]
 
 Implement `to_string()` and round-trip parsing for supported subset. Add tests.
 

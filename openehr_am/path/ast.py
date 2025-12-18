@@ -25,6 +25,9 @@ class PathPredicate:
     text: str
     span: SourceSpan | None = None
 
+    def to_string(self) -> str:
+        return self.text
+
 
 @dataclass(slots=True, frozen=True)
 class PathSegment:
@@ -34,6 +37,11 @@ class PathSegment:
     predicate: PathPredicate | None = None
     span: SourceSpan | None = None
 
+    def to_string(self) -> str:
+        if self.predicate is None:
+            return self.name
+        return f"{self.name}[{self.predicate.to_string()}]"
+
 
 @dataclass(slots=True, frozen=True)
 class Path:
@@ -42,11 +50,8 @@ class Path:
     segments: tuple[PathSegment, ...]
     span: SourceSpan | None = None
 
+    def to_string(self) -> str:
+        return "/" + "/".join(seg.to_string() for seg in self.segments)
+
     def __str__(self) -> str:
-        parts: list[str] = []
-        for seg in self.segments:
-            if seg.predicate is None:
-                parts.append(seg.name)
-            else:
-                parts.append(f"{seg.name}[{seg.predicate.text}]")
-        return "/" + "/".join(parts)
+        return self.to_string()
