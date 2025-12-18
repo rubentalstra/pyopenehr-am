@@ -1,21 +1,60 @@
-# AGENTS — openEHR AM Toolkit
+# AGENTS — pyopenehr-am (Python 3.14+)
 
-This workspace builds a **pure-Python** openEHR AM toolkit.
+These instructions apply to _all_ AI agents working in this repository.
 
-## Scope
+## What we’re building
 
-- ADL2 + ODIN parsing
-- AOM2 model building
-- Validation (syntax + semantic + RM via BMM)
-- OPT2 compilation
-- Optional instance validation (later)
+A **pure-Python** openEHR AM toolkit that other developers embed to build their
+own legacy→openEHR migration logic.
 
-## Guardrails
+This repo provides reusable primitives:
 
-- No runtime bridges to Java/.NET reference implementations.
-- Prefer incremental changes with tests.
-- Keep public API stable; mark experimental modules clearly.
+- Parse **ADL2** archetypes/templates and embedded **ODIN**
+- Build an **AOM2** semantic object model
+- Validate: syntax, AOM2 semantics, RM conformance via **BMM**
+- Compile templates into **OPT2** (Operational Templates)
+- (Later) validate instance data against OPT
 
-## Internal pipeline
+Internal pipeline: **Parse → Build AOM → Validate → Compile OPT → (Optional)
+Validate Instances**
 
-Parse → Build AOM → Validate → Compile OPT → (Optional) Validate Instances
+## Target runtime (important)
+
+- **Python 3.14+ only**.
+- Avoid `from __future__ import annotations` because it opts out of 3.14’s
+  default deferred-annotation semantics.
+- If annotation introspection is required, use
+  `annotationlib.get_annotations()`.
+
+## Non-negotiables
+
+- **Pure Python only**: no wrapping Java/.NET reference implementations, no
+  JPype/JNI.
+- **Diagnostics**: return structured `Issue` objects for all recoverable
+  problems (no exceptions for invalid artefacts).
+- **Spec provenance**: new rules must include a short `# Spec: <URL>` comment
+  and a stable Issue code.
+
+## Developer workflows (expected)
+
+- Run tests: `pytest`
+- Lint: `ruff check .` and `ruff format .` (generated code excluded)
+- Type-check: `pyright` (or `mypy` if chosen)
+
+## Generated parser code (ANTLR)
+
+Policy:
+
+- Grammar sources live in `grammars/`.
+- Generated Python code lives in `openehr_am/_generated/` and is **committed**.
+- A CI job runs the generator and fails if `git diff` is not clean.
+- Never edit files in `openehr_am/_generated/` by hand.
+
+## Output format for code changes
+
+When implementing anything:
+
+1. Brief plan
+2. Files changed
+3. Patch file-by-file
+4. Tests added/updated + commands to run

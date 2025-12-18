@@ -3,68 +3,59 @@
 This document defines **stable Issue codes** used across the project for parser,
 validation, and compiler diagnostics.
 
-## Why this exists
-
-- Tooling users need **stable, machine-readable codes** for CI gating,
-  analytics, and automated remediation.
-- Contributors need a single place to avoid collisions and keep categories
-  consistent.
-
 ## Format
 
 Codes are formatted as:
 
-- `ADL###` — ADL2 / ODIN-in-ADL parsing & syntax-level issues
-- `AOM###` — AOM2 semantic model and validity rules
-- `BMM###` — BMM schema loading and RM conformance checks
-- `OPT###` — OPT2 compilation and operational template integrity
-- `PATH###` — openEHR path parsing/resolution utilities
-- `CLI###` — CLI usage/IO issues (rare; prefer standard exit codes)
-
-### Severity
-
-- `INFO` — informational (usually disabled by default)
-- `WARN` — potentially problematic but not invalid
-- `ERROR` — invalid artefact or failed compilation
+- `ADL###` — ADL2 parsing & syntax-level issues
+- `ODN###` — ODIN parsing issues (optional prefix; you may also keep ODIN under
+  ADL*)
+- `AOM###` — AOM2 semantic validity rules
+- `BMM###` — BMM loading and RM conformance checks
+- `OPT###` — OPT compilation and integrity
+- `PATH###` — openEHR path parsing/resolution
+- `CLI###` — CLI usage/IO errors (rare)
 
 ## Allocation ranges (recommended)
 
 - ADL001–ADL199: parser/syntax/structure
+- ODN100–ODN199: ODIN-specific parse/structure (if used)
 - AOM200–AOM499: AOM2 semantic validity
-- BMM500–BMM699: BMM loader + RM validation
-- OPT700–OPT899: OPT2 compilation + integrity
+- BMM500–BMM699: BMM + RM validation
+- OPT700–OPT899: OPT compilation + integrity
 - PATH900–PATH999: path parsing/resolution
 
-> You can change these ranges, but keep them consistent once published.
-
----
-
-## Code Registry
-
-> Add new codes here before using them in code.
+## Registry
 
 | Code    | Severity | Category  | Summary                                     | Notes / Spec Link         |
 | ------- | -------- | --------- | ------------------------------------------- | ------------------------- |
-| ADL001  | ERROR    | Parse     | Unexpected token / parse failure            | (spec URL when relevant)  |
-| ADL010  | ERROR    | Structure | Missing required ADL section                |                           |
-| ADL020  | WARN     | Structure | Deprecated/unknown section                  |                           |
+| ADL001  | ERROR    | Parse     | Unexpected token / parse failure            | ADL2 grammar              |
+| ADL010  | ERROR    | Structure | Missing required ADL section                | ADL2 structure            |
+| ADL020  | WARN     | Structure | Deprecated/unknown section                  | ADL2 structure            |
+| ODN100  | ERROR    | Parse     | ODIN parse failure                          | ODIN grammar              |
+| ODN110  | WARN     | Structure | ODIN key duplication                        | ODIN rules                |
 | AOM200  | ERROR    | Semantics | Terminology code referenced but not defined | AOM2 terminology validity |
-| AOM210  | ERROR    | Semantics | Invalid node id format                      |                           |
-| AOM230  | ERROR    | Semantics | Specialisation level mismatch               |                           |
-| BMM500  | ERROR    | RM        | Unknown RM type referenced                  |                           |
-| BMM510  | ERROR    | RM        | Unknown RM attribute referenced             |                           |
-| OPT700  | ERROR    | Compile   | Cannot resolve archetype inclusion          |                           |
-| OPT720  | ERROR    | Compile   | Slot filling failed / no matching archetype |                           |
-| OPT750  | ERROR    | Integrity | Broken internal reference after compilation |                           |
-| PATH900 | ERROR    | Path      | Path parse failure                          |                           |
-| PATH910 | ERROR    | Path      | Path resolves to no nodes                   |                           |
+| AOM210  | ERROR    | Semantics | Invalid node id format                      | AOM2 node id rules        |
+| AOM230  | ERROR    | Semantics | Specialisation level mismatch               | AOM2 specialization       |
+| AOM240  | ERROR    | Semantics | Duplicate node id / duplicate path          | AOM2 uniqueness           |
+| AOM250  | ERROR    | Semantics | Occurrences/cardinality invalid             | AOM2 constraints          |
+| AOM260  | ERROR    | Semantics | Value set integrity failure                 | AOM2 terminology          |
+| AOM270  | WARN     | Semantics | Language/original_language inconsistency    | AOM2 language             |
+| AOM280  | ERROR    | Semantics | Template overlay/exclusion invalid          | Template rules            |
+| AOM290  | WARN     | Semantics | Rules reference invalid path/code           | GDL2/RULES subset         |
+| BMM500  | ERROR    | RM        | Unknown RM type referenced                  | BMM                       |
+| BMM510  | ERROR    | RM        | Unknown RM attribute referenced             | BMM                       |
+| BMM520  | ERROR    | RM        | Multiplicity mismatch                       | BMM                       |
+| OPT700  | ERROR    | Compile   | Cannot resolve archetype inclusion          | OPT2                      |
+| OPT705  | ERROR    | Compile   | Dependency cycle detected                   | OPT2                      |
+| OPT720  | ERROR    | Compile   | Slot filling failed / no matching archetype | OPT2                      |
+| OPT730  | ERROR    | Compile   | Specialisation flattening conflict          | OPT2                      |
+| OPT750  | ERROR    | Integrity | Broken internal reference after compilation | OPT2                      |
+| PATH900 | ERROR    | Path      | Path parse failure                          | Path rules                |
+| PATH910 | ERROR    | Path      | Path resolves to no nodes                   | Path resolver             |
 
----
+## Contributor checklist for new codes
 
-## Contributor checklist for adding a new Issue code
-
-- [ ] Add the code row to this table
-- [ ] Ensure the code is unique and within the correct range
-- [ ] Add/extend tests asserting the code appears
-- [ ] If the rule comes from the spec, add a short spec URL in the “Notes / Spec
-      Link” column
+- [ ] Add the code to this table before using it
+- [ ] Add tests asserting the code appears
+- [ ] Add a short spec URL comment near the rule implementation

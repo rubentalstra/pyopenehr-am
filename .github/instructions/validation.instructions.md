@@ -1,22 +1,29 @@
 ---
-name: Validation checks
-description: How to implement new validation rules in a consistent way
+name: Validation framework and rules
+description: Implementing validation checks with stable Issue codes and spec provenance
 applyTo: "openehr_am/validation/**/*.py"
 ---
-# Validation checks
+# Validation rules
 
-## Structure
-- Implement checks as small functions: `def check_xxx(ctx) -> list[Issue]`
-- Each check:
-  - returns Issue objects only
-  - never raises for invalid artefacts
-  - uses stable Issue codes (tracked in `docs/issue-codes.md`)
-- Add checks to a registry so `validate(level=...)` can run them by layer.
+## Layers
+- syntax: produced during parsing; optionally re-run on text input
+- semantic: AOM2 validity rules
+- rm: BMM conformance checks
+- opt: OPT compilation + integrity checks
 
-## Guidance
-- Prefer deterministic ordering of issues.
-- Use paths/node_ids to pinpoint errors when possible.
-- Include a short `# Spec:` URL comment for each rule family.
+## Rule requirements
+Every new rule must:
+- Emit stable Issue codes (documented in `docs/issue-codes.md`)
+- Include a short `# Spec: <URL>` comment near the rule implementation
+- Have tests asserting code + severity + (when possible) location
 
-## Template
-Use `docs/validation-rule-template.md` when adding a new rule.
+## Rule structure
+Prefer small functions:
+- `def check_xxx(ctx: ValidationContext) -> list[Issue]: ...`
+
+## Registry
+- Checks must be registered in a layer registry, executed in a deterministic order.
+
+## Output stability
+- Issue ordering must be deterministic:
+  - sort by file, line, col, code, message

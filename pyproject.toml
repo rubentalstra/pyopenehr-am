@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling>=1.28.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "openehr-am"
+version = "0.0.0"
+description = "Pure-Python openEHR AM toolkit (ADL2/AOM2/ODIN/BMM/OPT2)."
+readme = "README.md"
+requires-python = ">=3.14"
+license = { file = "LICENSE" }
+authors = [{ name = "rubentalstra" }]
+
+dependencies = ["rich>=14.2.0", "typer>=0.20.0"]
+
+[project.optional-dependencies]
+dev = ["pyright>=1.1.407", "pytest>=9.0.2", "ruff>=0.14.9"]
+
+[project.scripts]
+openehr-am = "openehr_am.cli.main:main"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+extend-exclude = ["openehr_am/_generated/"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"

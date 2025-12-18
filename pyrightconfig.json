@@ -1,0 +1,14 @@
+{
+    "pythonVersion": "3.14",
+    "typeCheckingMode": "basic",
+    "include": [
+        "openehr_am",
+        "tests"
+    ],
+    "exclude": [
+        "openehr_am/_generated/**",
+        "**/__pycache__",
+        ".venv/**"
+    ],
+    "reportMissingTypeStubs": "none"
+}

@@ -1,18 +1,15 @@
 # AGENTS — openehr_am package
 
-Folder-specific guidance for the core library.
+## Boundaries
+- `adl/`, `odin/`, `antlr/`: syntax + parsing only (no semantic checks here)
+- `aom/`: semantic data model (AOM2)
+- `validation/`: all rule checks (syntax/semantic/RM/OPT)
+- `bmm/`: RM schemas (BMM) and type repository
+- `opt/`: compilation and operational template model
+- `path/`: path parsing and resolution helpers
 
-## Generated code
-
-- `openehr_am/_generated/` is generated from ANTLR grammars — do not edit
-  manually.
-
-## Layering
-
-- Keep parsing, semantic model, validation, and OPT compilation separate.
-- Avoid circular imports between `adl/`, `aom/`, `validation/`, and `opt/`.
-
-## Diagnostics
-
-- Prefer returning `Issue` lists.
-- Ensure Issue codes are stable and documented (see `docs/issue-codes.md`).
+## Python 3.14+ conventions
+- Prefer `@dataclass(slots=True)` for domain models.
+- Use `frozen=True` where immutability makes sense.
+- Do not use `from __future__ import annotations`.
+- Use `annotationlib.get_annotations()` for introspection.
