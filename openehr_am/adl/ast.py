@@ -78,6 +78,12 @@ class AdlArtefact:
     kind: ArtefactKind
     artefact_id: str
 
+    # Archetype specialisation (dependency).
+    #
+    # When present, this indicates the parent archetype id declared in the ADL
+    # `specialise`/`specialize` section.
+    parent_archetype_id: str | None = None
+
     # Language section
     original_language: str | None = None
     language: str | None = None
@@ -98,6 +104,8 @@ class AdlArtefact:
     language_span: SourceSpan | None = None
     description_span: SourceSpan | None = None
     terminology_span: SourceSpan | None = None
+
+    parent_archetype_id_span: SourceSpan | None = None
 
 
 __all__ = [

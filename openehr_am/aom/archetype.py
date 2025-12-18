@@ -28,6 +28,7 @@ class Archetype:
     """Semantic representation of an openEHR archetype."""
 
     archetype_id: str
+    parent_archetype_id: str | None = None
     concept: str | None = None
 
     original_language: str | None = None

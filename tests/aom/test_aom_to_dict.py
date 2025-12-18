@@ -63,6 +63,7 @@ def test_aom_to_dict_is_deterministic_and_json_serializable() -> None:
     # Key ordering is deterministic (dict preserves insertion order).
     assert list(d1.keys()) == [
         "archetype_id",
+        "parent_archetype_id",
         "concept",
         "original_language",
         "languages",

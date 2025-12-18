@@ -421,17 +421,17 @@ tests.
 
 ## Phase 13 — Archetype repository + dependency management
 
-### 13.1 ArchetypeRepository indexing
+### 13.1 ArchetypeRepository indexing [x]
 
 Implement `ArchetypeRepository` that loads `.adl` files from a directory, parses
 them, and indexes by archetype id. Add tests.
 
-### 13.2 Dependency graph and cycle detection
+### 13.2 Dependency graph and cycle detection [x]
 
 Implement dependency extraction and detect cycles. Emit `OPT705` for cycles. Add
 tests.
 
-### 13.3 Caching and incremental load (optional)
+### 13.3 Caching and incremental load (optional) [NotDone]
 
 Add simple caching to avoid reparsing unchanged files. Add tests.
 
