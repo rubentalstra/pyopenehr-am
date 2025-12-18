@@ -87,9 +87,9 @@ baseline changes require a minor version bump.”
 
 ### 0.4 Add repo hygiene files
 
-Add `.gitignore`, `.editorconfig`, `LICENSE` placeholder (TBD),
-`CONTRIBUTING.md`, and `CODE_OF_CONDUCT.md`. Keep `CONTRIBUTING.md` aligned with
-the Issue-code and “Spec provenance” policy, and note “Python 3.14+ only”.
+Add `.gitignore`, `.editorconfig`, `CONTRIBUTING.md`, and `CODE_OF_CONDUCT.md`.
+Keep `CONTRIBUTING.md` aligned with the Issue-code and “Spec provenance” policy,
+and note “Python 3.14+ only”.
 
 ### 0.5 Add ruff config and formatting policy
 
