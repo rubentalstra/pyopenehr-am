@@ -192,7 +192,7 @@ clearly out of date (lightweight sanity check). CI remains the primary enforcer.
 
 ## Phase 4 — ODIN parsing (complete)
 
-### 4.1 ODIN AST dataclasses (use slots where sensible)
+### 4.1 ODIN AST dataclasses (use slots where sensible) [x]
 
 Implement ODIN AST nodes in `openehr_am/odin/ast.py`: primitives, object, list,
 keyed list. Prefer `@dataclass(slots=True, frozen=True)` unless mutation is
