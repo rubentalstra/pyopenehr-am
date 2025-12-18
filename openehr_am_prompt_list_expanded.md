@@ -393,7 +393,7 @@ Implement `to_string()` and round-trip parsing for supported subset. Add tests.
 Implement BMM dataclasses: Model, Package, Class, Property, TypeRef,
 Multiplicity. Add tests.
 
-### 12.2 BMM persistence parser (ODIN-backed)
+### 12.2 BMM persistence parser (ODIN-backed) [x]
 
 Implement `load_bmm(path)` mapping ODIN AST → BMM dataclasses (subset). Add
 tests with tiny fixture.

@@ -50,6 +50,9 @@ Codes are formatted as:
 | BMM500  | ERROR    | RM        | Unknown RM type referenced                        | BMM                       |
 | BMM510  | ERROR    | RM        | Unknown RM attribute referenced                   | BMM                       |
 | BMM520  | ERROR    | RM        | Multiplicity mismatch                             | BMM                       |
+| BMM530  | WARN     | Structure | Unsupported / ignored BMM field                   | BMM loader (subset)       |
+| BMM540  | ERROR    | Structure | Missing required BMM field                        | BMM loader (subset)       |
+| BMM550  | ERROR    | Structure | Invalid BMM value shape/type                      | BMM loader (subset)       |
 | OPT700  | ERROR    | Compile   | Cannot resolve archetype inclusion                | OPT2                      |
 | OPT705  | ERROR    | Compile   | Dependency cycle detected                         | OPT2                      |
 | OPT720  | ERROR    | Compile   | Slot filling failed / no matching archetype       | OPT2                      |
