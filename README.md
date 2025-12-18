@@ -1,5 +1,11 @@
 # pyopenehr-am
 
+[![CI](https://github.com/rubentalstra/pyopenehr-am/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rubentalstra/pyopenehr-am/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/Python-3.14%2B-blue)
+[![License: MIT](https://img.shields.io/github/license/rubentalstra/pyopenehr-am)](LICENSE)
+![Ruff](https://img.shields.io/badge/code%20style-ruff-261230)
+![Pyright](https://img.shields.io/badge/type%20checker-pyright-4B32C3)
+
 Pure-Python (**Python 3.14+ only**) openEHR **ADL2 / AOM2 / ODIN / BMM / OPT2**
 toolkit for parsing, validation, and template compilation.
 

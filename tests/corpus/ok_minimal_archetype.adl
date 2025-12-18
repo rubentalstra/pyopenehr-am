@@ -1,0 +1,15 @@
+archetype
+openEHR-EHR-OBSERVATION.corpus_minimal.v1
+
+language
+original_language = <"en">
+language = <"en">
+
+description
+<>
+
+terminology
+<>
+
+definition
+-- TODO
