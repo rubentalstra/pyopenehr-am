@@ -1,24 +1,10 @@
 from openehr_am.adl import ArtefactKind, parse_adl
+from openehr_am.validation.issue import Severity
+from tests.fixture_loader import load_fixture_text
 
 
 def test_parse_adl_minimal_archetype_extracts_sections_and_spans() -> None:
-    text = (
-        "archetype\n"
-        "openEHR-EHR-OBSERVATION.test.v1\n"
-        "\n"
-        "language\n"
-        'original_language = <"en">\n'
-        'language = <"en">\n'
-        "\n"
-        "description\n"
-        "<>\n"
-        "\n"
-        "terminology\n"
-        "<>\n"
-        "\n"
-        "definition\n"
-        "-- TODO\n"
-    )
+    text = load_fixture_text("adl", "minimal_archetype.adl")
 
     artefact, issues = parse_adl(text, filename="test.adl")
 
@@ -46,19 +32,7 @@ def test_parse_adl_minimal_archetype_extracts_sections_and_spans() -> None:
 
 
 def test_parse_adl_minimal_template_extracts_id_and_odins() -> None:
-    text = (
-        "template\n"
-        "openEHR-EHR-COMPOSITION.test_template.v1\n"
-        "\n"
-        "language\n"
-        'original_language = <"en">\n'
-        "\n"
-        "description\n"
-        "<>\n"
-        "\n"
-        "terminology\n"
-        "<>\n"
-    )
+    text = load_fixture_text("adl", "minimal_template.adl")
 
     artefact, issues = parse_adl(text, filename="template.adl")
 
@@ -66,3 +40,27 @@ def test_parse_adl_minimal_template_extracts_id_and_odins() -> None:
     assert artefact is not None
     assert artefact.kind is ArtefactKind.TEMPLATE
     assert artefact.artefact_id == "openEHR-EHR-COMPOSITION.test_template.v1"
+
+
+def test_parse_adl_invalid_missing_id_returns_issue() -> None:
+    text = load_fixture_text("adl", "invalid_missing_id.adl")
+
+    artefact, issues = parse_adl(text, filename="invalid.adl")
+
+    assert artefact is None
+    assert issues
+    assert issues[0].code == "ADL001"
+    assert issues[0].severity is Severity.ERROR
+
+
+def test_parse_adl_invalid_odin_in_description_shifts_issue_line() -> None:
+    text = load_fixture_text("adl", "invalid_bad_odin_description.adl")
+
+    artefact, issues = parse_adl(text, filename="bad_odin.adl")
+
+    assert artefact is not None
+    assert issues
+    # The embedded ODIN parser emits ODN100; ADL shifts it to file coordinates.
+    assert issues[0].code == "ODN100"
+    assert issues[0].file == "bad_odin.adl"
+    assert issues[0].line == 8

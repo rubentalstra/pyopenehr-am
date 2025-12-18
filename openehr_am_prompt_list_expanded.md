@@ -232,7 +232,7 @@ header id and ODIN blocks (language/description/terminology). Leave
 definition/rules as TODO but don’t crash. Add tests with minimal archetype and
 template samples.
 
-### 5.3 Add ADL fixtures folder
+### 5.3 Add ADL fixtures folder [x]
 
 Create `tests/fixtures/adl/` with tiny valid/invalid ADL snippets used by tests.
 Add a fixture loader helper.
