@@ -17,6 +17,7 @@ The definition and rules sections are recognised but not parsed yet.
 """
 
 from dataclasses import replace
+from typing import Literal
 
 from openehr_am.adl.ast import AdlArtefact, AdlSectionPlaceholder, ArtefactKind
 from openehr_am.antlr.span import SourceSpan
@@ -329,7 +330,10 @@ def _parse_odin_section(
 
 
 def _placeholder_section(
-    lines: list[str], section_map: dict[str, int], name: str, filename: str | None
+    lines: list[str],
+    section_map: dict[str, int],
+    name: Literal["definition", "rules"],
+    filename: str | None,
 ) -> AdlSectionPlaceholder | None:
     idx = section_map.get(name)
     if idx is None:
