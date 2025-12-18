@@ -154,7 +154,7 @@ methods. Add tests for formatting and JSON-serializable dict output.
 Implement `validate_issue_code(code: str) -bool` enforcing prefixes/ranges. Add
 tests. Align with `docs/issue-codes.md`.
 
-### 2.3 IssueCollector + deterministic ordering
+### 2.3 IssueCollector + deterministic ordering [x]
 
 Implement `IssueCollector` that preserves deterministic ordering and supports
 `.extend(...)`, `.has_errors()`, `.to_json()`. Add tests.
