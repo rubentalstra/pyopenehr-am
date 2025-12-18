@@ -340,7 +340,7 @@ Implement check: every referenced `atNNNN`/`acNNNN` exists in terminology. Emit
 Implement check: node ids match expected patterns and specialization depth
 basics. Emit `AOM210` / `AOM230`. Add tests.
 
-### 10.3 Duplicate node ids / duplicate paths
+### 10.3 Duplicate node ids / duplicate paths [x]
 
 Implement check: detect duplicates in scopes (basic). Emit `AOM240`. Add tests.
 

@@ -308,3 +308,119 @@ def test_validate_semantic_aom210_allows_specialised_node_id_pattern() -> None:
 
     issues = validate_semantic(aom)
     assert issues == ()
+
+
+def test_validate_semantic_aom240_duplicate_attribute_name_emitted() -> None:
+    from openehr_am.antlr.span import SourceSpan
+    from openehr_am.aom.archetype import Archetype
+    from openehr_am.aom.constraints import CAttribute, CComplexObject
+    from openehr_am.aom.terminology import ArchetypeTerminology, TermDefinition
+
+    root_span = SourceSpan(
+        file="dup_attr.adl", start_line=10, start_col=1, end_line=10, end_col=10
+    )
+    attr1_span = SourceSpan(
+        file="dup_attr.adl", start_line=20, start_col=1, end_line=20, end_col=10
+    )
+    attr2_span = SourceSpan(
+        file="dup_attr.adl", start_line=30, start_col=1, end_line=30, end_col=10
+    )
+
+    definition = CComplexObject(
+        rm_type_name="OBSERVATION",
+        node_id="at0000",
+        span=root_span,
+        attributes=(
+            CAttribute(
+                rm_attribute_name="data",
+                children=(),
+                span=attr1_span,
+            ),
+            CAttribute(
+                rm_attribute_name="data",
+                children=(),
+                span=attr2_span,
+            ),
+        ),
+    )
+
+    terminology = ArchetypeTerminology(
+        original_language="en",
+        term_definitions=(TermDefinition(language="en", code="at0000", text="Root"),),
+    )
+
+    aom = Archetype(
+        archetype_id="openEHR-EHR-OBSERVATION.dup_attr.v1",
+        concept="at0000",
+        definition=definition,
+        terminology=terminology,
+        span=root_span,
+    )
+
+    issues = validate_semantic(aom)
+    assert [i.code for i in issues] == ["AOM240"]
+    assert issues[0].line == 30
+    assert issues[0].path == "/definition/data"
+
+
+def test_validate_semantic_aom240_duplicate_sibling_node_id_emitted() -> None:
+    from openehr_am.antlr.span import SourceSpan
+    from openehr_am.aom.archetype import Archetype
+    from openehr_am.aom.constraints import CAttribute, CComplexObject
+    from openehr_am.aom.terminology import ArchetypeTerminology, TermDefinition
+
+    root_span = SourceSpan(
+        file="dup_id.adl", start_line=10, start_col=1, end_line=10, end_col=10
+    )
+    first_span = SourceSpan(
+        file="dup_id.adl", start_line=20, start_col=1, end_line=20, end_col=10
+    )
+    dup_span = SourceSpan(
+        file="dup_id.adl", start_line=30, start_col=1, end_line=30, end_col=10
+    )
+
+    definition = CComplexObject(
+        rm_type_name="OBSERVATION",
+        node_id="at0000",
+        span=root_span,
+        attributes=(
+            CAttribute(
+                rm_attribute_name="items",
+                children=(
+                    CComplexObject(
+                        rm_type_name="ELEMENT",
+                        node_id="at0001",
+                        span=first_span,
+                    ),
+                    CComplexObject(
+                        rm_type_name="ELEMENT",
+                        node_id="at0001",
+                        span=dup_span,
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    # Keep terminology in-sync so AOM200 doesn't fire.
+    terminology = ArchetypeTerminology(
+        original_language="en",
+        term_definitions=(
+            TermDefinition(language="en", code="at0000", text="Root"),
+            TermDefinition(language="en", code="at0001", text="Child"),
+        ),
+    )
+
+    aom = Archetype(
+        archetype_id="openEHR-EHR-OBSERVATION.dup_id.v1",
+        concept="at0000",
+        definition=definition,
+        terminology=terminology,
+        span=root_span,
+    )
+
+    issues = validate_semantic(aom)
+    assert [i.code for i in issues] == ["AOM240"]
+    assert issues[0].node_id == "at0001"
+    assert issues[0].line == 30
+    assert issues[0].path == "/definition/items"

@@ -262,6 +262,82 @@ def check_specialisation_depth_mismatch(ctx: ValidationContext) -> Iterable[Issu
     return tuple(issues)
 
 
+def check_duplicates_in_scopes(ctx: ValidationContext) -> Iterable[Issue]:
+    """AOM240: detect duplicates in basic scopes.
+
+    Implemented (basic) checks:
+    - Duplicate attribute names within the same `CComplexObject`.
+    - Duplicate sibling `node_id` values within the same attribute.
+
+    # Spec: https://specifications.openehr.org/releases/AM/latest/AOM2.html
+    """
+
+    artefact = ctx.artefact
+    if not isinstance(artefact, (Archetype, Template)):
+        return ()
+
+    if artefact.definition is None:
+        return ()
+
+    issues: list[Issue] = []
+
+    def walk(obj: CObject, *, path: str) -> None:
+        if not isinstance(obj, CComplexObject):
+            return
+
+        seen_attr_names: set[str] = set()
+        for attr in obj.attributes:
+            attr_name = attr.rm_attribute_name
+            attr_path = f"{path}/{attr_name}"
+
+            if attr_name in seen_attr_names:
+                span = attr.span
+                issues.append(
+                    Issue(
+                        code="AOM240",
+                        severity=Severity.ERROR,
+                        message=f"Duplicate attribute name '{attr_name}' in scope",
+                        file=span.file if span else None,
+                        line=span.start_line if span else None,
+                        col=span.start_col if span else None,
+                        end_line=span.end_line if span else None,
+                        end_col=span.end_col if span else None,
+                        path=attr_path,
+                        node_id=obj.node_id,
+                    )
+                )
+            else:
+                seen_attr_names.add(attr_name)
+
+            seen_child_node_ids: set[str] = set()
+            for child in attr.children:
+                if child.node_id is not None and child.node_id in seen_child_node_ids:
+                    span = child.span
+                    issues.append(
+                        Issue(
+                            code="AOM240",
+                            severity=Severity.ERROR,
+                            message=(
+                                f"Duplicate node id '{child.node_id}' within attribute '{attr_name}'"
+                            ),
+                            file=span.file if span else None,
+                            line=span.start_line if span else None,
+                            col=span.start_col if span else None,
+                            end_line=span.end_line if span else None,
+                            end_col=span.end_col if span else None,
+                            path=attr_path,
+                            node_id=child.node_id,
+                        )
+                    )
+                elif child.node_id is not None:
+                    seen_child_node_ids.add(child.node_id)
+
+                walk(child, path=attr_path)
+
+    walk(artefact.definition, path="/definition")
+    return tuple(issues)
+
+
 register_semantic_check(
     check_referenced_terminology_codes_exist,
     name="aom200_referenced_codes_exist_in_terminology",
@@ -275,4 +351,9 @@ register_semantic_check(
 register_semantic_check(
     check_specialisation_depth_mismatch,
     name="aom230_specialisation_depth_mismatch",
+)
+
+register_semantic_check(
+    check_duplicates_in_scopes,
+    name="aom240_duplicates_in_scopes_basic",
 )
