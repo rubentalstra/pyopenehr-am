@@ -55,9 +55,7 @@ Planned milestones and tasks live in:
 
 ---
 
-## Install (planned)
-
-Once published:
+## Install
 
 ```bash
 pip install pyopenehr-am
