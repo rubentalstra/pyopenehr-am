@@ -1,0 +1,15 @@
+archetype
+openEHR-EHR-OBSERVATION.wanted.v1
+
+language
+original_language = <"en">
+language = <"en">
+
+description
+<>
+
+terminology
+<>
+
+definition
+-- TODO
