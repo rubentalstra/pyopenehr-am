@@ -526,7 +526,7 @@ Expand `docs/architecture.md` with module boundaries and pipeline.
 
 Flesh out `docs/dev/parsers.md` with regeneration steps and CI drift policy.
 
-### 17.4 Validation docs
+### 17.4 Validation docs [x]
 
 Add `docs/validation_levels.md` describing `syntax|semantic|rm|opt|all`.
 
