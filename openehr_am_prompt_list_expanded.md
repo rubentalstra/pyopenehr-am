@@ -370,7 +370,7 @@ Emit `AOM290`. Add tests.
 
 ## Phase 11 — openEHR path parsing + resolution (expand)
 
-### 11.1 Path AST + parser
+### 11.1 Path AST + parser [x]
 
 Implement `openehr_am/path/parser.py` returning Path AST. Emit `PATH900` on
 parse failure. Add tests.
