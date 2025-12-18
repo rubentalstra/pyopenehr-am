@@ -335,7 +335,7 @@ Add a test that checks Issue codes used in code are present in
 Implement check: every referenced `atNNNN`/`acNNNN` exists in terminology. Emit
 `AOM200`. Add tests.
 
-### 10.2 Node id format validation
+### 10.2 Node id format validation [x]
 
 Implement check: node ids match expected patterns and specialization depth
 basics. Emit `AOM210` / `AOM230`. Add tests.

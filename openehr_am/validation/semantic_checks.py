@@ -11,7 +11,7 @@ from collections.abc import Iterable, Iterator
 from openehr_am.antlr.span import SourceSpan
 from openehr_am.aom.archetype import Archetype, Template
 from openehr_am.aom.constraints import CAttribute, CComplexObject, CObject
-from openehr_am.aom.ids import is_ac_code, is_at_code
+from openehr_am.aom.ids import try_parse_node_id
 from openehr_am.aom.terminology import ArchetypeTerminology
 from openehr_am.validation.context import ValidationContext
 from openehr_am.validation.issue import Issue, Severity
@@ -48,9 +48,7 @@ def _iter_referenced_node_ids(
     *,
     artefact: Archetype | Template,
 ) -> Iterator[tuple[str, SourceSpan | None]]:
-    if artefact.concept is not None and (
-        is_at_code(artefact.concept) or is_ac_code(artefact.concept)
-    ):
+    if artefact.concept is not None and _is_node_id_like(artefact.concept):
         yield artefact.concept, artefact.span
 
     if artefact.definition is None:
@@ -59,8 +57,56 @@ def _iter_referenced_node_ids(
     for obj in _iter_cobject_tree(artefact.definition):
         if obj.node_id is None:
             continue
-        if is_at_code(obj.node_id) or is_ac_code(obj.node_id):
+        if _is_node_id_like(obj.node_id):
             yield obj.node_id, obj.span
+
+
+def _try_parse_specialised_node_id(value: str) -> tuple[str, int] | None:
+    """Parse `atNNNN(.n)*` / `acNNNN(.n)*`.
+
+    Returns:
+        (base_code, depth) where depth is the number of suffix segments.
+        Returns None if the format is invalid.
+
+    Notes:
+        - Suffix segments must be positive integers (>= 1).
+        - This is a permissive parser used for validation rules; it must not raise.
+    """
+
+    if not value:
+        return None
+
+    parts = value.split(".")
+    if not parts:
+        return None
+
+    base = parts[0]
+    if try_parse_node_id(base) is None:
+        return None
+
+    if len(parts) == 1:
+        return base, 0
+
+    for seg in parts[1:]:
+        if not seg or not seg.isdigit():
+            return None
+        # Basic safety: specialisation suffix segments start at 1.
+        if int(seg) < 1:
+            return None
+
+    return base, len(parts) - 1
+
+
+def _is_node_id_like(value: str) -> bool:
+    return _try_parse_specialised_node_id(value) is not None
+
+
+def _specialisation_depth(value: str) -> int | None:
+    parsed = _try_parse_specialised_node_id(value)
+    if parsed is None:
+        return None
+    _base, depth = parsed
+    return depth
 
 
 def _defined_codes(term: ArchetypeTerminology | None) -> set[str]:
@@ -85,7 +131,7 @@ def check_referenced_terminology_codes_exist(ctx: ValidationContext) -> Iterable
     # Term bindings reference internal codes too.
     if artefact.terminology is not None:
         for b in artefact.terminology.term_bindings:
-            if is_at_code(b.code) or is_ac_code(b.code):
+            if _is_node_id_like(b.code):
                 referenced.append((b.code, b.span))
 
     referenced.sort(key=lambda item: (_span_key(item[1]), item[0]))
@@ -111,7 +157,122 @@ def check_referenced_terminology_codes_exist(ctx: ValidationContext) -> Iterable
     return tuple(issues)
 
 
+def check_node_id_format(ctx: ValidationContext) -> Iterable[Issue]:
+    """AOM210: node ids must match expected patterns.
+
+    Accepts the basic AOM2 node-id forms `atNNNN` / `acNNNN` and their
+    specialised variants with dot-separated suffixes (e.g. `at0001.1`).
+
+    # Spec: https://specifications.openehr.org/releases/AM/latest/AOM2.html
+    """
+
+    artefact = ctx.artefact
+    if not isinstance(artefact, (Archetype, Template)):
+        return ()
+
+    issues: list[Issue] = []
+
+    def maybe_emit(value: str, span: SourceSpan | None) -> None:
+        if _is_node_id_like(value):
+            return
+        issues.append(
+            Issue(
+                code="AOM210",
+                severity=Severity.ERROR,
+                message=f"Invalid node id format: '{value}'",
+                file=span.file if span else None,
+                line=span.start_line if span else None,
+                col=span.start_col if span else None,
+                end_line=span.end_line if span else None,
+                end_col=span.end_col if span else None,
+                node_id=value,
+            )
+        )
+
+    if artefact.concept is not None:
+        maybe_emit(artefact.concept, artefact.span)
+
+    if artefact.definition is not None:
+        for obj in _iter_cobject_tree(artefact.definition):
+            if obj.node_id is None:
+                continue
+            maybe_emit(obj.node_id, obj.span)
+
+    if artefact.terminology is not None:
+        for td in artefact.terminology.term_definitions:
+            maybe_emit(td.code, td.span)
+        for b in artefact.terminology.term_bindings:
+            maybe_emit(b.code, b.span)
+
+    return tuple(issues)
+
+
+def check_specialisation_depth_mismatch(ctx: ValidationContext) -> Iterable[Issue]:
+    """AOM230: specialisation level mismatch (basic).
+
+    Basic rule: a node id's specialisation depth must not exceed the artefact's
+    concept node-id depth.
+
+    # Spec: https://specifications.openehr.org/releases/AM/latest/AOM2.html
+    """
+
+    artefact = ctx.artefact
+    if not isinstance(artefact, (Archetype, Template)):
+        return ()
+
+    if artefact.concept is None:
+        return ()
+
+    artefact_depth = _specialisation_depth(artefact.concept)
+    if artefact_depth is None:
+        # Let AOM210 report the invalid concept node id.
+        return ()
+
+    issues: list[Issue] = []
+
+    def check_depth(value: str, span: SourceSpan | None) -> None:
+        depth = _specialisation_depth(value)
+        if depth is None:
+            return
+        if depth <= artefact_depth:
+            return
+        issues.append(
+            Issue(
+                code="AOM230",
+                severity=Severity.ERROR,
+                message=(
+                    "Specialisation level mismatch: "
+                    f"'{value}' depth {depth} exceeds archetype depth {artefact_depth}"
+                ),
+                file=span.file if span else None,
+                line=span.start_line if span else None,
+                col=span.start_col if span else None,
+                end_line=span.end_line if span else None,
+                end_col=span.end_col if span else None,
+                node_id=value,
+            )
+        )
+
+    if artefact.definition is not None:
+        for obj in _iter_cobject_tree(artefact.definition):
+            if obj.node_id is None:
+                continue
+            check_depth(obj.node_id, obj.span)
+
+    return tuple(issues)
+
+
 register_semantic_check(
     check_referenced_terminology_codes_exist,
     name="aom200_referenced_codes_exist_in_terminology",
+)
+
+register_semantic_check(
+    check_node_id_format,
+    name="aom210_node_id_format",
+)
+
+register_semantic_check(
+    check_specialisation_depth_mismatch,
+    name="aom230_specialisation_depth_mismatch",
 )
