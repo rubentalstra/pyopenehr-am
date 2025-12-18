@@ -31,7 +31,12 @@ from openehr_am.aom.ids import (
     try_parse_archetype_id,
     try_parse_node_id,
 )
-from openehr_am.aom.terminology import ArchetypeTerminology, TermBinding, TermDefinition
+from openehr_am.aom.terminology import (
+    ArchetypeTerminology,
+    TermBinding,
+    TermDefinition,
+    ValueSet,
+)
 
 __all__ = [
     "Archetype",
@@ -39,6 +44,7 @@ __all__ = [
     "ArchetypeTerminology",
     "TermBinding",
     "TermDefinition",
+    "ValueSet",
     "Interval",
     "Cardinality",
     "CObject",

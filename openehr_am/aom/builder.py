@@ -8,7 +8,7 @@ Design notes:
 - It must not raise for malformed user artefacts; it returns `Issue` objects.
 """
 
-from openehr_am.adl.ast import AdlArtefact, ArtefactKind
+from openehr_am.adl.ast import AdlArtefact, AdlRulesSection, ArtefactKind
 from openehr_am.adl.cadl_ast import (
     CadlAttributeNode,
     CadlBooleanConstraint,
@@ -22,7 +22,7 @@ from openehr_am.adl.cadl_ast import (
     CadlRealInterval,
     CadlStringConstraint,
 )
-from openehr_am.aom.archetype import Archetype, Template
+from openehr_am.aom.archetype import Archetype, RuleStatement, Template
 from openehr_am.aom.constraints import (
     Cardinality,
     CAttribute,
@@ -59,6 +59,13 @@ def build_aom_from_adl(
 
         terminology = _build_terminology(artefact)
 
+        rules: tuple[RuleStatement, ...] = ()
+        if isinstance(artefact.rules, AdlRulesSection):
+            rules = tuple(
+                RuleStatement(text=s.text, span=s.span)
+                for s in artefact.rules.statements
+            )
+
         if artefact.kind is ArtefactKind.ARCHETYPE:
             return (
                 Archetype(
@@ -68,6 +75,7 @@ def build_aom_from_adl(
                     languages=(artefact.language,) if artefact.language else (),
                     definition=definition,
                     terminology=terminology,
+                    rules=rules,
                     span=artefact.span,
                 ),
                 issues,
@@ -82,6 +90,7 @@ def build_aom_from_adl(
                     languages=(artefact.language,) if artefact.language else (),
                     definition=definition,
                     terminology=terminology,
+                    rules=rules,
                     span=artefact.span,
                 ),
                 issues,

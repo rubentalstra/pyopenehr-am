@@ -57,3 +57,12 @@ def validate_semantic(
     ctx = ValidationContext(artefact=aom_obj)
     runner = registry or DEFAULT_REGISTRY
     return runner.run(ctx, layers=[ValidationLayer.SEMANTIC])
+
+
+# Import default semantic checks (registers into DEFAULT_REGISTRY).
+#
+# This keeps `validate_semantic()` useful out of the box, while still allowing
+# tests to monkeypatch DEFAULT_REGISTRY for isolation.
+import openehr_am.validation.semantic_checks as _semantic_checks  # noqa: E402
+
+del _semantic_checks

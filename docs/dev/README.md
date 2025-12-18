@@ -29,3 +29,29 @@ By default, Ruff runs on each commit and `pytest` runs on `pre-push`.
 ```bash
 pytest
 ```
+
+## Test layout
+
+The test suite is grouped by subsystem to keep it navigable as the project
+grows:
+
+- `tests/adl/` — ADL parsing + syntax AST
+- `tests/odin/` — ODIN parsing/transform/roundtrip
+- `tests/antlr/` — ANTLR runtime glue (error listeners, spans)
+- `tests/aom/` — AOM models + builder
+- `tests/validation/` — validation layers (syntax/semantic) + Issue machinery
+- `tests/cli/` — CLI rendering/UX
+- `tests/meta/` — repo-level invariants (imports, issue-code registry,
+  generated-code sanity)
+
+Shared helpers and fixtures:
+
+- `tests/fixture_loader.py`
+- `tests/fixtures/`
+
+Running a subset (examples):
+
+```bash
+pytest -q tests/validation
+pytest -q tests/adl
+```

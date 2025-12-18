@@ -97,3 +97,26 @@ def test_build_aom_from_adl_converts_primitives_without_leaking_syntax_ast() -> 
     assert ratio_obj.constraint.interval is not None
     assert ratio_obj.constraint.interval.lower == 0.0
     assert ratio_obj.constraint.interval.upper == 1.0
+
+
+def test_build_aom_from_adl_copies_rules_statements() -> None:
+    from openehr_am.aom.archetype import RuleStatement
+
+    text = load_fixture_text("adl", "minimal_archetype_with_rules.adl")
+
+    artefact, issues = parse_adl(text, filename="rules.adl")
+    assert issues == []
+    assert artefact is not None
+
+    aom, build_issues = build_aom_from_adl(artefact)
+    assert build_issues == []
+    assert isinstance(aom, Archetype)
+
+    assert aom.rules
+    assert all(isinstance(s, RuleStatement) for s in aom.rules)
+    assert [s.text for s in aom.rules] == [
+        "valid_rule_line_1",
+        "valid_rule_line_2_with_indent",
+    ]
+    assert aom.rules[0].span is not None
+    assert aom.rules[0].span.start_line == 16

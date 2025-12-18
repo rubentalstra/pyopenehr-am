@@ -61,5 +61,5 @@ generated output is present for the grammars (it does not run Java/ANTLR).
 Enable it locally with:
 
 ```bash
-OPENEHR_AM_CHECK_GENERATED=1 pytest -q tests/test_generated_sanity.py
+OPENEHR_AM_CHECK_GENERATED=1 pytest -q tests/meta/test_generated_sanity.py
 ```

@@ -25,6 +25,11 @@ Run tests:
 pytest
 ```
 
+Test layout (high level):
+
+- `tests/adl/`, `tests/odin/`, `tests/antlr/`, `tests/aom/`,
+  `tests/validation/`, `tests/cli/`, `tests/meta/`
+
 Optional lint:
 
 ```bash

@@ -330,38 +330,38 @@ Add a test that checks Issue codes used in code are present in
 
 ## Phase 10 — AOM2 semantic rules (task-by-task)
 
-### 10.1 Terminology references defined
+### 10.1 Terminology references defined [x]
 
 Implement check: every referenced `atNNNN`/`acNNNN` exists in terminology. Emit
 `AOM200`. Add tests.
 
-### 10.2 Node id format validation
+### 10.2 Node id format validation [x]
 
 Implement check: node ids match expected patterns and specialization depth
 basics. Emit `AOM210` / `AOM230`. Add tests.
 
-### 10.3 Duplicate node ids / duplicate paths
+### 10.3 Duplicate node ids / duplicate paths [x]
 
 Implement check: detect duplicates in scopes (basic). Emit `AOM240`. Add tests.
 
-### 10.4 Occurrences/cardinality sanity
+### 10.4 Occurrences/cardinality sanity [x]
 
 Check min<=max and invariants. Emit `AOM250`. Add tests.
 
-### 10.5 Value sets integrity
+### 10.5 Value sets integrity [x]
 
 Validate value set references and emptiness rules. Emit `AOM260`. Add tests.
 
-### 10.6 Language/original_language integrity
+### 10.6 Language/original_language integrity [x]
 
 Validate language presence and basic structure. Emit `AOM270`. Add tests.
 
-### 10.7 Template overlays/exclusions (basic)
+### 10.7 Template overlays/exclusions (basic) [x]
 
 Add basic checks for templates: excluded nodes exist, overlays reference valid
 paths. Emit `AOM280`. Add tests.
 
-### 10.8 Rules reference validity (basic)
+### 10.8 Rules reference validity (basic) [x]
 
 Validate that rule references point to known paths/codes for supported subset.
 Emit `AOM290`. Add tests.
