@@ -10,8 +10,10 @@ from openehr_am.antlr.runtime import (
     IssueCollectingErrorListener,
     construct_lexer_parser,
 )
+from openehr_am.antlr.span import SourceSpan
 
 __all__ = [
     "IssueCollectingErrorListener",
     "construct_lexer_parser",
+    "SourceSpan",
 ]

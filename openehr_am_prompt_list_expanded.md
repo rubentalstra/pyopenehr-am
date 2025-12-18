@@ -192,25 +192,25 @@ clearly out of date (lightweight sanity check). CI remains the primary enforcer.
 
 ## Phase 4 — ODIN parsing (complete)
 
-### 4.1 ODIN AST dataclasses (use slots where sensible)
+### 4.1 ODIN AST dataclasses (use slots where sensible) [x]
 
 Implement ODIN AST nodes in `openehr_am/odin/ast.py`: primitives, object, list,
 keyed list. Prefer `@dataclass(slots=True, frozen=True)` unless mutation is
 required. Include optional source spans. Add tests.
 
-### 4.2 ODIN parse API (stable surface)
+### 4.2 ODIN parse API (stable surface) [x]
 
 Implement
 `parse_odin(text, *, filename=None) -tuple[OdinNode | None, list[Issue]]` in
 `openehr_am/odin/parser.py`. It must never crash on invalid input; it returns
 Issues. Add tests for malformed input.
 
-### 4.3 ODIN parse-tree → AST visitor
+### 4.3 ODIN parse-tree → AST visitor [x]
 
 Implement visitor/transformer from ANTLR parse tree to ODIN AST. Handle strings,
 numbers, booleans, lists, objects, keyed lists. Add tests for each.
 
-### 4.4 ODIN serializer (MVP)
+### 4.4 ODIN serializer (MVP) [x]
 
 Implement `to_odin(node) -str` for debugging and round-trip tests. Add
 round-trip tests.
