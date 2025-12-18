@@ -164,3 +164,17 @@ def test_parse_adl_parses_primitive_enums_intervals_and_regex() -> None:
     assert ratio_obj.primitive.interval.lower == 0.0
     assert ratio_obj.primitive.interval.upper == 1.0
     assert ratio_obj.primitive.values == (2.5,)
+
+
+def test_parse_adl_definition_invalid_occurrences_and_cardinality_emits_adl030() -> (
+    None
+):
+    text = load_fixture_text("adl", "invalid_cadl_occurrences_cardinality.adl")
+
+    artefact, issues = parse_adl(text, filename="invalid_cadl.adl")
+
+    assert artefact is not None
+    assert issues
+
+    codes = [i.code for i in issues]
+    assert "ADL030" in codes

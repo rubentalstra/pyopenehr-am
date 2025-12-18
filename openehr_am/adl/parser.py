@@ -274,7 +274,8 @@ def _parse_definition_section(
         )
         return None, [issue]
 
-    return root, []
+    validation_issues = root.validate(code="ADL030")
+    return root, validation_issues
 
 
 class _CadlParseError(Exception):

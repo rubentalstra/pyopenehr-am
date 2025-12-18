@@ -256,7 +256,7 @@ AST. Add tests.
 
 Add ranges/intervals, regex/string constraints, enumerations. Add tests.
 
-### 6.4 Parse occurrences/cardinality
+### 6.4 Parse occurrences/cardinality [x]
 
 Implement occurrences/cardinality parsing and validation in AST form. Add tests.
 

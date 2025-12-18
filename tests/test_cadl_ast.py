@@ -86,3 +86,17 @@ def test_primitive_constraints_can_be_attached_to_object_nodes() -> None:
 
     assert primitive_object.primitive is i
     assert primitive_object.attributes == ()
+
+
+def test_occurrences_and_cardinality_validate_structural_ranges() -> None:
+    span = SourceSpan(file="x.adl", start_line=1, start_col=1, end_line=1, end_col=10)
+
+    bad_occ = CadlOccurrences(lower=2, upper=1, span=span)
+    occ_issues = bad_occ.validate()
+    assert occ_issues
+    assert occ_issues[0].code == "ADL030"
+
+    bad_card = CadlCardinality(lower=-1, upper=0, span=span)
+    card_issues = bad_card.validate()
+    assert card_issues
+    assert {i.code for i in card_issues} == {"ADL030"}
