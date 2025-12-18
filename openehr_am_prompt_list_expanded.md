@@ -123,7 +123,7 @@ scans for it and fails if found.
 Add GitHub Actions workflow(s) to run: ruff, tests, and type checking on
 push/PR. Keep CI fast and deterministic. Ensure it runs with Python 3.14.
 
-### 1.2 ANTLR policy scaffolding (commit generated code + CI drift check)
+### 1.2 ANTLR policy scaffolding (commit generated code + CI drift check) [x]
 
 Create:
 

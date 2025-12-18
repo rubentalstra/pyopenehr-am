@@ -2,6 +2,10 @@ import argparse
 from pathlib import Path
 
 
+def _find_antlr_grammars(grammars_dir: Path) -> list[Path]:
+    return sorted(grammars_dir.rglob("*.g4"))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
@@ -26,10 +30,14 @@ def main() -> int:
             "openehr_am/_generated/ is missing. Create it and commit generated code."
         )
 
+    grammars = _find_antlr_grammars(grammars_dir)
+    if not grammars:
+        print("scripts/generate_parsers.py: no *.g4 grammars; nothing to generate")
+        return 0
+
     raise SystemExit(
         "Parser generation is not implemented yet. "
-        "Add grammars under grammars/ and implement this script to regenerate "
-        "openehr_am/_generated/ deterministically."
+        "Add implementation to regenerate openehr_am/_generated/ deterministically."
     )
 
 
