@@ -379,6 +379,51 @@ def _tokenize_cadl(chunk: str, *, section_start_line: int) -> list[_Token]:
             )
             continue
 
+        # Regex literal (/.../)
+        if ch == "/":
+            advance()  # opening
+            value_chars: list[str] = []
+            escaped = False
+            while i < len(chunk):
+                cur = chunk[i]
+                if cur == "\n":
+                    raise _CadlParseError(
+                        message="Unterminated regex literal",
+                        line=start_line,
+                        col=start_col,
+                    )
+                if escaped:
+                    value_chars.append(cur)
+                    escaped = False
+                    advance()
+                    continue
+                if cur == "\\":
+                    escaped = True
+                    advance()
+                    continue
+                if cur == "/":
+                    break
+                value_chars.append(cur)
+                advance()
+            if i >= len(chunk) or chunk[i] != "/":
+                raise _CadlParseError(
+                    message="Unterminated regex literal",
+                    line=start_line,
+                    col=start_col,
+                )
+            advance()  # closing
+            tokens.append(
+                _Token(
+                    "REGEX",
+                    "".join(value_chars),
+                    start_line,
+                    start_col,
+                    line,
+                    col - 1,
+                )
+            )
+            continue
+
         # Number (int/float)
         if ch.isdigit() or (
             ch == "-" and i + 1 < len(chunk) and chunk[i + 1].isdigit()
@@ -699,7 +744,7 @@ class _CadlParser:
     def _looks_like_primitive_block(self) -> bool:
         # Primitive blocks start with a literal (STRING/NUMBER/true/false), '*', or a number interval.
         tok = self._peek()
-        if tok.kind == "STRING" or tok.kind == "NUMBER" or tok.kind == "STAR":
+        if tok.kind in {"STRING", "NUMBER", "STAR", "REGEX"}:
             return True
         if tok.kind == "KEYWORD" and tok.value.casefold() in {"true", "false"}:
             return True
@@ -713,59 +758,110 @@ class _CadlParser:
         start = self._peek()
 
         if start.kind == "NUMBER":
-            # Could be interval or set.
-            if self._tokens[self._i + 1].kind == "DOTDOT":
-                # Decide int vs real.
-                lower_s = start.value
-                self._advance()  # lower
-                self._expect("DOTDOT")
-                if self._peek().kind == "STAR":
-                    self._advance()
-                    upper_s = None
-                    upper_unbounded = True
-                else:
-                    upper_tok = self._expect("NUMBER")
-                    upper_s = upper_tok.value
-                    upper_unbounded = False
-
-                is_real = "." in lower_s or (upper_s is not None and "." in upper_s)
-                if is_real:
-                    interval = CadlRealInterval(
-                        lower=float(lower_s),
-                        upper=(float(upper_s) if upper_s is not None else None),
-                        upper_unbounded=upper_unbounded,
-                    )
-                    return CadlRealConstraint(interval=interval)
-
-                interval = CadlIntegerInterval(
-                    lower=int(lower_s),
-                    upper=(int(upper_s) if upper_s is not None else None),
-                    upper_unbounded=upper_unbounded,
-                )
-                return CadlIntegerConstraint(interval=interval)
-
-            # Set of numbers.
+            # Support mixed forms: interval and/or enumerated numbers.
             number_values: list[str] = []
-            while True:
-                tok = self._expect("NUMBER")
-                number_values.append(tok.value)
-                if self._peek().kind != "COMMA":
-                    break
-                self._advance()
-            is_real = any("." in v for v in number_values)
-            if is_real:
-                return CadlRealConstraint(values=tuple(float(v) for v in number_values))
-            return CadlIntegerConstraint(values=tuple(int(v) for v in number_values))
+            interval_lower: str | None = None
+            interval_upper: str | None = None
+            interval_upper_unbounded = False
 
-        if start.kind == "STRING":
-            string_values: list[str] = []
             while True:
-                tok = self._expect("STRING")
-                string_values.append(tok.value)
+                if (
+                    self._peek().kind == "NUMBER"
+                    and self._tokens[self._i + 1].kind == "DOTDOT"
+                ):
+                    if interval_lower is not None:
+                        tok = self._peek()
+                        raise _CadlParseError(
+                            message="Multiple intervals in one primitive constraint are not supported",
+                            line=tok.start_line,
+                            col=tok.start_col,
+                        )
+
+                    lower_tok = self._expect("NUMBER")
+                    interval_lower = lower_tok.value
+                    self._expect("DOTDOT")
+                    if self._peek().kind == "STAR":
+                        self._advance()
+                        interval_upper = None
+                        interval_upper_unbounded = True
+                    else:
+                        upper_tok = self._expect("NUMBER")
+                        interval_upper = upper_tok.value
+                        interval_upper_unbounded = False
+                else:
+                    tok = self._expect("NUMBER")
+                    number_values.append(tok.value)
+
                 if self._peek().kind != "COMMA":
                     break
                 self._advance()
-            return CadlStringConstraint(values=tuple(string_values))
+
+            is_real = any("." in v for v in number_values) or (
+                interval_lower is not None
+                and (
+                    "." in interval_lower
+                    or (interval_upper is not None and "." in interval_upper)
+                )
+            )
+
+            if is_real:
+                interval = None
+                if interval_lower is not None:
+                    interval = CadlRealInterval(
+                        lower=float(interval_lower),
+                        upper=(
+                            float(interval_upper)
+                            if interval_upper is not None
+                            else None
+                        ),
+                        upper_unbounded=interval_upper_unbounded,
+                    )
+                values = (
+                    tuple(float(v) for v in number_values) if number_values else None
+                )
+                return CadlRealConstraint(values=values, interval=interval)
+
+            interval = None
+            if interval_lower is not None:
+                interval = CadlIntegerInterval(
+                    lower=int(interval_lower),
+                    upper=(int(interval_upper) if interval_upper is not None else None),
+                    upper_unbounded=interval_upper_unbounded,
+                )
+            values = tuple(int(v) for v in number_values) if number_values else None
+            return CadlIntegerConstraint(values=values, interval=interval)
+
+        if start.kind in {"STRING", "REGEX"}:
+            string_values: list[str] = []
+            pattern: str | None = None
+
+            while True:
+                if self._peek().kind == "STRING":
+                    tok = self._expect("STRING")
+                    string_values.append(tok.value)
+                elif self._peek().kind == "REGEX":
+                    tok = self._expect("REGEX")
+                    if pattern is not None:
+                        raise _CadlParseError(
+                            message="Multiple regex patterns in one string constraint are not supported",
+                            line=tok.start_line,
+                            col=tok.start_col,
+                        )
+                    pattern = tok.value
+                else:
+                    tok = self._peek()
+                    raise _CadlParseError(
+                        message=f"Expected STRING or REGEX, got {tok.kind}",
+                        line=tok.start_line,
+                        col=tok.start_col,
+                    )
+
+                if self._peek().kind != "COMMA":
+                    break
+                self._advance()
+
+            values = tuple(string_values) if string_values else None
+            return CadlStringConstraint(values=values, pattern=pattern)
 
         if start.kind == "KEYWORD" and start.value.casefold() in {"true", "false"}:
             bool_values: list[bool] = []

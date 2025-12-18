@@ -252,7 +252,7 @@ primitive constraints. Add tests.
 Extend ADL parsing to parse a minimal supported subset of `definition` into cADL
 AST. Add tests.
 
-### 6.3 Expand primitive constraints support
+### 6.3 Expand primitive constraints support [x]
 
 Add ranges/intervals, regex/string constraints, enumerations. Add tests.
 

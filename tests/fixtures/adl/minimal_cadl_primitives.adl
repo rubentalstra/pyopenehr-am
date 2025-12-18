@@ -1,0 +1,31 @@
+archetype
+openEHR-EHR-OBSERVATION.test.v1
+
+language
+original_language = <"en">
+language = <"en">
+
+description
+<>
+
+terminology
+<>
+
+definition
+OBSERVATION[at0000] matches {
+    name matches {
+        String matches {/[A-Z][a-z]+/}
+    }
+
+    code matches {
+        String matches {"at0001", "at0002"}
+    }
+
+    qty matches {
+        Integer matches {0..10, 99}
+    }
+
+    ratio matches {
+        Real matches {0.0..1.0, 2.5}
+    }
+}

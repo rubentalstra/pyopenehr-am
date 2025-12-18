@@ -1,5 +1,10 @@
 from openehr_am.adl import ArtefactKind, parse_adl
-from openehr_am.adl.cadl_ast import CadlIntegerConstraint, CadlObjectNode
+from openehr_am.adl.cadl_ast import (
+    CadlIntegerConstraint,
+    CadlObjectNode,
+    CadlRealConstraint,
+    CadlStringConstraint,
+)
 from openehr_am.validation.issue import Severity
 from tests.fixture_loader import load_fixture_text
 
@@ -112,3 +117,50 @@ def test_parse_adl_parses_minimal_definition_subset_into_cadl_ast() -> None:
     assert integer_obj.primitive.interval is not None
     assert integer_obj.primitive.interval.lower == 0
     assert integer_obj.primitive.interval.upper == 10
+
+
+def test_parse_adl_parses_primitive_enums_intervals_and_regex() -> None:
+    text = load_fixture_text("adl", "minimal_cadl_primitives.adl")
+
+    artefact, issues = parse_adl(text, filename="cadl_primitives.adl")
+
+    assert issues == []
+    assert artefact is not None
+    assert isinstance(artefact.definition, CadlObjectNode)
+
+    name_attr = next(
+        a for a in artefact.definition.attributes if a.rm_attribute_name == "name"
+    )
+    string_obj = name_attr.children[0]
+    assert string_obj.rm_type_name == "String"
+    assert isinstance(string_obj.primitive, CadlStringConstraint)
+    assert string_obj.primitive.pattern == "[A-Z][a-z]+"
+    assert string_obj.primitive.values is None
+
+    code_attr = next(
+        a for a in artefact.definition.attributes if a.rm_attribute_name == "code"
+    )
+    code_obj = code_attr.children[0]
+    assert isinstance(code_obj.primitive, CadlStringConstraint)
+    assert code_obj.primitive.values == ("at0001", "at0002")
+    assert code_obj.primitive.pattern is None
+
+    qty_attr = next(
+        a for a in artefact.definition.attributes if a.rm_attribute_name == "qty"
+    )
+    qty_obj = qty_attr.children[0]
+    assert isinstance(qty_obj.primitive, CadlIntegerConstraint)
+    assert qty_obj.primitive.interval is not None
+    assert qty_obj.primitive.interval.lower == 0
+    assert qty_obj.primitive.interval.upper == 10
+    assert qty_obj.primitive.values == (99,)
+
+    ratio_attr = next(
+        a for a in artefact.definition.attributes if a.rm_attribute_name == "ratio"
+    )
+    ratio_obj = ratio_attr.children[0]
+    assert isinstance(ratio_obj.primitive, CadlRealConstraint)
+    assert ratio_obj.primitive.interval is not None
+    assert ratio_obj.primitive.interval.lower == 0.0
+    assert ratio_obj.primitive.interval.upper == 1.0
+    assert ratio_obj.primitive.values == (2.5,)
