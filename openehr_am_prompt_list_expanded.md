@@ -431,7 +431,7 @@ them, and indexes by archetype id. Add tests.
 Implement dependency extraction and detect cycles. Emit `OPT705` for cycles. Add
 tests.
 
-### 13.3 Caching and incremental load (optional)
+### 13.3 Caching and incremental load (optional) [NotDone]
 
 Add simple caching to avoid reparsing unchanged files. Add tests.
 
