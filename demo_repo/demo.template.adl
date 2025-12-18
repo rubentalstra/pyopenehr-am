@@ -1,0 +1,23 @@
+template
+openEHR-EHR-COMPOSITION.template_with_slot.v1
+
+language
+original_language = <"en">
+language = <"en">
+
+description
+<>
+
+terminology
+<>
+
+definition
+COMPOSITION matches {
+  content matches {
+    OBSERVATION matches {
+      archetype_slot matches {
+        include matches { "openEHR-EHR-OBSERVATION.wanted.v1" }
+      }
+    }
+  }
+}
