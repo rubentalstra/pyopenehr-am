@@ -281,7 +281,7 @@ Parse a small expression subset into Expression AST. Add tests.
 
 ## Phase 8 — AOM2 semantic model (dataclasses)
 
-### 8.1 Implement core AOM dataclasses
+### 8.1 Implement core AOM dataclasses [x]
 
 Implement AOM dataclasses under `openehr_am/aom/` for Archetype/Template,
 terminology, and a constraint skeleton (CComplexObject, CAttribute, etc.).
