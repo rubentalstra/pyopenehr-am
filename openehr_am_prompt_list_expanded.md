@@ -370,17 +370,17 @@ Emit `AOM290`. Add tests.
 
 ## Phase 11 — openEHR path parsing + resolution (expand)
 
-### 11.1 Path AST + parser
+### 11.1 Path AST + parser [x]
 
 Implement `openehr_am/path/parser.py` returning Path AST. Emit `PATH900` on
 parse failure. Add tests.
 
-### 11.2 Path resolver against AOM
+### 11.2 Path resolver against AOM [x]
 
 Resolve paths against your AOM constraint tree (subset). Emit `PATH910` when
 resolves to no nodes. Add tests.
 
-### 11.3 Normalization and string round-trip
+### 11.3 Normalization and string round-trip [x]
 
 Implement `to_string()` and round-trip parsing for supported subset. Add tests.
 

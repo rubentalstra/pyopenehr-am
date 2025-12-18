@@ -21,6 +21,7 @@ from openehr_am.aom.constraints import (
 )
 from openehr_am.aom.ids import try_parse_node_id
 from openehr_am.aom.terminology import ArchetypeTerminology
+from openehr_am.path.resolver import resolve_path
 from openehr_am.validation.context import ValidationContext
 from openehr_am.validation.issue import Issue, Severity
 from openehr_am.validation.semantic import register_semantic_check
@@ -117,113 +118,15 @@ def _specialisation_depth(value: str) -> int | None:
     return depth
 
 
-def _parse_open_ehr_path(path: str) -> tuple[tuple[str, str | None], ...] | None:
-    """Parse a minimal openEHR-style path.
-
-    Supported forms:
-        - /definition
-        - /definition/attr
-        - /definition/attr[node_id]/child_attr[child_id]
-        - /attr[node_id]/child_attr[child_id]  (implicit /definition)
-
-    Returns:
-        Tuple of (attribute_name, node_id_or_none) segments, excluding the
-        optional leading 'definition'. Returns None on parse failure.
-
-    Notes:
-        This is intentionally minimal and permissive; it must not raise.
-    """
-
-    if not path:
-        return None
-
-    if not path.startswith("/"):
-        return None
-
-    raw_segs = [seg for seg in path.split("/") if seg]
-    if not raw_segs:
-        return None
-
-    if raw_segs[0] == "definition":
-        raw_segs = raw_segs[1:]
-
-    if not raw_segs:
-        # "/definition" refers to the root.
-        return ()
-
-    segs: list[tuple[str, str | None]] = []
-    for seg in raw_segs:
-        if "[" not in seg:
-            if "]" in seg:
-                return None
-            segs.append((seg, None))
-            continue
-
-        if not seg.endswith("]"):
-            return None
-        name, rest = seg.split("[", 1)
-        node_id = rest[:-1]
-
-        if name == "" or node_id == "":
-            return None
-
-        segs.append((name, node_id))
-
-    return tuple(segs)
-
-
 def _path_resolves_in_definition(
     definition: CComplexObject | None, *, path: str
 ) -> bool:
     """Return True if `path` can be followed in the given definition tree."""
 
-    if definition is None:
+    nodes, issues = resolve_path(definition, path)
+    if issues:
         return False
-
-    parsed = _parse_open_ehr_path(path)
-    if parsed is None:
-        return False
-
-    current: CObject = definition
-    for attr_name, node_id in parsed:
-        if not isinstance(current, CComplexObject):
-            return False
-
-        attr: CAttribute | None = None
-        for a in current.attributes:
-            if a.rm_attribute_name == attr_name:
-                attr = a
-                break
-
-        if attr is None:
-            return False
-
-        if node_id is None:
-            # If this is a leaf segment, the presence of the attribute is enough.
-            # Otherwise, we need to descend into some child.
-            if attr.children == ():
-                return False
-            # Pick the first complex child to continue (minimal resolver).
-            next_obj: CObject | None = None
-            for child in attr.children:
-                if isinstance(child, CComplexObject):
-                    next_obj = child
-                    break
-            if next_obj is None:
-                return False
-            current = next_obj
-            continue
-
-        next_obj2: CObject | None = None
-        for child in attr.children:
-            if child.node_id == node_id:
-                next_obj2 = child
-                break
-        if next_obj2 is None:
-            return False
-        current = next_obj2
-
-    return True
+    return nodes is not None and nodes != ()
 
 
 def _defined_codes(term: ArchetypeTerminology | None) -> set[str]:
