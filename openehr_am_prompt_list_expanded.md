@@ -168,7 +168,7 @@ file, sort by line/col). Add tests that JSON mode never outputs Rich markup.
 
 ## Phase 3 — ANTLR runtime wiring and error capture
 
-### 3.1 Add ANTLR runtime dependency and wrappers
+### 3.1 Add ANTLR runtime dependency and wrappers [x]
 
 Add `antlr4-python3-runtime` dependency and create `openehr_am/antlr/runtime.py`
 that:
@@ -177,13 +177,13 @@ that:
 - attaches error listeners that collect Issues with line/col Add tests that the
   error listener converts a fake syntax error into Issues.
 
-### 3.2 Add generation script that supports ODIN + ADL
+### 3.2 Add generation script that supports ODIN + ADL [x]
 
 Implement `scripts/generate_parsers.py` to generate Python code into
 `openehr_am/_generated/` from grammars. Document requirements (Java, ANTLR jar)
 only for contributors.
 
-### 3.3 Add “generated code drift” unit test (optional)
+### 3.3 Add “generated code drift” unit test (optional) [x]
 
 Add an optional local test that fails if generated outputs are missing or
 clearly out of date (lightweight sanity check). CI remains the primary enforcer.
