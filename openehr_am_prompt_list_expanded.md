@@ -219,7 +219,7 @@ round-trip tests.
 
 ## Phase 5 — ADL2 parsing (incremental)
 
-### 5.1 ADL AST skeleton
+### 5.1 ADL AST skeleton [x]
 
 Implement `openehr_am/adl/ast.py` capturing: artefact kind, artefact id,
 language/original_language, description + terminology ODIN AST, definition
