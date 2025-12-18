@@ -388,31 +388,31 @@ Implement `to_string()` and round-trip parsing for supported subset. Add tests.
 
 ## Phase 12 — BMM loader and RM repository (expand)
 
-### 12.1 BMM dataclasses (minimal)
+### 12.1 BMM dataclasses (minimal) [x]
 
 Implement BMM dataclasses: Model, Package, Class, Property, TypeRef,
 Multiplicity. Add tests.
 
-### 12.2 BMM persistence parser (ODIN-backed)
+### 12.2 BMM persistence parser (ODIN-backed) [x]
 
 Implement `load_bmm(path)` mapping ODIN AST → BMM dataclasses (subset). Add
 tests with tiny fixture.
 
-### 12.3 ModelRepository loader for a directory
+### 12.3 ModelRepository loader for a directory [x]
 
 Implement `ModelRepository.load_from_dir(dir)` that loads multiple `.bmm`,
 resolves class refs, and provides `get_class(name)`. Add tests.
 
-### 12.4 RM conformance: rm_type_name exists
+### 12.4 RM conformance: rm_type_name exists [x]
 
 Validate referenced RM types exist. Emit `BMM500`. Add tests.
 
-### 12.5 RM conformance: rm_attribute_name exists
+### 12.5 RM conformance: rm_attribute_name exists [x]
 
 Validate referenced RM attributes exist on the RM type. Emit `BMM510`. Add
 tests.
 
-### 12.6 RM conformance: multiplicity compatibility (basic)
+### 12.6 RM conformance: multiplicity compatibility (basic) [x]
 
 Validate multiplicity doesn’t exceed RM constraints (subset). Emit `BMM520`. Add
 tests.

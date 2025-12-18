@@ -2,18 +2,11 @@
 
 This package provides infrastructure and checks that emit structured `Issue`
 objects rather than raising exceptions for recoverable problems.
+
+Note:
+    Keep this module lightweight: importing submodules like
+    `openehr_am.validation.issue` must not trigger heavy imports or introduce
+    cycles with parsing/loading modules.
 """
 
-from openehr_am.validation.context import ValidationContext
-from openehr_am.validation.registry import ValidationLayer, ValidationRegistry
-from openehr_am.validation.semantic import register_semantic_check, validate_semantic
-from openehr_am.validation.syntax import validate_syntax
-
-__all__ = [
-    "ValidationContext",
-    "ValidationLayer",
-    "ValidationRegistry",
-    "register_semantic_check",
-    "validate_semantic",
-    "validate_syntax",
-]
+__all__ = []
