@@ -45,7 +45,9 @@ jobs:
               run: python -m ruff format --check .
 
             - name: Ruff lint
-              run: python -m ruff check .
+              run: |
+                  python -m ruff check --fix .
+                  git diff --exit-code
 
             - name: Type check (pyright)
               run: pyright
