@@ -52,3 +52,14 @@ Locally, you can run the same check:
 python scripts/generate_parsers.py
 git diff --exit-code
 ```
+
+## Optional local pytest check
+
+There is an optional, lightweight sanity test that checks whether committed
+generated output is present for the grammars (it does not run Java/ANTLR).
+
+Enable it locally with:
+
+```bash
+OPENEHR_AM_CHECK_GENERATED=1 pytest -q tests/test_generated_sanity.py
+```
