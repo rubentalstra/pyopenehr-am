@@ -17,6 +17,7 @@ from openehr_am.aom.constraints import (
     CPrimitiveObject,
     Interval,
 )
+from openehr_am.aom.debug_dict import aom_to_dict
 from openehr_am.aom.ids import (
     ArchetypeId,
     NodeId,
@@ -55,4 +56,5 @@ __all__ = [
     "ArchetypeId",
     "try_parse_archetype_id",
     "is_archetype_id",
+    "aom_to_dict",
 ]

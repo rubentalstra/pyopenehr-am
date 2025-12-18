@@ -297,7 +297,7 @@ tests.
 Build AOM objects from ADL AST + cADL AST for the supported subset. Preserve
 source locations. Add tests.
 
-### 8.4 Add debug serializers
+### 8.4 Add debug serializers [x]
 
 Add deterministic `to_dict()` helpers for AOM objects (debug). Add tests.
 

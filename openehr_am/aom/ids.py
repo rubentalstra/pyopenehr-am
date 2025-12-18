@@ -13,6 +13,8 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Literal
 
+from openehr_am.aom.debug_dict import aom_to_dict
+
 type NodeIdPrefix = Literal["at", "ac"]
 
 
@@ -34,6 +36,9 @@ class NodeId:
 
     def __str__(self) -> str:
         return format_node_id(self.prefix, self.number)
+
+    def to_dict(self) -> dict[str, object]:
+        return aom_to_dict(self)
 
 
 def is_node_id(value: str) -> bool:
@@ -112,6 +117,9 @@ class ArchetypeId:
 
     concept: str
     version: str
+
+    def to_dict(self) -> dict[str, object]:
+        return aom_to_dict(self)
 
 
 def try_parse_archetype_id(value: str) -> ArchetypeId | None:

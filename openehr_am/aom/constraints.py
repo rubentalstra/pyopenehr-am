@@ -9,6 +9,7 @@ Only a small, pragmatic surface is implemented for now.
 from dataclasses import dataclass
 
 from openehr_am.antlr.span import SourceSpan
+from openehr_am.aom.debug_dict import aom_to_dict
 
 type MaybeNumber = int | float | None
 
@@ -28,12 +29,18 @@ class Interval:
     upper_included: bool = True
     span: SourceSpan | None = None
 
+    def to_dict(self) -> dict[str, object]:
+        return aom_to_dict(self)
+
 
 @dataclass(slots=True, frozen=True)
 class PrimitiveStringConstraint:
     values: tuple[str, ...] | None = None
     pattern: str | None = None
     span: SourceSpan | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        return aom_to_dict(self)
 
 
 @dataclass(slots=True, frozen=True)
@@ -42,6 +49,9 @@ class PrimitiveIntegerConstraint:
     interval: Interval | None = None
     span: SourceSpan | None = None
 
+    def to_dict(self) -> dict[str, object]:
+        return aom_to_dict(self)
+
 
 @dataclass(slots=True, frozen=True)
 class PrimitiveRealConstraint:
@@ -49,11 +59,17 @@ class PrimitiveRealConstraint:
     interval: Interval | None = None
     span: SourceSpan | None = None
 
+    def to_dict(self) -> dict[str, object]:
+        return aom_to_dict(self)
+
 
 @dataclass(slots=True, frozen=True)
 class PrimitiveBooleanConstraint:
     values: tuple[bool, ...] | None = None
     span: SourceSpan | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        return aom_to_dict(self)
 
 
 type PrimitiveConstraint = (
@@ -73,6 +89,9 @@ class Cardinality:
     is_unique: bool = False
     span: SourceSpan | None = None
 
+    def to_dict(self) -> dict[str, object]:
+        return aom_to_dict(self)
+
 
 @dataclass(slots=True, frozen=True)
 class CObject:
@@ -82,6 +101,9 @@ class CObject:
     node_id: str | None = None
     occurrences: Interval | None = None
     span: SourceSpan | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        return aom_to_dict(self)
 
 
 @dataclass(slots=True, frozen=True)
@@ -93,6 +115,9 @@ class CAttribute:
     existence: Interval | None = None
     cardinality: Cardinality | None = None
     span: SourceSpan | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        return aom_to_dict(self)
 
 
 @dataclass(slots=True, frozen=True)

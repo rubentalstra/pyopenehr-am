@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 from openehr_am.antlr.span import SourceSpan
 from openehr_am.aom.constraints import CComplexObject
+from openehr_am.aom.debug_dict import aom_to_dict
 from openehr_am.aom.terminology import ArchetypeTerminology
 
 
@@ -24,6 +25,9 @@ class Archetype:
     terminology: ArchetypeTerminology | None = None
 
     span: SourceSpan | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        return aom_to_dict(self)
 
 
 @dataclass(slots=True, frozen=True)
@@ -45,6 +49,9 @@ class Template:
     terminology: ArchetypeTerminology | None = None
 
     span: SourceSpan | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        return aom_to_dict(self)
 
 
 __all__ = [
