@@ -15,6 +15,7 @@ from openehr_am.odin.ast import (
     OdinReal,
     OdinString,
 )
+from openehr_am.odin.parser import parse_odin
 
 __all__ = [
     "OdinBoolean",
@@ -27,4 +28,5 @@ __all__ = [
     "OdinObjectItem",
     "OdinReal",
     "OdinString",
+    "parse_odin",
 ]
