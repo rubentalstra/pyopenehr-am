@@ -1,4 +1,5 @@
 from openehr_am.adl import ArtefactKind, parse_adl
+from openehr_am.adl.ast import AdlRulesSection
 from openehr_am.adl.cadl_ast import (
     CadlIntegerConstraint,
     CadlObjectNode,
@@ -46,6 +47,35 @@ def test_parse_adl_minimal_template_extracts_id_and_odins() -> None:
     assert artefact is not None
     assert artefact.kind is ArtefactKind.TEMPLATE
     assert artefact.artefact_id == "openEHR-EHR-COMPOSITION.test_template.v1"
+
+
+def test_parse_adl_captures_rules_section_with_statement_spans() -> None:
+    text = load_fixture_text("adl", "minimal_archetype_with_rules.adl")
+
+    artefact, issues = parse_adl(text, filename="rules.adl")
+
+    assert issues == []
+    assert artefact is not None
+    assert artefact.kind is ArtefactKind.ARCHETYPE
+    assert artefact.artefact_id == "openEHR-EHR-OBSERVATION.test_with_rules.v1"
+
+    assert isinstance(artefact.rules, AdlRulesSection)
+    assert artefact.rules.header_span is not None
+    assert artefact.rules.header_span.start_line == 14
+
+    # Content starts on the line after the header.
+    assert artefact.rules.span is not None
+    assert artefact.rules.span.start_line == 15
+
+    # Statements: ignore comment/blank lines and keep best-effort spans.
+    assert [s.text for s in artefact.rules.statements] == [
+        "valid_rule_line_1",
+        "valid_rule_line_2_with_indent",
+    ]
+    assert artefact.rules.statements[0].span is not None
+    assert artefact.rules.statements[0].span.start_line == 16
+    assert artefact.rules.statements[1].span is not None
+    assert artefact.rules.statements[1].span.start_line == 17
 
 
 def test_parse_adl_invalid_missing_id_returns_issue() -> None:

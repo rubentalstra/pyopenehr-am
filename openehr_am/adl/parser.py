@@ -11,7 +11,8 @@ The MVP parser only extracts:
 - language/original_language (best-effort, from the language ODIN block)
 - ODIN blocks for: language, description, terminology
 
-The definition and rules sections are recognised but not parsed yet.
+The definition section is recognised (minimal cADL subset supported).
+The rules section is captured as raw text + best-effort spans (no parsing/evaluation).
 
 # Spec: https://specifications.openehr.org/releases/AM/latest/ADL2.html
 """
@@ -19,7 +20,13 @@ The definition and rules sections are recognised but not parsed yet.
 from dataclasses import dataclass, replace
 from typing import Literal
 
-from openehr_am.adl.ast import AdlArtefact, AdlSectionPlaceholder, ArtefactKind
+from openehr_am.adl.ast import (
+    AdlArtefact,
+    AdlRulesSection,
+    AdlRuleStatement,
+    AdlSectionPlaceholder,
+    ArtefactKind,
+)
 from openehr_am.adl.cadl_ast import (
     CadlAttributeNode,
     CadlBooleanConstraint,
@@ -155,7 +162,8 @@ def parse_adl(
     definition_placeholder = _placeholder_section(
         lines, section_map, "definition", filename
     )
-    rules_placeholder = _placeholder_section(lines, section_map, "rules", filename)
+
+    rules_section = _parse_rules_section(lines, section_map, filename=filename)
 
     root_span = _root_span(lines, filename=filename)
 
@@ -169,7 +177,7 @@ def parse_adl(
         definition=definition_node
         if definition_node is not None
         else definition_placeholder,
-        rules=rules_placeholder,
+        rules=rules_section,
         span=root_span,
         kind_span=kind_span,
         artefact_id_span=artefact_id_span,
@@ -1056,6 +1064,70 @@ def _placeholder_section(
         end_col=len(line) if line else 1,
     )
     return AdlSectionPlaceholder(name=name, span=span)
+
+
+def _parse_rules_section(
+    lines: list[str],
+    section_map: dict[str, int],
+    *,
+    filename: str | None,
+) -> AdlRulesSection | None:
+    idx = section_map.get("rules")
+    if idx is None:
+        return None
+
+    header_line = lines[idx].rstrip("\n")
+    header_span = SourceSpan(
+        file=filename,
+        start_line=idx + 1,
+        start_col=1,
+        end_line=idx + 1,
+        end_col=len(header_line) if header_line else 1,
+    )
+
+    rng = _section_content_range(lines, section_map, "rules")
+    if rng is None:
+        return AdlRulesSection(raw_text="", statements=(), header_span=header_span)
+
+    start_idx, end_idx = rng
+    chunk_lines = lines[start_idx:end_idx]
+    raw_text = "".join(chunk_lines)
+
+    # Build best-effort statement spans.
+    # We do not attempt to parse rule syntax; we only capture meaningful lines.
+    statements: list[AdlRuleStatement] = []
+    for offset, raw in enumerate(chunk_lines):
+        stripped = raw.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("--"):
+            continue
+
+        line_no = start_idx + offset + 1
+        line_text = raw.rstrip("\n")
+        span = SourceSpan(
+            file=filename,
+            start_line=line_no,
+            start_col=1,
+            end_line=line_no,
+            end_col=len(line_text) if line_text else 1,
+        )
+        statements.append(AdlRuleStatement(text=stripped, span=span))
+
+    section_start_line = start_idx + 1
+    span = _span_for_range(
+        lines,
+        start_line=section_start_line,
+        end_line=end_idx,
+        filename=filename,
+    )
+
+    return AdlRulesSection(
+        raw_text=raw_text,
+        statements=tuple(statements),
+        header_span=header_span,
+        span=span,
+    )
 
 
 def _extract_language_fields(

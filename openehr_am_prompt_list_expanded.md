@@ -264,7 +264,7 @@ Implement occurrences/cardinality parsing and validation in AST form. Add tests.
 
 ## Phase 7 — RULES / expression parsing (parse-only first)
 
-### 7.1 Rules section capture (syntax only)
+### 7.1 Rules section capture (syntax only) [x]
 
 Extend ADL parser to capture `rules` section with source locations. Don’t
 implement evaluation. Add tests.

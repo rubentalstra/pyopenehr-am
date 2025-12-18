@@ -1,0 +1,20 @@
+archetype
+openEHR-EHR-OBSERVATION.test_with_rules.v1
+
+language
+original_language = <"en">
+language = <"en">
+
+description
+<>
+
+terminology
+<>
+
+rules
+-- comment-only line should be ignored
+valid_rule_line_1
+  valid_rule_line_2_with_indent
+
+definition
+-- TODO

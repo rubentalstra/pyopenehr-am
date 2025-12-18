@@ -41,6 +41,33 @@ class AdlSectionPlaceholder:
 
 
 @dataclass(slots=True, frozen=True)
+class AdlRuleStatement:
+    """A single (unparsed) statement line in the ADL `rules` section."""
+
+    text: str
+    span: SourceSpan | None = None
+
+
+@dataclass(slots=True, frozen=True)
+class AdlRulesSection:
+    """Captured ADL `rules` section.
+
+    Notes:
+        - This is syntax-layer only. We intentionally do not parse or evaluate
+          rule expressions here.
+        - `raw_text` is the verbatim section content (between the `rules`
+          header and the next section header).
+    """
+
+    raw_text: str
+    statements: tuple[AdlRuleStatement, ...] = ()
+
+    # Spans
+    header_span: SourceSpan | None = None
+    span: SourceSpan | None = None
+
+
+@dataclass(slots=True, frozen=True)
 class AdlArtefact:
     """Minimal ADL artefact root node.
 
@@ -61,7 +88,7 @@ class AdlArtefact:
 
     # Placeholders for sections not modelled yet
     definition: AdlSectionPlaceholder | CadlObjectNode | None = None
-    rules: AdlSectionPlaceholder | None = None
+    rules: AdlSectionPlaceholder | AdlRulesSection | None = None
 
     # Spans
     span: SourceSpan | None = None
@@ -75,6 +102,8 @@ class AdlArtefact:
 
 __all__ = [
     "AdlArtefact",
+    "AdlRulesSection",
+    "AdlRuleStatement",
     "AdlSectionPlaceholder",
     "ArtefactKind",
 ]
