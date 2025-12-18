@@ -28,32 +28,33 @@ Codes are formatted as:
 
 ## Registry
 
-| Code    | Severity | Category  | Summary                                     | Notes / Spec Link         |
-| ------- | -------- | --------- | ------------------------------------------- | ------------------------- |
-| ADL001  | ERROR    | Parse     | Unexpected token / parse failure            | ADL2 grammar              |
-| ADL010  | ERROR    | Structure | Missing required ADL section                | ADL2 structure            |
-| ADL020  | WARN     | Structure | Deprecated/unknown section                  | ADL2 structure            |
-| ODN100  | ERROR    | Parse     | ODIN parse failure                          | ODIN grammar              |
-| ODN110  | WARN     | Structure | ODIN key duplication                        | ODIN rules                |
-| AOM200  | ERROR    | Semantics | Terminology code referenced but not defined | AOM2 terminology validity |
-| AOM210  | ERROR    | Semantics | Invalid node id format                      | AOM2 node id rules        |
-| AOM230  | ERROR    | Semantics | Specialisation level mismatch               | AOM2 specialization       |
-| AOM240  | ERROR    | Semantics | Duplicate node id / duplicate path          | AOM2 uniqueness           |
-| AOM250  | ERROR    | Semantics | Occurrences/cardinality invalid             | AOM2 constraints          |
-| AOM260  | ERROR    | Semantics | Value set integrity failure                 | AOM2 terminology          |
-| AOM270  | WARN     | Semantics | Language/original_language inconsistency    | AOM2 language             |
-| AOM280  | ERROR    | Semantics | Template overlay/exclusion invalid          | Template rules            |
-| AOM290  | WARN     | Semantics | Rules reference invalid path/code           | GDL2/RULES subset         |
-| BMM500  | ERROR    | RM        | Unknown RM type referenced                  | BMM                       |
-| BMM510  | ERROR    | RM        | Unknown RM attribute referenced             | BMM                       |
-| BMM520  | ERROR    | RM        | Multiplicity mismatch                       | BMM                       |
-| OPT700  | ERROR    | Compile   | Cannot resolve archetype inclusion          | OPT2                      |
-| OPT705  | ERROR    | Compile   | Dependency cycle detected                   | OPT2                      |
-| OPT720  | ERROR    | Compile   | Slot filling failed / no matching archetype | OPT2                      |
-| OPT730  | ERROR    | Compile   | Specialisation flattening conflict          | OPT2                      |
-| OPT750  | ERROR    | Integrity | Broken internal reference after compilation | OPT2                      |
-| PATH900 | ERROR    | Path      | Path parse failure                          | Path rules                |
-| PATH910 | ERROR    | Path      | Path resolves to no nodes                   | Path resolver             |
+| Code    | Severity | Category  | Summary                                           | Notes / Spec Link         |
+| ------- | -------- | --------- | ------------------------------------------------- | ------------------------- |
+| ADL001  | ERROR    | Parse     | Unexpected token / parse failure                  | ADL2 grammar              |
+| ADL010  | ERROR    | Structure | Missing required ADL section                      | ADL2 structure            |
+| ADL020  | WARN     | Structure | Deprecated/unknown section                        | ADL2 structure            |
+| ADL030  | ERROR    | Structure | Invalid cADL interval / occurrences / cardinality | AOM2 constraints          |
+| ODN100  | ERROR    | Parse     | ODIN parse failure                                | ODIN grammar              |
+| ODN110  | WARN     | Structure | ODIN key duplication                              | ODIN rules                |
+| AOM200  | ERROR    | Semantics | Terminology code referenced but not defined       | AOM2 terminology validity |
+| AOM210  | ERROR    | Semantics | Invalid node id format                            | AOM2 node id rules        |
+| AOM230  | ERROR    | Semantics | Specialisation level mismatch                     | AOM2 specialization       |
+| AOM240  | ERROR    | Semantics | Duplicate node id / duplicate path                | AOM2 uniqueness           |
+| AOM250  | ERROR    | Semantics | Occurrences/cardinality invalid                   | AOM2 constraints          |
+| AOM260  | ERROR    | Semantics | Value set integrity failure                       | AOM2 terminology          |
+| AOM270  | WARN     | Semantics | Language/original_language inconsistency          | AOM2 language             |
+| AOM280  | ERROR    | Semantics | Template overlay/exclusion invalid                | Template rules            |
+| AOM290  | WARN     | Semantics | Rules reference invalid path/code                 | GDL2/RULES subset         |
+| BMM500  | ERROR    | RM        | Unknown RM type referenced                        | BMM                       |
+| BMM510  | ERROR    | RM        | Unknown RM attribute referenced                   | BMM                       |
+| BMM520  | ERROR    | RM        | Multiplicity mismatch                             | BMM                       |
+| OPT700  | ERROR    | Compile   | Cannot resolve archetype inclusion                | OPT2                      |
+| OPT705  | ERROR    | Compile   | Dependency cycle detected                         | OPT2                      |
+| OPT720  | ERROR    | Compile   | Slot filling failed / no matching archetype       | OPT2                      |
+| OPT730  | ERROR    | Compile   | Specialisation flattening conflict                | OPT2                      |
+| OPT750  | ERROR    | Integrity | Broken internal reference after compilation       | OPT2                      |
+| PATH900 | ERROR    | Path      | Path parse failure                                | Path rules                |
+| PATH910 | ERROR    | Path      | Path resolves to no nodes                         | Path resolver             |
 
 ## Contributor checklist for new codes
 

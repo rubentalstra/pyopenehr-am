@@ -16,10 +16,23 @@ The definition and rules sections are recognised but not parsed yet.
 # Spec: https://specifications.openehr.org/releases/AM/latest/ADL2.html
 """
 
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from typing import Literal
 
 from openehr_am.adl.ast import AdlArtefact, AdlSectionPlaceholder, ArtefactKind
+from openehr_am.adl.cadl_ast import (
+    CadlAttributeNode,
+    CadlBooleanConstraint,
+    CadlCardinality,
+    CadlIntegerConstraint,
+    CadlIntegerInterval,
+    CadlObjectNode,
+    CadlOccurrences,
+    CadlPrimitiveConstraint,
+    CadlRealConstraint,
+    CadlRealInterval,
+    CadlStringConstraint,
+)
 from openehr_am.antlr.span import SourceSpan
 from openehr_am.odin.ast import (
     OdinBoolean,
@@ -106,7 +119,7 @@ def parse_adl(
 
     section_map = _find_sections(lines)
 
-    language_node, language_span, language_issues = _parse_odin_section(
+    language_node, _language_span, language_issues = _parse_odin_section(
         lines,
         section_map,
         name="language",
@@ -132,6 +145,13 @@ def parse_adl(
 
     original_language, language = _extract_language_fields(language_node)
 
+    definition_node, definition_issues = _parse_definition_section(
+        lines,
+        section_map,
+        filename=filename,
+    )
+    issues.extend(definition_issues)
+
     definition_placeholder = _placeholder_section(
         lines, section_map, "definition", filename
     )
@@ -146,7 +166,9 @@ def parse_adl(
         language=language,
         description=description_node,
         terminology=terminology_node,
-        definition=definition_placeholder,
+        definition=definition_node
+        if definition_node is not None
+        else definition_placeholder,
         rules=rules_placeholder,
         span=root_span,
         kind_span=kind_span,
@@ -181,6 +203,692 @@ def parse_adl(
                 artefact = replace(artefact, language_span=item.key_span)
 
     return artefact, issues
+
+
+# -----------------------
+# Minimal cADL definition
+# -----------------------
+
+
+@dataclass(slots=True, frozen=True)
+class _Token:
+    kind: str
+    value: str
+    start_line: int
+    start_col: int
+    end_line: int
+    end_col: int
+
+
+_CADL_KEYWORDS = {
+    "matches",
+    "occurrences",
+    "cardinality",
+    "ordered",
+    "unique",
+    "true",
+    "false",
+}
+
+
+def _parse_definition_section(
+    lines: list[str],
+    section_map: dict[str, int],
+    *,
+    filename: str | None,
+) -> tuple[CadlObjectNode | None, list[Issue]]:
+    rng = _section_content_range(lines, section_map, "definition")
+    if rng is None:
+        return None, []
+
+    start_idx, end_idx = rng
+    chunk_lines = lines[start_idx:end_idx]
+
+    # Treat comment-only or whitespace-only definitions as "not present".
+    meaningful = []
+    for raw in chunk_lines:
+        stripped = raw.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("--"):
+            continue
+        meaningful.append(raw)
+    if not meaningful:
+        return None, []
+
+    chunk = "".join(chunk_lines)
+    section_start_line = start_idx + 1
+
+    try:
+        tokens = _tokenize_cadl(chunk, section_start_line=section_start_line)
+        parser = _CadlParser(tokens, filename=filename)
+        root = parser.parse_object()
+    except _CadlParseError as e:
+        issue = Issue(
+            code="ADL001",
+            severity=Severity.ERROR,
+            message=f"Definition parse failure (minimal subset): {e.message}",
+            file=filename,
+            line=e.line,
+            col=e.col,
+        )
+        return None, [issue]
+
+    validation_issues = root.validate(code="ADL030")
+    return root, validation_issues
+
+
+class _CadlParseError(Exception):
+    def __init__(self, *, message: str, line: int, col: int) -> None:
+        super().__init__(message)
+        self.message = message
+        self.line = line
+        self.col = col
+
+
+def _tokenize_cadl(chunk: str, *, section_start_line: int) -> list[_Token]:
+    tokens: list[_Token] = []
+
+    line = section_start_line
+    col = 1
+    i = 0
+
+    def advance(n: int = 1) -> None:
+        nonlocal i, line, col
+        for _ in range(n):
+            if i >= len(chunk):
+                return
+            ch = chunk[i]
+            i += 1
+            if ch == "\n":
+                line += 1
+                col = 1
+            else:
+                col += 1
+
+    while i < len(chunk):
+        ch = chunk[i]
+
+        # Whitespace
+        if ch.isspace():
+            advance()
+            continue
+
+        # Comment to end of line
+        if ch == "-" and i + 1 < len(chunk) and chunk[i + 1] == "-":
+            while i < len(chunk) and chunk[i] != "\n":
+                advance()
+            continue
+
+        start_line, start_col = line, col
+
+        # Two-char operator
+        if ch == "." and i + 1 < len(chunk) and chunk[i + 1] == ".":
+            advance(2)
+            tokens.append(_Token("DOTDOT", "..", start_line, start_col, line, col - 1))
+            continue
+
+        # Single-char symbols
+        if ch in "{}[](),;*":
+            advance()
+            kind = {
+                "{": "LBRACE",
+                "}": "RBRACE",
+                "[": "LBRACK",
+                "]": "RBRACK",
+                "(": "LPAREN",
+                ")": "RPAREN",
+                ",": "COMMA",
+                ";": "SEMI",
+                "*": "STAR",
+            }[ch]
+            tokens.append(_Token(kind, ch, start_line, start_col, line, col - 1))
+            continue
+
+        # String literal (double quotes)
+        if ch == '"':
+            advance()  # opening
+            value_chars: list[str] = []
+            while i < len(chunk):
+                cur = chunk[i]
+                if cur == "\\" and i + 1 < len(chunk):
+                    # Minimal escape support.
+                    advance()
+                    value_chars.append(chunk[i])
+                    advance()
+                    continue
+                if cur == '"':
+                    break
+                value_chars.append(cur)
+                advance()
+            if i >= len(chunk) or chunk[i] != '"':
+                raise _CadlParseError(
+                    message="Unterminated string literal",
+                    line=start_line,
+                    col=start_col,
+                )
+            advance()  # closing
+            tokens.append(
+                _Token(
+                    "STRING",
+                    "".join(value_chars),
+                    start_line,
+                    start_col,
+                    line,
+                    col - 1,
+                )
+            )
+            continue
+
+        # Regex literal (/.../)
+        if ch == "/":
+            advance()  # opening
+            value_chars: list[str] = []
+            escaped = False
+            while i < len(chunk):
+                cur = chunk[i]
+                if cur == "\n":
+                    raise _CadlParseError(
+                        message="Unterminated regex literal",
+                        line=start_line,
+                        col=start_col,
+                    )
+                if escaped:
+                    value_chars.append(cur)
+                    escaped = False
+                    advance()
+                    continue
+                if cur == "\\":
+                    escaped = True
+                    advance()
+                    continue
+                if cur == "/":
+                    break
+                value_chars.append(cur)
+                advance()
+            if i >= len(chunk) or chunk[i] != "/":
+                raise _CadlParseError(
+                    message="Unterminated regex literal",
+                    line=start_line,
+                    col=start_col,
+                )
+            advance()  # closing
+            tokens.append(
+                _Token(
+                    "REGEX",
+                    "".join(value_chars),
+                    start_line,
+                    start_col,
+                    line,
+                    col - 1,
+                )
+            )
+            continue
+
+        # Number (int/float)
+        if ch.isdigit() or (
+            ch == "-" and i + 1 < len(chunk) and chunk[i + 1].isdigit()
+        ):
+            num_chars: list[str] = []
+            if ch == "-":
+                num_chars.append("-")
+                advance()
+            saw_dot = False
+            while i < len(chunk):
+                cur = chunk[i]
+                if cur.isdigit():
+                    num_chars.append(cur)
+                    advance()
+                    continue
+                if (
+                    cur == "."
+                    and not saw_dot
+                    and not (i + 1 < len(chunk) and chunk[i + 1] == ".")
+                ):
+                    saw_dot = True
+                    num_chars.append(".")
+                    advance()
+                    continue
+                break
+            tokens.append(
+                _Token(
+                    "NUMBER", "".join(num_chars), start_line, start_col, line, col - 1
+                )
+            )
+            continue
+
+        # Identifier / keyword
+        if ch.isalpha() or ch in "_":
+            ident_chars: list[str] = []
+            while i < len(chunk):
+                cur = chunk[i]
+                if cur.isalnum() or cur in "_-.":
+                    ident_chars.append(cur)
+                    advance()
+                    continue
+                break
+            value = "".join(ident_chars)
+            kind = "KEYWORD" if value.casefold() in _CADL_KEYWORDS else "IDENT"
+            tokens.append(_Token(kind, value, start_line, start_col, line, col - 1))
+            continue
+
+        raise _CadlParseError(
+            message=f"Unexpected character: {ch!r}", line=line, col=col
+        )
+
+    tokens.append(_Token("EOF", "", line, col, line, col))
+    return tokens
+
+
+class _CadlParser:
+    def __init__(self, tokens: list[_Token], *, filename: str | None) -> None:
+        self._tokens = tokens
+        self._i = 0
+        self._file = filename
+
+    def _peek(self) -> _Token:
+        return self._tokens[self._i]
+
+    def _advance(self) -> _Token:
+        tok = self._tokens[self._i]
+        self._i = min(self._i + 1, len(self._tokens) - 1)
+        return tok
+
+    def _expect(self, kind: str, *, value_casefold: str | None = None) -> _Token:
+        tok = self._peek()
+        if tok.kind != kind:
+            raise _CadlParseError(
+                message=f"Expected {kind}, got {tok.kind}",
+                line=tok.start_line,
+                col=tok.start_col,
+            )
+        if value_casefold is not None and tok.value.casefold() != value_casefold:
+            raise _CadlParseError(
+                message=f"Expected {value_casefold!r}, got {tok.value!r}",
+                line=tok.start_line,
+                col=tok.start_col,
+            )
+        return self._advance()
+
+    def _span_from(self, start: _Token, end: _Token) -> SourceSpan:
+        return SourceSpan(
+            file=self._file,
+            start_line=start.start_line,
+            start_col=start.start_col,
+            end_line=end.end_line,
+            end_col=end.end_col,
+        )
+
+    def parse_object(self) -> CadlObjectNode:
+        rm_type_tok = self._expect("IDENT")
+        node_id: str | None = None
+        node_id_span: SourceSpan | None = None
+
+        if self._peek().kind == "LBRACK":
+            self._advance()
+            node_tok = self._expect("IDENT")
+            self._expect("RBRACK")
+            node_id = node_tok.value
+            node_id_span = self._span_from(node_tok, node_tok)
+
+        rm_span = self._span_from(rm_type_tok, rm_type_tok)
+
+        occurrences: CadlOccurrences | None = None
+        attributes: list[CadlAttributeNode] = []
+        primitive: CadlPrimitiveConstraint | None = None
+
+        if (
+            self._peek().kind == "KEYWORD"
+            and self._peek().value.casefold() == "matches"
+        ):
+            self._advance()
+            lbrace = self._expect("LBRACE")
+
+            # Decide whether this is a primitive constraint block or an object body.
+            if self._looks_like_primitive_block():
+                primitive = self._parse_primitive_constraint_block()
+                rbrace = self._expect("RBRACE")
+                span = self._span_from(rm_type_tok, rbrace)
+                return CadlObjectNode(
+                    rm_type_name=rm_type_tok.value,
+                    node_id=node_id,
+                    occurrences=None,
+                    attributes=(),
+                    primitive=primitive,
+                    span=span,
+                    rm_type_name_span=rm_span,
+                    node_id_span=node_id_span,
+                )
+
+            # Object body
+            while self._peek().kind != "RBRACE":
+                if self._peek().kind == "EOF":
+                    raise _CadlParseError(
+                        message="Unterminated matches block",
+                        line=lbrace.start_line,
+                        col=lbrace.start_col,
+                    )
+
+                if (
+                    self._peek().kind == "KEYWORD"
+                    and self._peek().value.casefold() == "occurrences"
+                ):
+                    occurrences = self._parse_occurrences()
+                    continue
+
+                # Attribute: IDENT matches { ... }
+                if self._peek().kind == "IDENT":
+                    attributes.append(self._parse_attribute())
+                    continue
+
+                tok = self._peek()
+                raise _CadlParseError(
+                    message=f"Unexpected token in object body: {tok.kind} {tok.value!r}",
+                    line=tok.start_line,
+                    col=tok.start_col,
+                )
+
+            rbrace = self._expect("RBRACE")
+            span = self._span_from(rm_type_tok, rbrace)
+            return CadlObjectNode(
+                rm_type_name=rm_type_tok.value,
+                node_id=node_id,
+                occurrences=occurrences,
+                attributes=tuple(attributes),
+                primitive=None,
+                span=span,
+                rm_type_name_span=rm_span,
+                node_id_span=node_id_span,
+            )
+
+        # No matches block.
+        span = self._span_from(rm_type_tok, rm_type_tok)
+        return CadlObjectNode(
+            rm_type_name=rm_type_tok.value,
+            node_id=node_id,
+            occurrences=None,
+            attributes=(),
+            primitive=None,
+            span=span,
+            rm_type_name_span=rm_span,
+            node_id_span=node_id_span,
+        )
+
+    def _parse_attribute(self) -> CadlAttributeNode:
+        name_tok = self._expect("IDENT")
+        name_span = self._span_from(name_tok, name_tok)
+        self._expect("KEYWORD", value_casefold="matches")
+        lbrace = self._expect("LBRACE")
+
+        cardinality: CadlCardinality | None = None
+        children: list[CadlObjectNode] = []
+
+        while self._peek().kind != "RBRACE":
+            if self._peek().kind == "EOF":
+                raise _CadlParseError(
+                    message="Unterminated attribute matches block",
+                    line=lbrace.start_line,
+                    col=lbrace.start_col,
+                )
+
+            if (
+                self._peek().kind == "KEYWORD"
+                and self._peek().value.casefold() == "cardinality"
+            ):
+                cardinality = self._parse_cardinality()
+                continue
+
+            if self._peek().kind == "IDENT":
+                children.append(self.parse_object())
+                continue
+
+            tok = self._peek()
+            raise _CadlParseError(
+                message=f"Unexpected token in attribute body: {tok.kind} {tok.value!r}",
+                line=tok.start_line,
+                col=tok.start_col,
+            )
+
+        rbrace = self._expect("RBRACE")
+        span = self._span_from(name_tok, rbrace)
+        return CadlAttributeNode(
+            rm_attribute_name=name_tok.value,
+            children=tuple(children),
+            cardinality=cardinality,
+            span=span,
+            rm_attribute_name_span=name_span,
+        )
+
+    def _parse_occurrences(self) -> CadlOccurrences:
+        occ_tok = self._expect("KEYWORD", value_casefold="occurrences")
+        self._expect("KEYWORD", value_casefold="matches")
+        self._expect("LBRACE")
+        interval, rbrace = self._parse_int_interval_with_rbrace()
+        span = self._span_from(occ_tok, rbrace)
+        return CadlOccurrences(
+            lower=interval.lower,
+            upper=interval.upper,
+            upper_unbounded=interval.upper_unbounded,
+            span=span,
+        )
+
+    def _parse_cardinality(self) -> CadlCardinality:
+        card_tok = self._expect("KEYWORD", value_casefold="cardinality")
+        self._expect("KEYWORD", value_casefold="matches")
+        self._expect("LBRACE")
+
+        interval, end_tok = self._parse_int_interval_and_end_token()
+
+        is_ordered: bool | None = None
+        is_unique: bool | None = None
+
+        # Optional '; ordered' / '; unique' flags.
+        while end_tok.kind != "RBRACE":
+            if end_tok.kind != "SEMI":
+                raise _CadlParseError(
+                    message="Expected ';' or '}' after cardinality interval",
+                    line=end_tok.start_line,
+                    col=end_tok.start_col,
+                )
+            self._expect("SEMI")
+            flag = self._expect("KEYWORD")
+            if flag.value.casefold() == "ordered":
+                is_ordered = True
+            elif flag.value.casefold() == "unique":
+                is_unique = True
+            else:
+                raise _CadlParseError(
+                    message=f"Unknown cardinality flag: {flag.value!r}",
+                    line=flag.start_line,
+                    col=flag.start_col,
+                )
+            end_tok = self._peek()
+
+        rbrace = self._expect("RBRACE")
+        span = self._span_from(card_tok, rbrace)
+        return CadlCardinality(
+            lower=interval.lower,
+            upper=interval.upper,
+            upper_unbounded=interval.upper_unbounded,
+            is_ordered=is_ordered,
+            is_unique=is_unique,
+            span=span,
+        )
+
+    def _parse_int_interval_and_end_token(self) -> tuple[CadlIntegerInterval, _Token]:
+        lower: int | None
+        upper: int | None
+        upper_unbounded = False
+
+        lower_tok = self._expect("NUMBER")
+        lower = int(lower_tok.value)
+        self._expect("DOTDOT")
+
+        if self._peek().kind == "STAR":
+            self._advance()
+            upper = None
+            upper_unbounded = True
+        else:
+            upper_tok = self._expect("NUMBER")
+            upper = int(upper_tok.value)
+
+        interval = CadlIntegerInterval(
+            lower=lower, upper=upper, upper_unbounded=upper_unbounded
+        )
+        return interval, self._peek()
+
+    def _parse_int_interval_with_rbrace(self) -> tuple[CadlIntegerInterval, _Token]:
+        interval, _end_tok = self._parse_int_interval_and_end_token()
+        rbrace = self._expect("RBRACE")
+        return interval, rbrace
+
+    def _looks_like_primitive_block(self) -> bool:
+        # Primitive blocks start with a literal (STRING/NUMBER/true/false), '*', or a number interval.
+        tok = self._peek()
+        if tok.kind in {"STRING", "NUMBER", "STAR", "REGEX"}:
+            return True
+        if tok.kind == "KEYWORD" and tok.value.casefold() in {"true", "false"}:
+            return True
+        return False
+
+    def _parse_primitive_constraint_block(self) -> CadlPrimitiveConstraint:
+        # Parse until the closing '}' of the matches block (but do not consume it).
+        # Supported minimal forms:
+        # - interval: NUMBER .. NUMBER|*
+        # - set: STRING/NUMBER/true/false (',' ...)*
+        start = self._peek()
+
+        if start.kind == "NUMBER":
+            # Support mixed forms: interval and/or enumerated numbers.
+            number_values: list[str] = []
+            interval_lower: str | None = None
+            interval_upper: str | None = None
+            interval_upper_unbounded = False
+
+            while True:
+                if (
+                    self._peek().kind == "NUMBER"
+                    and self._tokens[self._i + 1].kind == "DOTDOT"
+                ):
+                    if interval_lower is not None:
+                        tok = self._peek()
+                        raise _CadlParseError(
+                            message="Multiple intervals in one primitive constraint are not supported",
+                            line=tok.start_line,
+                            col=tok.start_col,
+                        )
+
+                    lower_tok = self._expect("NUMBER")
+                    interval_lower = lower_tok.value
+                    self._expect("DOTDOT")
+                    if self._peek().kind == "STAR":
+                        self._advance()
+                        interval_upper = None
+                        interval_upper_unbounded = True
+                    else:
+                        upper_tok = self._expect("NUMBER")
+                        interval_upper = upper_tok.value
+                        interval_upper_unbounded = False
+                else:
+                    tok = self._expect("NUMBER")
+                    number_values.append(tok.value)
+
+                if self._peek().kind != "COMMA":
+                    break
+                self._advance()
+
+            is_real = any("." in v for v in number_values) or (
+                interval_lower is not None
+                and (
+                    "." in interval_lower
+                    or (interval_upper is not None and "." in interval_upper)
+                )
+            )
+
+            if is_real:
+                interval = None
+                if interval_lower is not None:
+                    interval = CadlRealInterval(
+                        lower=float(interval_lower),
+                        upper=(
+                            float(interval_upper)
+                            if interval_upper is not None
+                            else None
+                        ),
+                        upper_unbounded=interval_upper_unbounded,
+                    )
+                values = (
+                    tuple(float(v) for v in number_values) if number_values else None
+                )
+                return CadlRealConstraint(values=values, interval=interval)
+
+            interval = None
+            if interval_lower is not None:
+                interval = CadlIntegerInterval(
+                    lower=int(interval_lower),
+                    upper=(int(interval_upper) if interval_upper is not None else None),
+                    upper_unbounded=interval_upper_unbounded,
+                )
+            values = tuple(int(v) for v in number_values) if number_values else None
+            return CadlIntegerConstraint(values=values, interval=interval)
+
+        if start.kind in {"STRING", "REGEX"}:
+            string_values: list[str] = []
+            pattern: str | None = None
+
+            while True:
+                if self._peek().kind == "STRING":
+                    tok = self._expect("STRING")
+                    string_values.append(tok.value)
+                elif self._peek().kind == "REGEX":
+                    tok = self._expect("REGEX")
+                    if pattern is not None:
+                        raise _CadlParseError(
+                            message="Multiple regex patterns in one string constraint are not supported",
+                            line=tok.start_line,
+                            col=tok.start_col,
+                        )
+                    pattern = tok.value
+                else:
+                    tok = self._peek()
+                    raise _CadlParseError(
+                        message=f"Expected STRING or REGEX, got {tok.kind}",
+                        line=tok.start_line,
+                        col=tok.start_col,
+                    )
+
+                if self._peek().kind != "COMMA":
+                    break
+                self._advance()
+
+            values = tuple(string_values) if string_values else None
+            return CadlStringConstraint(values=values, pattern=pattern)
+
+        if start.kind == "KEYWORD" and start.value.casefold() in {"true", "false"}:
+            bool_values: list[bool] = []
+            while True:
+                tok = self._expect("KEYWORD")
+                val = tok.value.casefold()
+                if val == "true":
+                    bool_values.append(True)
+                elif val == "false":
+                    bool_values.append(False)
+                else:
+                    raise _CadlParseError(
+                        message=f"Expected boolean literal, got {tok.value!r}",
+                        line=tok.start_line,
+                        col=tok.start_col,
+                    )
+                if self._peek().kind != "COMMA":
+                    break
+                self._advance()
+            return CadlBooleanConstraint(values=tuple(bool_values))
+
+        raise _CadlParseError(
+            message="Unsupported primitive constraint",
+            line=start.start_line,
+            col=start.start_col,
+        )
 
 
 _SECTION_NAMES = {
@@ -271,7 +979,7 @@ def _section_content_range(
 
     # Find the next section header line after this one.
     next_idx = len(lines)
-    for other_name, other_idx in section_map.items():
+    for _other_name, other_idx in section_map.items():
         if other_idx > start_idx and other_idx < next_idx:
             next_idx = other_idx
 

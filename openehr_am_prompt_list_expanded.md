@@ -241,22 +241,22 @@ Add a fixture loader helper.
 
 ## Phase 6 — cADL definition parsing (constraint syntax)
 
-### 6.1 Define a cADL AST (syntax layer)
+### 6.1 Define a cADL AST (syntax layer) [x]
 
 Create `openehr_am/adl/cadl_ast.py` with syntax-level nodes: object nodes
 (rm_type_name, node_id), attributes with children, occurrences/cardinality,
 primitive constraints. Add tests.
 
-### 6.2 Parse cADL blocks into cADL AST (MVP)
+### 6.2 Parse cADL blocks into cADL AST (MVP) [x]
 
 Extend ADL parsing to parse a minimal supported subset of `definition` into cADL
 AST. Add tests.
 
-### 6.3 Expand primitive constraints support
+### 6.3 Expand primitive constraints support [x]
 
 Add ranges/intervals, regex/string constraints, enumerations. Add tests.
 
-### 6.4 Parse occurrences/cardinality
+### 6.4 Parse occurrences/cardinality [x]
 
 Implement occurrences/cardinality parsing and validation in AST form. Add tests.
 
