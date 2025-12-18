@@ -241,7 +241,7 @@ Add a fixture loader helper.
 
 ## Phase 6 — cADL definition parsing (constraint syntax)
 
-### 6.1 Define a cADL AST (syntax layer)
+### 6.1 Define a cADL AST (syntax layer) [x]
 
 Create `openehr_am/adl/cadl_ast.py` with syntax-level nodes: object nodes
 (rm_type_name, node_id), attributes with children, occurrences/cardinality,
