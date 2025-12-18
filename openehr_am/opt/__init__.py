@@ -10,6 +10,7 @@ from openehr_am.opt.dependencies import (
     dependency_order_for_archetypes,
     detect_dependency_cycles,
 )
+from openehr_am.opt.json import opt_to_json
 from openehr_am.opt.model import (
     OperationalTemplate,
     OptBooleanConstraint,
@@ -42,4 +43,5 @@ __all__ = [
     "OptCAttribute",
     "OptCComplexObject",
     "OptCPrimitiveObject",
+    "opt_to_json",
 ]

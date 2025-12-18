@@ -15,6 +15,7 @@ from dataclasses import dataclass
 
 from openehr_am.antlr.span import SourceSpan
 from openehr_am.opt.debug_dict import opt_to_dict
+from openehr_am.opt.json import opt_to_json
 
 
 @dataclass(slots=True, frozen=True)
@@ -145,6 +146,9 @@ class OperationalTemplate:
 
     def to_dict(self) -> dict[str, object]:
         return opt_to_dict(self)
+
+    def to_json(self, *, indent: int | None = None) -> str:
+        return opt_to_json(self, indent=indent)
 
 
 __all__ = [

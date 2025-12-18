@@ -444,7 +444,7 @@ Add simple caching to avoid reparsing unchanged files. Add tests.
 Implement `openehr_am/opt/model.py` dataclasses for an OperationalTemplate
 subset + flattened constraints. Add tests.
 
-### 14.2 OPT JSON export (deterministic)
+### 14.2 OPT JSON export (deterministic) [x]
 
 Implement deterministic `to_dict()` and JSON export for OPT. Add tests.
 
