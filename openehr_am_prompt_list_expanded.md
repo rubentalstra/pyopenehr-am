@@ -403,7 +403,7 @@ tests with tiny fixture.
 Implement `ModelRepository.load_from_dir(dir)` that loads multiple `.bmm`,
 resolves class refs, and provides `get_class(name)`. Add tests.
 
-### 12.4 RM conformance: rm_type_name exists
+### 12.4 RM conformance: rm_type_name exists [x]
 
 Validate referenced RM types exist. Emit `BMM500`. Add tests.
 
