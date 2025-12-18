@@ -316,7 +316,7 @@ tests.
 Implement `validate_syntax(text/path)` that calls parsers and returns Issues.
 Add tests.
 
-### 9.3 Semantic validation runner
+### 9.3 Semantic validation runner [x]
 
 Implement `validate_semantic(aom_obj)` calling registered semantic checks. Add
 tests with a stub check.
