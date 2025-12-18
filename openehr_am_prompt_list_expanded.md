@@ -118,12 +118,12 @@ scans for it and fails if found.
 
 ## Phase 1 — CI and “generated parser code” discipline
 
-### 1.1 CI: lint + tests + typing
+### 1.1 CI: lint + tests + typing [x]
 
 Add GitHub Actions workflow(s) to run: ruff, tests, and type checking on
 push/PR. Keep CI fast and deterministic. Ensure it runs with Python 3.14.
 
-### 1.2 ANTLR policy scaffolding (commit generated code + CI drift check)
+### 1.2 ANTLR policy scaffolding (commit generated code + CI drift check) [x]
 
 Create:
 
@@ -134,7 +134,7 @@ Create:
 - CI job: run generator and fail if `git diff` is non-empty. Add
   `docs/dev/parsers.md` documenting regeneration steps and the policy.
 
-### 1.3 Optional: pre-commit hooks
+### 1.3 Optional: pre-commit hooks [x]
 
 Add `pre-commit` config (recommended) to run ruff + tests locally. Document
 usage.
@@ -143,7 +143,7 @@ usage.
 
 ## Phase 2 — Diagnostics and stable Issue codes (foundation)
 
-### 2.1 Implement `Issue` model and Severity enum
+### 2.1 Implement `Issue` model and Severity enum [x]
 
 Implement `Severity` enum and `Issue` dataclass: code, severity, message, file,
 line, col, end_line, end_col, path, node_id, plus `.to_dict()` and `.pretty()`
