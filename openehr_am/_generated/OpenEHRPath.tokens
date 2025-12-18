@@ -1,0 +1,5 @@
+SLASH=1
+PREDICATE=2
+IDENT=3
+WS=4
+'/'=1

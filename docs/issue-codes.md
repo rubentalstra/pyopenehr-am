@@ -10,6 +10,7 @@ Codes are formatted as:
 - `ADL###` — ADL2 parsing & syntax-level issues
 - `ODN###` — ODIN parsing issues (optional prefix; you may also keep ODIN under
   ADL*)
+- `AQL###` — AQL parsing & syntax-level issues
 - `AOM###` — AOM2 semantic validity rules
 - `BMM###` — BMM loading and RM conformance checks
 - `OPT###` — OPT compilation and integrity
@@ -20,6 +21,7 @@ Codes are formatted as:
 
 - ADL001–ADL199: parser/syntax/structure
 - ODN100–ODN199: ODIN-specific parse/structure (if used)
+- AQL100–AQL199: AQL parser/syntax
 - AOM200–AOM499: AOM2 semantic validity
 - BMM500–BMM699: BMM + RM validation
 - OPT700–OPT899: OPT compilation + integrity
@@ -37,6 +39,7 @@ Codes are formatted as:
 | ADL030  | ERROR    | Structure | Invalid cADL interval / occurrences / cardinality | AOM2 constraints          |
 | ODN100  | ERROR    | Parse     | ODIN parse failure                                | ODIN grammar              |
 | ODN110  | WARN     | Structure | ODIN key duplication                              | ODIN rules                |
+| AQL100  | ERROR    | Parse     | AQL parse failure / invalid query syntax          | AQL grammar               |
 | AOM200  | ERROR    | Semantics | Terminology code referenced but not defined       | AOM2 terminology validity |
 | AOM205  | ERROR    | Semantics | AOM build failed / unsupported artefact shape     | Internal builder          |
 | AOM210  | ERROR    | Semantics | Invalid node id format                            | AOM2 node id rules        |

@@ -5,7 +5,8 @@ Thanks for contributing to **pyopenehr-am**.
 ## Baseline constraints (non-negotiable)
 
 - **Python 3.14+ only**.
-- **Pure Python only** (no wrappers around Java/.NET implementations).
+- **Pure Python only** (no wrappers around non-Python reference
+  implementations).
 - Invalid user input must be handled with structured **Issue** objects (no
   exceptions for recoverable parse/validation failures).
 - **Do not** add `from __future__ import annotations` (Python 3.14 has deferred

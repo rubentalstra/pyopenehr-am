@@ -180,7 +180,7 @@ that:
 ### 3.2 Add generation script that supports ODIN + ADL [x]
 
 Implement `scripts/generate_parsers.py` to generate Python code into
-`openehr_am/_generated/` from grammars. Document requirements (Java, ANTLR jar)
+`openehr_am/_generated/` from grammars. Document requirements (JVM, ANTLR jar)
 only for contributors.
 
 ### 3.3 Add “generated code drift” unit test (optional) [x]
@@ -600,6 +600,6 @@ release.
   clean).
 - **Rich output policy:** Human output uses Rich; `--json` outputs strict JSON
   only.
-- **Pure Python policy:** Do not wrap Java/.NET reference implementations.
+- **Pure Python policy:** Do not wrap non-Python reference implementations.
 - **Python 3.14 annotations:** Avoid `from __future__ import annotations`; use
   `annotationlib` if introspection is needed.
