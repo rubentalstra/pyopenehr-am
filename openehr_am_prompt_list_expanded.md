@@ -530,7 +530,7 @@ Flesh out `docs/dev/parsers.md` with regeneration steps and CI drift policy.
 
 Add `docs/validation_levels.md` describing `syntax|semantic|rm|opt|all`.
 
-### 17.5 OPT compilation doc
+### 17.5 OPT compilation doc [x]
 
 Add `docs/opt_compilation.md` describing what’s supported and planned.
 
