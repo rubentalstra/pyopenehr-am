@@ -11,6 +11,7 @@ from openehr_am.adl.ast import (
     ArtefactKind,
 )
 from openehr_am.adl.parser import parse_adl
+from openehr_am.adl.expr_parser import parse_expr
 
 __all__ = [
     "AdlArtefact",
@@ -19,4 +20,5 @@ __all__ = [
     "AdlSectionPlaceholder",
     "ArtefactKind",
     "parse_adl",
+    "parse_expr",
 ]

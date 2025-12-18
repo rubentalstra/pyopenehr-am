@@ -273,7 +273,7 @@ implement evaluation. Add tests.
 
 Create `openehr_am/adl/expr_ast.py` for minimal expression AST. Add tests.
 
-### 7.3 Parse expressions into Expression AST (MVP)
+### 7.3 Parse expressions into Expression AST (MVP) [x]
 
 Parse a small expression subset into Expression AST. Add tests.
 
