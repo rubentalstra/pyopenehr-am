@@ -32,3 +32,124 @@ def test_validate_semantic_runs_registered_check(monkeypatch) -> None:
 
     assert seen == [aom_obj]
     assert [i.code for i in issues] == ["AOM205"]
+
+
+def test_validate_semantic_aom200_missing_terminology_codes_emitted_deterministically() -> (
+    None
+):
+    from openehr_am.antlr.span import SourceSpan
+    from openehr_am.aom.archetype import Archetype
+    from openehr_am.aom.constraints import CAttribute, CComplexObject
+    from openehr_am.aom.terminology import ArchetypeTerminology, TermDefinition
+
+    root_span = SourceSpan(
+        file="x.adl", start_line=10, start_col=1, end_line=10, end_col=10
+    )
+    child_span = SourceSpan(
+        file="x.adl", start_line=20, start_col=1, end_line=20, end_col=10
+    )
+    ac_span = SourceSpan(
+        file="x.adl", start_line=30, start_col=1, end_line=30, end_col=10
+    )
+
+    definition = CComplexObject(
+        rm_type_name="OBSERVATION",
+        node_id="at0000",
+        span=root_span,
+        attributes=(
+            CAttribute(
+                rm_attribute_name="data",
+                children=(
+                    CComplexObject(
+                        rm_type_name="HISTORY",
+                        node_id="at0001",
+                        span=child_span,
+                    ),
+                    CComplexObject(
+                        rm_type_name="ELEMENT",
+                        node_id="ac0001",
+                        span=ac_span,
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    terminology = ArchetypeTerminology(
+        original_language="en",
+        term_definitions=(TermDefinition(language="en", code="at0000", text="Root"),),
+    )
+
+    aom = Archetype(
+        archetype_id="openEHR-EHR-OBSERVATION.test.v1",
+        concept="at0000",
+        definition=definition,
+        terminology=terminology,
+        span=root_span,
+    )
+
+    issues = validate_semantic(aom)
+
+    assert [i.code for i in issues] == ["AOM200", "AOM200"]
+    assert [i.node_id for i in issues] == ["at0001", "ac0001"]
+    assert [i.line for i in issues] == [20, 30]
+
+
+def test_validate_semantic_aom200_no_missing_codes_ok() -> None:
+    from openehr_am.antlr.span import SourceSpan
+    from openehr_am.aom.archetype import Archetype
+    from openehr_am.aom.constraints import CAttribute, CComplexObject
+    from openehr_am.aom.terminology import ArchetypeTerminology, TermDefinition
+
+    root_span = SourceSpan(
+        file="ok.adl", start_line=10, start_col=1, end_line=10, end_col=10
+    )
+    child_span = SourceSpan(
+        file="ok.adl", start_line=20, start_col=1, end_line=20, end_col=10
+    )
+    ac_span = SourceSpan(
+        file="ok.adl", start_line=30, start_col=1, end_line=30, end_col=10
+    )
+
+    definition = CComplexObject(
+        rm_type_name="OBSERVATION",
+        node_id="at0000",
+        span=root_span,
+        attributes=(
+            CAttribute(
+                rm_attribute_name="data",
+                children=(
+                    CComplexObject(
+                        rm_type_name="HISTORY",
+                        node_id="at0001",
+                        span=child_span,
+                    ),
+                    CComplexObject(
+                        rm_type_name="ELEMENT",
+                        node_id="ac0001",
+                        span=ac_span,
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    terminology = ArchetypeTerminology(
+        original_language="en",
+        term_definitions=(
+            TermDefinition(language="en", code="at0000", text="Root"),
+            TermDefinition(language="en", code="at0001", text="Child"),
+            TermDefinition(language="en", code="ac0001", text="Constraint"),
+        ),
+    )
+
+    aom = Archetype(
+        archetype_id="openEHR-EHR-OBSERVATION.ok.v1",
+        concept="at0000",
+        definition=definition,
+        terminology=terminology,
+        span=root_span,
+    )
+
+    issues = validate_semantic(aom)
+    assert issues == ()

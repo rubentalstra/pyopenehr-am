@@ -330,7 +330,7 @@ Add a test that checks Issue codes used in code are present in
 
 ## Phase 10 — AOM2 semantic rules (task-by-task)
 
-### 10.1 Terminology references defined
+### 10.1 Terminology references defined [x]
 
 Implement check: every referenced `atNNNN`/`acNNNN` exists in terminology. Emit
 `AOM200`. Add tests.
