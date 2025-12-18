@@ -407,7 +407,7 @@ resolves class refs, and provides `get_class(name)`. Add tests.
 
 Validate referenced RM types exist. Emit `BMM500`. Add tests.
 
-### 12.5 RM conformance: rm_attribute_name exists
+### 12.5 RM conformance: rm_attribute_name exists [x]
 
 Validate referenced RM attributes exist on the RM type. Emit `BMM510`. Add
 tests.

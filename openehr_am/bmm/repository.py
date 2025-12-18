@@ -105,6 +105,36 @@ class ModelRepository:
             return None
         return cls_obj.get_property(property_name)
 
+    def get_property_inherited(
+        self, class_name: str, property_name: str
+    ) -> Property | None:
+        """Return property from class or its ancestors.
+
+        This follows the `parent` chain on `Class` objects.
+
+        Notes:
+            - If an inheritance cycle is detected, traversal stops.
+            - The first matching property found in the chain is returned.
+        """
+
+        seen: set[str] = set()
+        current: str | None = class_name
+
+        while current is not None and current not in seen:
+            seen.add(current)
+
+            cls_obj = self.get_class(current)
+            if cls_obj is None:
+                return None
+
+            prop = cls_obj.get_property(property_name)
+            if prop is not None:
+                return prop
+
+            current = cls_obj.parent
+
+        return None
+
     def resolve_type_ref(self, tref: TypeRef) -> Class | None:
         """Resolve a `TypeRef` to a loaded class, if applicable."""
 

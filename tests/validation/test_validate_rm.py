@@ -60,3 +60,88 @@ def test_validate_rm_no_repo_no_issues() -> None:
 
     issues = validate_rm(aom, rm_repo=None)
     assert issues == ()
+
+
+def test_validate_rm_emits_bmm510_for_unknown_attribute(tmp_path: Path) -> None:
+    rm_dir = tmp_path / "rm"
+    rm_dir.mkdir()
+
+    (rm_dir / "rm.bmm").write_text(
+        """
+<
+  model_name = <\"RM\">
+  packages = <
+    [\"rm\"] = <
+      classes = <
+        [\"COMPOSITION\"] = <
+          properties = <
+            [\"content\"] = < type = <\"String\"> >
+          >
+        >
+      >
+    >
+  >
+>
+""".strip(),
+        encoding="utf-8",
+    )
+
+    repo, _issues = ModelRepository.load_from_dir(rm_dir)
+
+    aom = Archetype(
+        archetype_id="openEHR-EHR-COMPOSITION.test.v1",
+        definition=CComplexObject(
+            rm_type_name="COMPOSITION",
+            node_id="at0000",
+            attributes=(CAttribute(rm_attribute_name="does_not_exist"),),
+        ),
+    )
+
+    issues = validate_rm(aom, rm_repo=repo)
+    assert any(i.code == "BMM510" and i.severity == Severity.ERROR for i in issues)
+    assert any(i.node_id == "at0000" for i in issues if i.code == "BMM510")
+
+
+def test_validate_rm_does_not_emit_bmm510_for_inherited_attribute(
+    tmp_path: Path,
+) -> None:
+    rm_dir = tmp_path / "rm"
+    rm_dir.mkdir()
+
+    (rm_dir / "rm.bmm").write_text(
+        """
+<
+    model_name = <\"RM\">
+    packages = <
+        [\"rm\"] = <
+            classes = <
+                [\"LOCATABLE\"] = <
+                    properties = <
+                        [\"uid\"] = < type = <\"String\"> >
+                    >
+                >
+
+                [\"COMPOSITION\"] = <
+                    parent = <\"LOCATABLE\">
+                    properties = < >
+                >
+            >
+        >
+    >
+>
+""".strip(),
+        encoding="utf-8",
+    )
+
+    repo, _issues = ModelRepository.load_from_dir(rm_dir)
+
+    aom = Archetype(
+        archetype_id="openEHR-EHR-COMPOSITION.test.v1",
+        definition=CComplexObject(
+            rm_type_name="COMPOSITION",
+            attributes=(CAttribute(rm_attribute_name="uid"),),
+        ),
+    )
+
+    issues = validate_rm(aom, rm_repo=repo)
+    assert not any(i.code == "BMM510" for i in issues)
