@@ -8,7 +8,6 @@ returns deterministically ordered `Issue` objects.
 
 from pathlib import Path
 
-from openehr_am.adl.parser import parse_adl
 from openehr_am.validation.issue import Issue, Severity
 from openehr_am.validation.issue_collector import IssueCollector
 
@@ -36,6 +35,8 @@ def validate_syntax(
         raise TypeError("validate_syntax expects exactly one of 'text' or 'path'")
 
     if path is not None:
+        from openehr_am.adl.parser import parse_adl
+
         p = Path(path)
         try:
             source = p.read_text(encoding="utf-8")
@@ -59,6 +60,8 @@ def validate_syntax(
         return collector.issues
 
     assert text is not None
+    from openehr_am.adl.parser import parse_adl
+
     _artefact, issues = parse_adl(text, filename=filename)
     collector = IssueCollector(issues)
     return collector.issues
