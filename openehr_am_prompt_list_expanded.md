@@ -159,7 +159,7 @@ tests. Align with `docs/issue-codes.md`.
 Implement `IssueCollector` that preserves deterministic ordering and supports
 `.extend(...)`, `.has_errors()`, `.to_json()`. Add tests.
 
-### 2.4 Rich rendering helpers (for CLI)
+### 2.4 Rich rendering helpers (for CLI) [x]
 
 Add `openehr_am/cli/render.py` that renders Issues using Rich tables (group by
 file, sort by line/col). Add tests that JSON mode never outputs Rich markup.
