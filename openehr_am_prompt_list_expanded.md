@@ -311,7 +311,7 @@ Implement a validation registry that runs checks by layer: `syntax`, `semantic`,
 `rm`, `opt`. Add `ValidationContext` carrying artefact + optional RM repo. Add
 tests.
 
-### 9.2 Syntax validation wrapper
+### 9.2 Syntax validation wrapper [x]
 
 Implement `validate_syntax(text/path)` that calls parsers and returns Issues.
 Add tests.

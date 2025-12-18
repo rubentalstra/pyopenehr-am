@@ -31,6 +31,7 @@ Codes are formatted as:
 | Code    | Severity | Category  | Summary                                           | Notes / Spec Link         |
 | ------- | -------- | --------- | ------------------------------------------------- | ------------------------- |
 | ADL001  | ERROR    | Parse     | Unexpected token / parse failure                  | ADL2 grammar              |
+| ADL005  | ERROR    | IO        | Cannot read input file                            | Internal                  |
 | ADL010  | ERROR    | Structure | Missing required ADL section                      | ADL2 structure            |
 | ADL020  | WARN     | Structure | Deprecated/unknown section                        | ADL2 structure            |
 | ADL030  | ERROR    | Structure | Invalid cADL interval / occurrences / cardinality | AOM2 constraints          |
