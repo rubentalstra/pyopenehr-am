@@ -10,7 +10,15 @@ from collections.abc import Iterable, Iterator
 
 from openehr_am.antlr.span import SourceSpan
 from openehr_am.aom.archetype import Archetype, Template
-from openehr_am.aom.constraints import CAttribute, CComplexObject, CObject
+from openehr_am.aom.constraints import (
+    CAttribute,
+    CComplexObject,
+    CObject,
+    CPrimitiveObject,
+    Interval,
+    PrimitiveIntegerConstraint,
+    PrimitiveRealConstraint,
+)
 from openehr_am.aom.ids import try_parse_node_id
 from openehr_am.aom.terminology import ArchetypeTerminology
 from openehr_am.validation.context import ValidationContext
@@ -338,6 +346,120 @@ def check_duplicates_in_scopes(ctx: ValidationContext) -> Iterable[Issue]:
     return tuple(issues)
 
 
+def check_interval_invariants(ctx: ValidationContext) -> Iterable[Issue]:
+    """AOM250: check min<=max and basic invariants.
+
+    Applies to:
+    - `CObject.occurrences`
+    - `CAttribute.cardinality.occurrences`
+    - primitive constraint intervals (integer/real)
+
+    # Spec: https://specifications.openehr.org/releases/AM/latest/AOM2.html
+    """
+
+    artefact = ctx.artefact
+    if not isinstance(artefact, (Archetype, Template)):
+        return ()
+
+    if artefact.definition is None:
+        return ()
+
+    issues: list[Issue] = []
+
+    def emit(
+        *,
+        message: str,
+        span: SourceSpan | None,
+        path: str,
+        node_id: str | None,
+    ) -> None:
+        issues.append(
+            Issue(
+                code="AOM250",
+                severity=Severity.ERROR,
+                message=message,
+                file=span.file if span else None,
+                line=span.start_line if span else None,
+                col=span.start_col if span else None,
+                end_line=span.end_line if span else None,
+                end_col=span.end_col if span else None,
+                path=path,
+                node_id=node_id,
+            )
+        )
+
+    def check_interval(
+        *,
+        interval: Interval,
+        path: str,
+        node_id: str | None,
+    ) -> None:
+        lo = interval.lower
+        hi = interval.upper
+
+        # Invariant: if both bounds exist, lower <= upper.
+        if lo is not None and hi is not None and lo > hi:
+            emit(
+                message=f"Invalid interval: lower bound {lo} exceeds upper bound {hi}",
+                span=interval.span,
+                path=path,
+                node_id=node_id,
+            )
+            return
+
+        # Invariant: if bounds are equal, interval must not be empty.
+        if lo is not None and hi is not None and lo == hi:
+            if not interval.lower_included or not interval.upper_included:
+                emit(
+                    message=(
+                        "Invalid interval: empty interval when bounds are equal and one side is excluded"
+                    ),
+                    span=interval.span,
+                    path=path,
+                    node_id=node_id,
+                )
+
+    def walk(obj: CObject, *, path: str) -> None:
+        if obj.occurrences is not None:
+            check_interval(
+                interval=obj.occurrences,
+                path=f"{path}/occurrences",
+                node_id=obj.node_id,
+            )
+
+        if isinstance(obj, CComplexObject):
+            for attr in obj.attributes:
+                attr_path = f"{path}/{attr.rm_attribute_name}"
+
+                if attr.cardinality is not None:
+                    check_interval(
+                        interval=attr.cardinality.occurrences,
+                        path=f"{attr_path}/cardinality",
+                        node_id=obj.node_id,
+                    )
+
+                for child in attr.children:
+                    walk(child, path=attr_path)
+
+        if isinstance(obj, CPrimitiveObject):
+            c = obj.constraint
+            if isinstance(c, PrimitiveIntegerConstraint) and c.interval is not None:
+                check_interval(
+                    interval=c.interval,
+                    path=f"{path}/constraint",
+                    node_id=obj.node_id,
+                )
+            if isinstance(c, PrimitiveRealConstraint) and c.interval is not None:
+                check_interval(
+                    interval=c.interval,
+                    path=f"{path}/constraint",
+                    node_id=obj.node_id,
+                )
+
+    walk(artefact.definition, path="/definition")
+    return tuple(issues)
+
+
 register_semantic_check(
     check_referenced_terminology_codes_exist,
     name="aom200_referenced_codes_exist_in_terminology",
@@ -356,4 +478,9 @@ register_semantic_check(
 register_semantic_check(
     check_duplicates_in_scopes,
     name="aom240_duplicates_in_scopes_basic",
+)
+
+register_semantic_check(
+    check_interval_invariants,
+    name="aom250_interval_invariants",
 )

@@ -344,7 +344,7 @@ basics. Emit `AOM210` / `AOM230`. Add tests.
 
 Implement check: detect duplicates in scopes (basic). Emit `AOM240`. Add tests.
 
-### 10.4 Occurrences/cardinality sanity
+### 10.4 Occurrences/cardinality sanity [x]
 
 Check min<=max and invariants. Emit `AOM250`. Add tests.
 

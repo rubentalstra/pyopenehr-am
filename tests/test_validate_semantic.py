@@ -424,3 +424,108 @@ def test_validate_semantic_aom240_duplicate_sibling_node_id_emitted() -> None:
     assert issues[0].node_id == "at0001"
     assert issues[0].line == 30
     assert issues[0].path == "/definition/items"
+
+
+def test_validate_semantic_aom250_invalid_occurrences_interval_emitted() -> None:
+    from openehr_am.antlr.span import SourceSpan
+    from openehr_am.aom.archetype import Archetype
+    from openehr_am.aom.constraints import CComplexObject, Interval
+    from openehr_am.aom.terminology import ArchetypeTerminology, TermDefinition
+
+    root_span = SourceSpan(
+        file="inv_occ.adl", start_line=10, start_col=1, end_line=10, end_col=10
+    )
+    occ_span = SourceSpan(
+        file="inv_occ.adl", start_line=20, start_col=1, end_line=20, end_col=10
+    )
+
+    definition = CComplexObject(
+        rm_type_name="OBSERVATION",
+        node_id="at0000",
+        span=root_span,
+        occurrences=Interval(lower=2, upper=1, span=occ_span),
+        attributes=(),
+    )
+
+    terminology = ArchetypeTerminology(
+        original_language="en",
+        term_definitions=(TermDefinition(language="en", code="at0000", text="Root"),),
+    )
+
+    aom = Archetype(
+        archetype_id="openEHR-EHR-OBSERVATION.inv_occ.v1",
+        concept="at0000",
+        definition=definition,
+        terminology=terminology,
+        span=root_span,
+    )
+
+    issues = validate_semantic(aom)
+    assert [i.code for i in issues] == ["AOM250"]
+    assert issues[0].line == 20
+    assert issues[0].path == "/definition/occurrences"
+
+
+def test_validate_semantic_aom250_invalid_primitive_interval_emitted() -> None:
+    from openehr_am.antlr.span import SourceSpan
+    from openehr_am.aom.archetype import Archetype
+    from openehr_am.aom.constraints import (
+        CAttribute,
+        CComplexObject,
+        CPrimitiveObject,
+        Interval,
+        PrimitiveIntegerConstraint,
+    )
+    from openehr_am.aom.terminology import ArchetypeTerminology, TermDefinition
+
+    root_span = SourceSpan(
+        file="inv_prim.adl", start_line=10, start_col=1, end_line=10, end_col=10
+    )
+    prim_span = SourceSpan(
+        file="inv_prim.adl", start_line=20, start_col=1, end_line=20, end_col=10
+    )
+    int_span = SourceSpan(
+        file="inv_prim.adl", start_line=25, start_col=1, end_line=25, end_col=10
+    )
+
+    definition = CComplexObject(
+        rm_type_name="OBSERVATION",
+        node_id="at0000",
+        span=root_span,
+        attributes=(
+            CAttribute(
+                rm_attribute_name="count",
+                children=(
+                    CPrimitiveObject(
+                        rm_type_name="Integer",
+                        node_id="at0001",
+                        span=prim_span,
+                        constraint=PrimitiveIntegerConstraint(
+                            interval=Interval(lower=5, upper=4, span=int_span)
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    terminology = ArchetypeTerminology(
+        original_language="en",
+        term_definitions=(
+            TermDefinition(language="en", code="at0000", text="Root"),
+            TermDefinition(language="en", code="at0001", text="Count"),
+        ),
+    )
+
+    aom = Archetype(
+        archetype_id="openEHR-EHR-OBSERVATION.inv_prim.v1",
+        concept="at0000",
+        definition=definition,
+        terminology=terminology,
+        span=root_span,
+    )
+
+    issues = validate_semantic(aom)
+    assert [i.code for i in issues] == ["AOM250"]
+    assert issues[0].line == 25
+    assert issues[0].path == "/definition/count/constraint"
