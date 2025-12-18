@@ -143,23 +143,23 @@ usage.
 
 ## Phase 2 — Diagnostics and stable Issue codes (foundation)
 
-### 2.1 Implement `Issue` model and Severity enum
+### 2.1 Implement `Issue` model and Severity enum [x]
 
 Implement `Severity` enum and `Issue` dataclass: code, severity, message, file,
 line, col, end_line, end_col, path, node_id, plus `.to_dict()` and `.pretty()`
 methods. Add tests for formatting and JSON-serializable dict output.
 
-### 2.2 Issue code validation helper
+### 2.2 Issue code validation helper [x]
 
 Implement `validate_issue_code(code: str) -bool` enforcing prefixes/ranges. Add
 tests. Align with `docs/issue-codes.md`.
 
-### 2.3 IssueCollector + deterministic ordering
+### 2.3 IssueCollector + deterministic ordering [x]
 
 Implement `IssueCollector` that preserves deterministic ordering and supports
 `.extend(...)`, `.has_errors()`, `.to_json()`. Add tests.
 
-### 2.4 Rich rendering helpers (for CLI)
+### 2.4 Rich rendering helpers (for CLI) [x]
 
 Add `openehr_am/cli/render.py` that renders Issues using Rich tables (group by
 file, sort by line/col). Add tests that JSON mode never outputs Rich markup.
