@@ -63,3 +63,11 @@ Codes are formatted as:
 - [ ] Add the code to this table before using it
 - [ ] Add tests asserting the code appears
 - [ ] Add a short spec URL comment near the rule implementation
+
+## Automated check
+
+The test suite includes a simple heuristic check that greps Python sources under
+`openehr_am/` for code-like strings (e.g. `ADL001`, `AOM205`) and asserts they
+are present in this document.
+
+When you introduce a new Issue code in code, add it to the table above first.
