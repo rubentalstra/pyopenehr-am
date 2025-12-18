@@ -421,7 +421,7 @@ tests.
 
 ## Phase 13 — Archetype repository + dependency management
 
-### 13.1 ArchetypeRepository indexing
+### 13.1 ArchetypeRepository indexing [x]
 
 Implement `ArchetypeRepository` that loads `.adl` files from a directory, parses
 them, and indexes by archetype id. Add tests.

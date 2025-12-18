@@ -47,6 +47,7 @@ Codes are formatted as:
 | AOM270  | WARN     | Semantics | Language/original_language inconsistency          | AOM2 language             |
 | AOM280  | ERROR    | Semantics | Template overlay/exclusion invalid                | Template rules            |
 | AOM290  | WARN     | Semantics | Rules reference invalid path/code                 | GDL2/RULES subset         |
+| AOM242  | ERROR    | Structure | Duplicate archetype id across ADL files           | Internal repository       |
 | BMM500  | ERROR    | RM        | Unknown RM type referenced                        | BMM                       |
 | BMM510  | ERROR    | RM        | Unknown RM attribute referenced                   | BMM                       |
 | BMM520  | ERROR    | RM        | Multiplicity mismatch                             | BMM                       |
