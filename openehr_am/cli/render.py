@@ -33,9 +33,9 @@ def render_issues(
             issue.to_dict() for issue in sorted(issues_list, key=_issue_sort_key)
         ]
         text = json.dumps(payload, ensure_ascii=False)
-            # Print as plain text (no markup/highlighting) while still going through
-            # Rich so record=True captures output for tests.
-            console.print(text, markup=False, highlight=False)
+        # Print as plain text (no markup/highlighting) while still going through
+        # Rich so record=True captures output for tests.
+        console.print(text, markup=False, highlight=False)
         return
 
     for file, group in _group_by_file(issues_list).items():
