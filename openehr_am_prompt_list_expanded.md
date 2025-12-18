@@ -388,7 +388,7 @@ Implement `to_string()` and round-trip parsing for supported subset. Add tests.
 
 ## Phase 12 — BMM loader and RM repository (expand)
 
-### 12.1 BMM dataclasses (minimal)
+### 12.1 BMM dataclasses (minimal) [x]
 
 Implement BMM dataclasses: Model, Package, Class, Property, TypeRef,
 Multiplicity. Add tests.
