@@ -8,6 +8,21 @@ requirements.
 
 ---
 
+## How to use this checklist (sources and order)
+
+- [ ] Keep [`SPEC_BASELINE.md`](SPEC_BASELINE.md) and [`openehr_am_resources.md`](openehr_am_resources.md) aligned with current spec URLs before starting any work.
+- [ ] Re-read the pinned specs so tasks map to concrete clauses:
+  - [ ] ADL2 syntax (AM 2.3.0): https://specifications.openehr.org/releases/AM/Release-2.3.0/ADL2.html
+  - [ ] AOM2 semantics (Release 2.1.0): https://specifications.openehr.org/releases/AM/Release-2.1.0/AOM2.html
+  - [ ] ODIN (latest): https://specifications.openehr.org/releases/LANG/latest/odin.html
+  - [ ] BMM (latest) + persistence format: https://specifications.openehr.org/releases/LANG/latest/bmm.html and https://specifications.openehr.org/releases/BASE/Release-1.0.4/bmm_persistence.html
+  - [ ] OPT2 (AM 2.3.0): https://specifications.openehr.org/releases/AM/Release-2.3.0/OPT2.html
+  - [ ] AQL query semantics (latest): https://specifications.openehr.org/releases/QUERY/latest/AQL.html
+- [ ] For every new validation rule or compiler behavior, capture a short `# Spec:` URL comment pointing to the clause above.
+- [ ] When adding fixtures or reference outputs, note the provenance (CKM URL, AWB version, or BMM repo commit) inside the test file header.
+
+---
+
 ## Phase 1: Repo Hygiene & Documentation Alignment
 
 - [x] Create `CHECKLIST.md` (this file)
@@ -23,12 +38,17 @@ requirements.
 
 - [x] Verify `SPEC_BASELINE.md` has correct release versions
 - [x] Verify `openehr_am_resources.md` links are current
-- [ ] Add instructions for fetching BMM schemas for RM testing
-- [ ] Document how to obtain reference archetypes from CKM for testing
+- [ ] Add instructions for fetching BMM schemas for RM testing (https://github.com/openEHR/specifications-ITS-BMM)
+- [ ] Mirror an example direct spec-hosted BMM URL for quick tests (e.g., https://specifications.openehr.org/releases/ITS-BMM/latest/components/RM/latest/openehr_rm_data_types.bmm)
+- [ ] Document how to obtain reference archetypes from CKM for testing (https://ckm.openehr.org/ckm/) including license note and caching strategy
+- [ ] Add a short “reading order” snippet referencing release_baseline and development_baseline indexes (https://specifications.openehr.org/release_baseline)
 
 ---
 
 ## Phase 3: Parsing (ADL2/ODIN/BMM) Milestones
+
+- [ ] Document ANTLR regeneration workflow (grammar source: https://github.com/openEHR/adl-antlr) and pin the commit hash used
+- [ ] Add CI guard that fails if generated parsers are stale relative to pinned grammar commit
 
 ### ODIN Parser
 
@@ -38,6 +58,7 @@ requirements.
 - [x] ODIN serializer for round-trip testing
 - [ ] Expand ODIN primitive support (duration, dates, intervals)
 - [ ] Add ODIN error recovery tests for edge cases
+- [ ] Add P_BMM parsing fixture to exercise ODIN persistence format (https://specifications.openehr.org/releases/BASE/Release-1.0.4/bmm_persistence.html)
 
 ### ADL2 Parser
 
@@ -47,6 +68,8 @@ requirements.
 - [ ] Expand cADL definition parsing coverage
 - [ ] Parse `annotations` section
 - [ ] Parse `component_terminologies` for templates
+- [ ] Add ADL2 syntax error recovery tests using examples from the spec (https://specifications.openehr.org/releases/AM/Release-2.3.0/ADL2.html)
+- [ ] Validate that parser emits `Issue` codes matching ADL* ranges for malformed header/description sections
 
 ### AQL Parser
 
@@ -55,6 +78,7 @@ requirements.
 - [ ] AQL AST dataclasses
 - [ ] `parse_aql()` API
 - [ ] AQL error recovery tests
+- [ ] Align AQL path parsing with QUERY latest spec examples (https://specifications.openehr.org/releases/QUERY/latest/AQL.html)
 
 ---
 
@@ -68,6 +92,8 @@ requirements.
 - [x] `Cardinality`, `Occurrences`, `Interval`
 - [x] Terminology structures (term defs, constraint defs, value sets)
 - [x] Archetype ID parsing and validation
+- [ ] Add rule/statement nodes placeholder for Expression Language hooks (https://specifications.openehr.org/releases/LANG/latest/expression_language.html)
+- [ ] Add support for `C_DOMAIN_TYPE` / `CONSTRAINT_BINDING` where present in AOM2
 
 ### AST → AOM Builder
 
@@ -75,6 +101,8 @@ requirements.
 - [x] Source location preservation
 - [ ] Improve builder error messages with better spans
 - [ ] Support more cADL constraint types in builder
+- [ ] Preserve differential vs flat markers to aid specialization flattening
+- [ ] Ensure terminology bindings propagate from component terminologies into the AOM template model
 
 ---
 
@@ -86,6 +114,8 @@ requirements.
 - [x] `IssueCollector` with deterministic ordering
 - [x] Validation registry with layer support (syntax/semantic/rm/opt)
 - [x] `validate_syntax()`, `validate_semantic()`, `validate_rm()`, `validate_opt()`
+- [ ] Document rule template with `# Spec:` comment examples drawn from `docs/validation-rule-template.md`
+- [ ] Add validation trace logging toggle for debugging (kept off by default)
 
 ### Semantic Rules (AOM200-AOM299)
 
@@ -100,6 +130,8 @@ requirements.
 - [x] AOM290: Rules reference validity
 - [ ] Add more specialization redefinition checks
 - [ ] Add external terminology binding validation
+- [ ] Add constraint ref validity for `acNNNN`/`atNNNN` per AOM2 §4 (https://specifications.openehr.org/releases/AM/Release-2.1.0/AOM2.html)
+- [ ] Add rule to ensure sibling node id uniqueness within same RM type (specialization safety)
 
 ### RM Conformance (BMM500-BMM599)
 
@@ -108,6 +140,8 @@ requirements.
 - [x] BMM520: Multiplicity mismatch
 - [ ] BMM530: Inheritance chain validation
 - [ ] Add RM type compatibility for constraints
+- [ ] Validate `existence`/`cardinality` against BMM property multiplicities (https://specifications.openehr.org/releases/LANG/latest/bmm.html)
+- [ ] Add RM conformance rule ensuring terminology binding target types match RM attribute types
 
 ---
 
@@ -118,6 +152,7 @@ requirements.
 - [x] `ArchetypeRepository` loading from directory
 - [x] Dependency graph and cycle detection (OPT705)
 - [ ] Incremental/cached loading
+- [ ] Add repository provenance metadata (source directory + timestamp) to aid reproducibility
 
 ### OPT Compiler
 
@@ -130,6 +165,8 @@ requirements.
 - [ ] Full specialization flattening rules
 - [ ] Template overlay expansion
 - [ ] RM-aware compilation using BMM
+- [ ] Validate compiled OPT against OPT2 structural rules (https://specifications.openehr.org/releases/AM/Release-2.3.0/OPT2.html)
+- [ ] Add regression fixtures comparing generated OPT JSON against ADL Workbench outputs (https://openehr.github.io/adl-tools/adl_workbench_guide.html)
 
 ---
 
@@ -143,6 +180,8 @@ requirements.
 - [ ] Add `validate_instance()` for data validation against OPT
 - [ ] Add `to_json()` / `from_json()` for AOM serialization
 - [ ] Consider adding `flatten_archetype()` for standalone flattening
+- [ ] Add strict/warn-as-error toggles to CLI + API (consistent exit codes documented in `docs/cli.md`)
+- [ ] Add stable JSON schema for Issue serialization for downstream tools
 
 ---
 
@@ -157,23 +196,28 @@ requirements.
 - [x] Path parser/resolver tests
 - [x] BMM loader tests
 - [x] OPT compiler tests
+- [ ] Add ODIN/BMM round-trip tests using spec-hosted fixtures (https://specifications.openehr.org/releases/ITS-BMM/latest/components/RM/latest/openehr_rm_data_types.bmm)
+- [ ] Add regression tests that compare Issue JSON output to a schema snapshot
 
 ### Integration Tests
 
 - [x] Public API flow tests (`test_public_api_flow.py`)
 - [ ] End-to-end CLI tests with realistic archetypes
+- [ ] Add CLI `--json` output validation for lint/validate/compile-opt commands
 
 ### Corpus Tests
 
 - [x] Corpus test harness (`tests/corpus/`)
 - [ ] Add more real-world archetype samples
 - [ ] Golden file comparisons for OPT output
+- [ ] Add CKM-sourced corpus with provenance metadata recorded per fixture
 
 ### Property/Fuzz Tests
 
 - [x] Fuzz test infrastructure (`tests/fuzz/`)
 - [ ] Expand fuzz coverage for ODIN/ADL edge cases
 - [ ] Add hypothesis property tests for validation
+- [ ] Add grammar-level fuzz inputs derived from openEHR/adl-antlr examples
 
 ---
 
@@ -198,6 +242,8 @@ requirements.
 - [x] `docs/releasing.md` checklist
 - [ ] Add CHANGELOG.md before v1.0
 - [ ] Automate version bumping
+- [ ] Add reproducible build documentation (exact Python version, dependency hashes)
+- [ ] Pin ANTLR runtime version in `pyproject.toml` with rationale in `docs/compatibility.md`
 
 ---
 
@@ -208,6 +254,8 @@ requirements.
 - [ ] Add migration pipeline example (legacy → openEHR)
 - [ ] Add BMM repository setup example
 - [ ] Add multi-template compilation example
+- [ ] Add AQL query validation example using compiled OPT paths (https://specifications.openehr.org/releases/QUERY/latest/AQL.html)
+- [ ] Add security considerations section to examples (handling untrusted artefacts)
 
 ---
 
@@ -215,46 +263,42 @@ requirements.
 
 **Prioritized list of 10 tasks that will move the project forward:**
 
-1. **Expand cADL parsing coverage** — More constraint types means more useful
-   validation. See ADL2 spec section on cADL.
+1. **Document RM/CKM asset acquisition** — unblock RM validation and corpus work.
+   - Deliverable: Guide covering https://github.com/openEHR/specifications-ITS-BMM and https://ckm.openehr.org/ckm/ with caching/licensing notes.
+   - Success: A new developer can fetch BMM + archetypes and run `validate_rm` following the doc.
+
+2. **Expand cADL parsing coverage** — more constraint types per ADL2 §8.
    - Module: `openehr_am/adl/cadl_ast.py`, `openehr_am/adl/parser.py`
-   - Success: Parse `C_ARCHETYPE_ROOT`, `ARCHETYPE_SLOT`, inline constraints
+   - Success: Parse `C_ARCHETYPE_ROOT`, `ARCHETYPE_SLOT`, inline constraints with correct spans.
 
-2. **Add corpus tests with real CKM archetypes** — Validate parser against
-   production archetypes.
-   - Module: `tests/corpus/`
-   - Success: Parse 10+ diverse archetypes from openEHR CKM without crashes
-
-3. **Implement full specialization flattening** — Required for correct OPT
-   compilation.
+3. **Implement full specialization flattening** — required for correct OPT compilation.
    - Module: `openehr_am/opt/flattening.py`
-   - Success: Flatten child archetype over parent correctly
+   - Success: Child archetype flattened over parent per OPT2 spec with regression fixture.
 
-4. **Add instance validation against OPT** — Key feature for migration tools.
+4. **Add CLI `--json` regression tests + schema** — keep API stable for tooling.
+   - Module: `tests/cli/`, `docs/cli.md`, Issue JSON schema (new)
+   - Success: CLI outputs validate against schema and include deterministic ordering.
+
+5. **Add Issue JSON schema + warn-as-error toggle** — improve SDK ergonomics.
+   - Module: `openehr_am/validation/issue.py`, `docs/cli.md`
+   - Success: Schema published; CLI/API honor `--strict` / `warn_as_error`.
+
+6. **Add CKM corpus with provenance** — real-world coverage.
+   - Module: `tests/corpus/`
+   - Success: At least 10 CKM archetypes with recorded source URLs parsed without crashes.
+
+7. **Add instance validation against OPT** — key feature for migration tools.
    - Module: `openehr_am/instance/` (new)
-   - Success: Validate JSON instance against compiled OPT constraints
+   - Success: Validate JSON instance against compiled OPT constraints.
 
-5. **Document BMM schema setup** — Enable RM validation testing.
-   - Deliverable: Guide in `docs/` for downloading and using BMM schemas
-   - Success: Users can run RM validation with official BMM files
-
-6. **Add AQL parsing support** — Complete the parser suite.
+8. **Add AQL AST + `parse_aql()`** — complete query parsing.
    - Module: `openehr_am/aql/`
-   - Success: `parse_aql()` returns AST for valid queries
+   - Success: Valid queries parsed per https://specifications.openehr.org/releases/QUERY/latest/AQL.html with error recovery.
 
-7. **Add CHANGELOG.md** — Prepare for v1.0 release.
-   - Deliverable: `CHANGELOG.md` following Keep a Changelog format
-   - Success: Document all changes since v0.0.1
+9. **Compare OPT output with ADL Workbench** — ensure compiler fidelity.
+   - Module: `openehr_am/opt/`, fixtures under `tests/fixtures/opt/`
+   - Success: Generated OPT JSON matches ADL Workbench output for sample templates (https://openehr.github.io/adl-tools/adl_workbench_guide.html)
 
-8. **Expand CLI with --verbose and --quiet modes** — Better UX for different use
-   cases.
-   - Module: `openehr_am/cli/`
-   - Success: Verbose shows all issues; quiet shows only errors
-
-9. **Add migration pipeline example** — Demonstrate SDK usage.
-   - Deliverable: Example in `examples/` showing data transformation
-   - Success: Working example that transforms sample data
-
-10. **Improve error messages with code snippets** — Better developer experience.
-    - Module: `openehr_am/validation/issue.py`
-    - Success: Issues include source code context when available
+10. **Add CHANGELOG.md + reproducible build note** — prepare for v1.0.
+    - Deliverable: `CHANGELOG.md`, build inputs (Python, deps, ANTLR runtime) documented
+    - Success: Release cut instructions in `docs/releasing.md` reference the changelog and pin runtime versions.
