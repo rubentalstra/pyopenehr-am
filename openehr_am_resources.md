@@ -8,7 +8,7 @@ ADL2/AOM2 validator + OPT2 compiler**.
 > [`SPEC_BASELINE.md`](SPEC_BASELINE.md). Use those pinned URLs for implementation
 > references. This document provides a broader resource index.
 
-> **Last reviewed:** December 2023
+> **Last reviewed:** December 2025
 
 ---
 

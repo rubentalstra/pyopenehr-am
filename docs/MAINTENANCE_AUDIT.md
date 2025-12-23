@@ -1,4 +1,4 @@
-# Maintenance Audit (December 2023)
+# Maintenance Audit (December 2025)
 
 This document summarizes findings from a repository-wide audit and identifies
 obsolete, duplicated, or missing documentation and configuration.
