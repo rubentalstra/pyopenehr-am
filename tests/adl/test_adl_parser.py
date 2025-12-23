@@ -208,3 +208,13 @@ def test_parse_adl_definition_invalid_occurrences_and_cardinality_emits_adl030()
 
     codes = [i.code for i in issues]
     assert "ADL030" in codes
+
+
+def test_parse_adl_empty_input_reports_adl001() -> None:
+    artefact, issues = parse_adl("", filename="empty.adl")
+
+    assert artefact is None
+    assert issues
+    assert issues[0].code == "ADL001"
+    assert issues[0].line == 1
+    assert issues[0].col == 1
