@@ -38,16 +38,21 @@ requirements.
 
 - [x] Verify `SPEC_BASELINE.md` has correct release versions
 - [x] Verify `openehr_am_resources.md` links are current
-- [ ] Add instructions for fetching BMM schemas for RM testing (https://github.com/openEHR/specifications-ITS-BMM)
-- [ ] Mirror an example direct spec-hosted BMM URL for quick tests (e.g., https://specifications.openehr.org/releases/ITS-BMM/latest/components/RM/latest/openehr_rm_data_types.bmm)
-- [ ] Document how to obtain reference archetypes from CKM for testing (https://ckm.openehr.org/ckm/) including license note and caching strategy
-- [ ] Add a short “reading order” snippet referencing release_baseline and development_baseline indexes (https://specifications.openehr.org/release_baseline)
+- [ ] Add instructions for fetching BMM schemas for RM testing  
+      Source: https://github.com/openEHR/specifications-ITS-BMM
+- [ ] Mirror a spec-hosted BMM URL for quick tests  
+      Example: https://specifications.openehr.org/releases/ITS-BMM/latest/components/RM/latest/openehr_rm_data_types.bmm
+- [ ] Document how to obtain reference archetypes from CKM for testing  
+      Source: https://ckm.openehr.org/ckm/ (include license note and caching strategy)
+- [ ] Add a short “reading order” snippet referencing release_baseline and development_baseline indexes  
+      Source: https://specifications.openehr.org/release_baseline
 
 ---
 
 ## Phase 3: Parsing (ADL2/ODIN/BMM) Milestones
 
-- [ ] Document ANTLR regeneration workflow (grammar source: https://github.com/openEHR/adl-antlr) and pin the commit hash used
+- [ ] Document ANTLR regeneration workflow and pin the grammar commit hash used  
+      Grammar source: https://github.com/openEHR/adl-antlr
 - [ ] Add CI guard that fails if generated parsers are stale relative to pinned grammar commit
 
 ### ODIN Parser
@@ -58,7 +63,8 @@ requirements.
 - [x] ODIN serializer for round-trip testing
 - [ ] Expand ODIN primitive support (duration, dates, intervals)
 - [ ] Add ODIN error recovery tests for edge cases
-- [ ] Add P_BMM parsing fixture to exercise ODIN persistence format (https://specifications.openehr.org/releases/BASE/Release-1.0.4/bmm_persistence.html)
+- [ ] Add P_BMM parsing fixture to exercise ODIN persistence format  
+      Source: https://specifications.openehr.org/releases/BASE/Release-1.0.4/bmm_persistence.html
 
 ### ADL2 Parser
 
@@ -68,7 +74,8 @@ requirements.
 - [ ] Expand cADL definition parsing coverage
 - [ ] Parse `annotations` section
 - [ ] Parse `component_terminologies` for templates
-- [ ] Add ADL2 syntax error recovery tests using examples from the spec (https://specifications.openehr.org/releases/AM/Release-2.3.0/ADL2.html)
+- [ ] Add ADL2 syntax error recovery tests using examples from the spec  
+      Source: https://specifications.openehr.org/releases/AM/Release-2.3.0/ADL2.html
 - [ ] Validate that parser emits `Issue` codes matching ADL* ranges for malformed header/description sections
 
 ### AQL Parser
@@ -78,7 +85,8 @@ requirements.
 - [ ] AQL AST dataclasses
 - [ ] `parse_aql()` API
 - [ ] AQL error recovery tests
-- [ ] Align AQL path parsing with QUERY latest spec examples (https://specifications.openehr.org/releases/QUERY/latest/AQL.html)
+- [ ] Align AQL path parsing with QUERY latest spec examples  
+      Source: https://specifications.openehr.org/releases/QUERY/latest/AQL.html
 
 ---
 
@@ -130,7 +138,8 @@ requirements.
 - [x] AOM290: Rules reference validity
 - [ ] Add more specialization redefinition checks
 - [ ] Add external terminology binding validation
-- [ ] Add constraint ref validity for `acNNNN`/`atNNNN` per AOM2 §4 (https://specifications.openehr.org/releases/AM/Release-2.1.0/AOM2.html)
+- [ ] Add constraint ref validity for `acNNNN`/`atNNNN` per AOM2 §4  
+      Source: https://specifications.openehr.org/releases/AM/Release-2.1.0/AOM2.html
 - [ ] Add rule to ensure sibling node id uniqueness within same RM type (specialization safety)
 
 ### RM Conformance (BMM500-BMM599)
@@ -140,7 +149,8 @@ requirements.
 - [x] BMM520: Multiplicity mismatch
 - [ ] BMM530: Inheritance chain validation
 - [ ] Add RM type compatibility for constraints
-- [ ] Validate `existence`/`cardinality` against BMM property multiplicities (https://specifications.openehr.org/releases/LANG/latest/bmm.html)
+- [ ] Validate `existence`/`cardinality` against BMM property multiplicities  
+      Source: https://specifications.openehr.org/releases/LANG/latest/bmm.html
 - [ ] Add RM conformance rule ensuring terminology binding target types match RM attribute types
 
 ---
@@ -165,8 +175,10 @@ requirements.
 - [ ] Full specialization flattening rules
 - [ ] Template overlay expansion
 - [ ] RM-aware compilation using BMM
-- [ ] Validate compiled OPT against OPT2 structural rules (https://specifications.openehr.org/releases/AM/Release-2.3.0/OPT2.html)
-- [ ] Add regression fixtures comparing generated OPT JSON against ADL Workbench outputs (https://openehr.github.io/adl-tools/adl_workbench_guide.html)
+- [ ] Validate compiled OPT against OPT2 structural rules  
+      Source: https://specifications.openehr.org/releases/AM/Release-2.3.0/OPT2.html
+- [ ] Add regression fixtures comparing generated OPT JSON against ADL Workbench outputs  
+      Source: https://openehr.github.io/adl-tools/adl_workbench_guide.html
 
 ---
 
@@ -196,7 +208,8 @@ requirements.
 - [x] Path parser/resolver tests
 - [x] BMM loader tests
 - [x] OPT compiler tests
-- [ ] Add ODIN/BMM round-trip tests using spec-hosted fixtures (https://specifications.openehr.org/releases/ITS-BMM/latest/components/RM/latest/openehr_rm_data_types.bmm)
+- [ ] Add ODIN/BMM round-trip tests using spec-hosted fixtures  
+      Source: https://specifications.openehr.org/releases/ITS-BMM/latest/components/RM/latest/openehr_rm_data_types.bmm
 - [ ] Add regression tests that compare Issue JSON output to a schema snapshot
 
 ### Integration Tests
@@ -254,7 +267,8 @@ requirements.
 - [ ] Add migration pipeline example (legacy → openEHR)
 - [ ] Add BMM repository setup example
 - [ ] Add multi-template compilation example
-- [ ] Add AQL query validation example using compiled OPT paths (https://specifications.openehr.org/releases/QUERY/latest/AQL.html)
+- [ ] Add AQL query validation example using compiled OPT paths  
+      Source: https://specifications.openehr.org/releases/QUERY/latest/AQL.html
 - [ ] Add security considerations section to examples (handling untrusted artefacts)
 
 ---
@@ -264,7 +278,8 @@ requirements.
 **Prioritized list of 10 tasks that will move the project forward:**
 
 1. **Document RM/CKM asset acquisition** — unblock RM validation and corpus work.
-   - Deliverable: Guide covering https://github.com/openEHR/specifications-ITS-BMM and https://ckm.openehr.org/ckm/ with caching/licensing notes.
+   - Deliverable: Guide covering key sources with caching/licensing notes.  
+     Sources: https://github.com/openEHR/specifications-ITS-BMM and https://ckm.openehr.org/ckm/
    - Success: A new developer can fetch BMM + archetypes and run `validate_rm` following the doc.
 
 2. **Expand cADL parsing coverage** — more constraint types per ADL2 §8.
@@ -293,11 +308,13 @@ requirements.
 
 8. **Add AQL AST + `parse_aql()`** — complete query parsing.
    - Module: `openehr_am/aql/`
-   - Success: Valid queries parsed per https://specifications.openehr.org/releases/QUERY/latest/AQL.html with error recovery.
+   - Success: Valid queries parsed with error recovery.  
+     Source: https://specifications.openehr.org/releases/QUERY/latest/AQL.html
 
 9. **Compare OPT output with ADL Workbench** — ensure compiler fidelity.
    - Module: `openehr_am/opt/`, fixtures under `tests/fixtures/opt/`
-   - Success: Generated OPT JSON matches ADL Workbench output for sample templates (https://openehr.github.io/adl-tools/adl_workbench_guide.html)
+   - Success: Generated OPT JSON matches ADL Workbench output for sample templates.  
+     Source: https://openehr.github.io/adl-tools/adl_workbench_guide.html
 
 10. **Add CHANGELOG.md + reproducible build note** — prepare for v1.0.
     - Deliverable: `CHANGELOG.md`, build inputs (Python, deps, ANTLR runtime) documented
