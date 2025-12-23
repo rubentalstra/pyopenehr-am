@@ -5,7 +5,12 @@ Public entrypoint: :func:`parse_odin`.
 This is a parsing-layer module: it must never raise for invalid ODIN input.
 Instead, it returns `Issue` objects.
 
-# Spec: https://specifications.openehr.org/releases/LANG/latest/odin.html
+Sources:
+- [LANG-ODIN-1.0.0] ODIN, Release-1.0.0. Section: 4 (syntax) and 5 (object and
+  primitive forms). Link/path:
+  https://specifications.openehr.org/releases/LANG/Release-1.0.0/odin.html
+  Note: MVP parser for object blocks, keyed lists, identifiers, numbers, and
+  strings; unsupported constructs surface as Issues.
 """
 
 from dataclasses import dataclass
@@ -570,7 +575,13 @@ def parse_odin(
         - Type annotations, plug-in syntaxes, references, and most leaf types
           (dates, terms, intervals) are not yet implemented.
 
-    # Spec: https://specifications.openehr.org/releases/LANG/latest/odin.html
+    Sources:
+    - [LANG-ODIN-1.0.0] ODIN, Release-1.0.0. Section: 4.1 (lexical rules) and
+      5.2 (object blocks). Link/path:
+      https://specifications.openehr.org/releases/LANG/Release-1.0.0/odin.html
+      Note: Parses object blocks, keyed lists, identifiers, numbers, and strings;
+      never raises on invalid input—surface ODN100 Issues instead. Unsupported
+      constructs (dates/terms/intervals) are intentionally unimplemented (TODO).
     """
 
     if not isinstance(text, str):

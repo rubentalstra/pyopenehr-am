@@ -65,3 +65,12 @@ def test_parse_odin_sets_issue_filename() -> None:
     assert node is None
     assert issues
     assert issues[0].file == "broken.odin"
+
+
+def test_parse_odin_empty_document_returns_empty_object() -> None:
+    node, issues = parse_odin("")
+
+    assert issues == []
+    assert node is not None
+    assert isinstance(node, OdinObject)
+    assert node.items == ()
