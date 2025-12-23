@@ -14,11 +14,26 @@ ADL2/AOM2 validator + OPT2 compiler**.
 
 ## Provenance and Versioning
 
-### What This Repo Pins (Authoritative)
+### Resource identifiers (use in `Sources:` blocks)
+
+| ID | Title | Version / date | URL / path |
+|----|-------|----------------|------------|
+| AM-ADL2-2.3.0 | ADL2 (Archetype Definition Language 2) | AM Release-2.3.0 | https://specifications.openehr.org/releases/AM/Release-2.3.0/ADL2.html |
+| AM-AOM2-2.3.0 | AOM2 (Archetype Object Model 2) | AM Release-2.3.0 | https://specifications.openehr.org/releases/AM/Release-2.3.0/AOM2.html |
+| AM-OPT2-2.3.0 | OPT2 (Operational Template 2) | AM Release-2.3.0 | https://specifications.openehr.org/releases/AM/Release-2.3.0/OPT2.html |
+| AM-ID-2.3.0 | Archetype Identification | AM Release-2.3.0 | https://specifications.openehr.org/releases/AM/Release-2.3.0/Identification.html |
+| LANG-ODIN-1.0.0 | ODIN (Object Data Instance Notation) | LANG Release-1.0.0 | https://specifications.openehr.org/releases/LANG/Release-1.0.0/odin.html |
+| LANG-BMM-1.0.0 | BMM (Basic Meta-Model) | LANG Release-1.0.0 | https://specifications.openehr.org/releases/LANG/Release-1.0.0/bmm.html |
+| BASE-PBMM-1.0.4 | P_BMM (Persistence Model) | BASE Release-1.0.4 | https://specifications.openehr.org/releases/BASE/Release-1.0.4/bmm_persistence.html |
+| QUERY-AQL-latest | AQL (Archetype Query Language) | QUERY latest | https://specifications.openehr.org/releases/QUERY/latest/AQL.html |
+| LANG-EL-latest | Expression Language | LANG latest | https://specifications.openehr.org/releases/LANG/latest/expression_language.html |
+| LANG-BEL-latest | Basic Expression Language | LANG latest | https://specifications.openehr.org/releases/LANG/latest/BEL.html |
+| ITS-BMM-repo | openEHR ITS BMM repository | development | https://github.com/openEHR/specifications-ITS-BMM |
+| ADL-ANTLR-repo | ADL ANTLR grammars | development | https://github.com/openEHR/adl-antlr |
+| ADL-WB-guide | ADL Workbench guide | latest | https://openehr.github.io/adl-tools/adl_workbench_guide.html |
 
 See [`SPEC_BASELINE.md`](SPEC_BASELINE.md) for the exact specification versions
-this project implements. Those URLs should be used in code comments and
-validation rule references.
+this project implements. Use the IDs above in `Sources:` blocks.
 
 ### External vs Vendored Resources
 
@@ -35,44 +50,43 @@ validation rule references.
 
 ### 1.1 Archetype Modeling (AM)
 
-- **ADL2 (Archetype Definition Language 2)** — latest:\
-  https://specifications.openehr.org/releases/AM/latest/ADL2.html
-- **OPT2 (Operational Template 2)** — released (AM 2.3.0):\
+- **ADL2 (Archetype Definition Language 2)** — Release-2.3.0 (pinned, ID: `AM-ADL2-2.3.0`):\
+  https://specifications.openehr.org/releases/AM/Release-2.3.0/ADL2.html
+- **OPT2 (Operational Template 2)** — Release-2.3.0 (pinned, ID: `AM-OPT2-2.3.0`):\
   https://specifications.openehr.org/releases/AM/Release-2.3.0/OPT2.html
-- **Archetype Identification** — released (AM 2.3.0):\
-  https://specifications.openehr.org/releases/AM/latest/Identification.html
+- **Archetype Identification** — Release-2.3.0 (ID: `AM-ID-2.3.0`):\
+  https://specifications.openehr.org/releases/AM/Release-2.3.0/Identification.html
 - **Archetype Technology Overview** (conceptual + implementer guidance):\
-  https://specifications.openehr.org/releases/AM/latest/Overview.html
+  https://specifications.openehr.org/releases/AM/Release-2.3.0/Overview.html
 - **AM release index (shows released vs development versions):**\
   https://specifications.openehr.org/releases/AM/Release-2.3.0
 
 ### 1.2 AOM2 (Archetype Object Model 2 — the semantic “truth”)
 
-- **AOM2 (Release 2.1.0 HTML)** (stable reference for semantics + validity
-  rules):\
-  https://specifications.openehr.org/releases/AM/Release-2.1.0/AOM2.html
+- **AOM2 (Release 2.3.0 HTML)** (pinned reference, ID: `AM-AOM2-2.3.0`):\
+  https://specifications.openehr.org/releases/AM/Release-2.3.0/AOM2.html
 
 > Note: the openEHR spec site also publishes “development” views of AOM2 via the
 > `classes/` pages, but for implementation baselines it’s best to pin a released
-> spec.
+> spec (see `SPEC_BASELINE.md`).
 
 ### 1.3 Generic Languages (LANG)
 
-- **ODIN (Object Data Instance Notation)** — latest:\
-  https://specifications.openehr.org/releases/LANG/latest/odin.html
-- **BMM (Basic Meta-Model)** — latest:\
-  https://specifications.openehr.org/releases/LANG/latest/bmm.html
+- **ODIN (Object Data Instance Notation)** — Release-1.0.0 (pinned, ID: `LANG-ODIN-1.0.0`):\
+  https://specifications.openehr.org/releases/LANG/Release-1.0.0/odin.html
+- **BMM (Basic Meta-Model)** — Release-1.0.0 (pinned, ID: `LANG-BMM-1.0.0`):\
+  https://specifications.openehr.org/releases/LANG/Release-1.0.0/bmm.html
 - **P_BMM / BMM Persistence Model and Syntax** (ODIN-like save format used in
-  practice):\
+  practice) — ID: `BASE-PBMM-1.0.4`:\
   https://specifications.openehr.org/releases/BASE/Release-1.0.4/bmm_persistence.html
-- **Expression Language (EL)** — latest:\
+- **Expression Language (EL)** — latest (not pinned in baseline, ID: `LANG-EL-latest`):\
   https://specifications.openehr.org/releases/LANG/latest/expression_language.html
-- **BEL (Basic Expression Language)** — latest:\
+- **BEL (Basic Expression Language)** — latest (not pinned in baseline, ID: `LANG-BEL-latest`):\
   https://specifications.openehr.org/releases/LANG/latest/BEL.html
 
 ### 1.4 Query (Useful for path semantics and testing)
 
-- **AQL (Archetype Query Language)** — latest:\
+- **AQL (Archetype Query Language)** — latest (not pinned in baseline, ID: `QUERY-AQL-latest`):\
   https://specifications.openehr.org/releases/QUERY/latest/AQL.html
 - **AQL Examples** (handy for understanding path usage in queries):\
   https://specifications.openehr.org/releases/QUERY/Release-1.1.0/AQL_examples.html
@@ -90,7 +104,7 @@ validation rule references.
 
 These are the go-to sources for ANTLR grammars and related test assets.
 
-- **openEHR/adl-antlr** — ANTLR4 grammars for ADL (ADL2-focused):\
+- **openEHR/adl-antlr** — ANTLR4 grammars for ADL (ADL2-focused) (ID: `ADL-ANTLR-repo`):\
   https://github.com/openEHR/adl-antlr
 - **openEHR/openEHR-antlr4** — broader development repo for multiple openEHR
   syntaxes:\

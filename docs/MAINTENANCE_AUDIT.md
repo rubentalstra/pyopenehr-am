@@ -22,6 +22,8 @@ historical planning artifacts that are now superseded by `CHECKLIST.md`:
 |------|---------|
 | `README.md` | Removed reference to archived files; updated doc links |
 | `openehr_am_resources.md` | Added version pins and provenance; clarified vendored vs external |
+| `resources/README.md` | Clarified pinned release URLs to match `SPEC_BASELINE.md` |
+| `docs/README.md` | **New** docs navigation map and reading order for AI/contributors |
 
 ### Files Created
 
@@ -30,6 +32,7 @@ historical planning artifacts that are now superseded by `CHECKLIST.md`:
 | `CHECKLIST.md` | Fresh continuation plan with concrete deliverables |
 | `resources/README.md` | Provenance and usage notes for fetched resources |
 | `docs/MAINTENANCE_AUDIT.md` | This audit report |
+| `docs/README.md` | Documentation map and reading order |
 
 ---
 
@@ -63,6 +66,7 @@ historical planning artifacts that are now superseded by `CHECKLIST.md`:
 | `docs/architecture.md` | Pipeline architecture | **Keep** |
 | `docs/quickstart.md` | Usage examples | **Keep** |
 | `docs/compatibility.md` | Stability guarantees | **Keep** |
+| `docs/README.md` | Documentation map | **New** |
 | `docs/glossary.md` | Term definitions | **Keep** |
 | `docs/issue-codes.md` | Issue code registry | **Keep** |
 | `docs/validation-rule-template.md` | Rule template | **Keep** |

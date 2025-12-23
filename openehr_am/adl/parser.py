@@ -14,7 +14,12 @@ The MVP parser only extracts:
 The definition section is recognised (minimal cADL subset supported).
 The rules section is captured as raw text + best-effort spans (no parsing/evaluation).
 
-# Spec: https://specifications.openehr.org/releases/AM/latest/ADL2.html
+Sources:
+- [AM-ADL2-2.3.0] ADL2, Release-2.3.0. Section: 8 (artefact structure) and 8.4
+  (specialise block). Link/path:
+  https://specifications.openehr.org/releases/AM/Release-2.3.0/ADL2.html
+  Note: Extracts artefact kind/id, optional specialise clause, core sections
+  (language, description, terminology), and a minimal cADL definition placeholder.
 """
 
 from dataclasses import dataclass, replace
@@ -77,7 +82,13 @@ def parse_adl(
         - This function never raises for invalid ADL input.
         - Only header + a small subset of sections are extracted.
 
-    # Spec: https://specifications.openehr.org/releases/AM/latest/ADL2.html
+    Sources:
+    - [AM-ADL2-2.3.0] ADL2, Release-2.3.0. Section: 8 (artefact structure) and 8.5
+      (rules section). Link/path:
+      https://specifications.openehr.org/releases/AM/Release-2.3.0/ADL2.html
+      Note: Top-level ADL parsing that collects header, specialise clause,
+      ODIN-backed sections, minimal cADL definition, and raw rules statements;
+      all errors surface as Issue objects.
     """
 
     if not isinstance(text, str):
@@ -318,6 +329,15 @@ def _parse_definition_section(
     *,
     filename: str | None,
 ) -> tuple[CadlObjectNode | None, list[Issue]]:
+    """Parse the minimal cADL definition section and validate basic constraints.
+
+    Sources:
+    - [AM-ADL2-2.3.0] ADL2, Release-2.3.0. Section: 10 (cADL) minimal subset.
+      Link/path: https://specifications.openehr.org/releases/AM/Release-2.3.0/ADL2.html
+      Note: Handles a minimal cADL subset (objects, attributes, primitive
+      constraints) and emits ADL030 validation Issues for invalid
+      occurrences/cardinality.
+    """
     rng = _section_content_range(lines, section_map, "definition")
     if rng is None:
         return None, []
