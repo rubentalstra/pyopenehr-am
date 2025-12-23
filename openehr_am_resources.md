@@ -4,8 +4,30 @@ Curated links to **official openEHR specifications**, **schemas**, **grammars**,
 **tools**, and **community resources** relevant to implementing a **pure-Python
 ADL2/AOM2 validator + OPT2 compiler**.
 
-> Recommended usage: pin a spec baseline (release + date) in your repo and treat
-> these docs as the source of truth.
+> **Important:** This project pins specific specification releases in
+> [`SPEC_BASELINE.md`](SPEC_BASELINE.md). Use those pinned URLs for implementation
+> references. This document provides a broader resource index.
+
+> **Last reviewed:** December 2025
+
+---
+
+## Provenance and Versioning
+
+### What This Repo Pins (Authoritative)
+
+See [`SPEC_BASELINE.md`](SPEC_BASELINE.md) for the exact specification versions
+this project implements. Those URLs should be used in code comments and
+validation rule references.
+
+### External vs Vendored Resources
+
+| Resource Type | Status | Location |
+|--------------|--------|----------|
+| Specifications (HTML) | External link only | Links below |
+| ANTLR grammars | Vendored in `grammars/` | Local copies |
+| BMM schemas | External link only | User-supplied |
+| Test archetypes | Minimal fixtures in `tests/fixtures/` | Local copies |
 
 ---
 
@@ -171,20 +193,20 @@ If you’re implementing a validator/compiler from scratch:
 
 ## 8) Handy Link Index (Copy/Paste)
 
-- ADL2: https://specifications.openehr.org/releases/AM/latest/ADL2.html
-- AOM2: https://specifications.openehr.org/releases/AM/Release-2.1.0/AOM2.html
-- OPT2: https://specifications.openehr.org/releases/AM/Release-2.3.0/OPT2.html
-- ODIN: https://specifications.openehr.org/releases/LANG/latest/odin.html
-- BMM: https://specifications.openehr.org/releases/LANG/latest/bmm.html
-- P_BMM:
-  https://specifications.openehr.org/releases/BASE/Release-1.0.4/bmm_persistence.html
-- BEL: https://specifications.openehr.org/releases/LANG/latest/BEL.html
-- EL:
-  https://specifications.openehr.org/releases/LANG/latest/expression_language.html
-- AQL: https://specifications.openehr.org/releases/QUERY/latest/AQL.html
-- ITS-BMM schemas repo: https://github.com/openEHR/specifications-ITS-BMM
-- adl-antlr: https://github.com/openEHR/adl-antlr
-- adl-tools: https://github.com/openEHR/adl-tools
-- Archetype Designer: https://www.openehr.org/archetypedesigner
-- CKM: https://ckm.openehr.org/ckm/
-- Discourse: https://discourse.openehr.org/
+**Pinned releases (use in code comments):**
+
+| Spec | Pinned URL |
+|------|------------|
+| ADL2 | https://specifications.openehr.org/releases/AM/Release-2.3.0/ADL2.html |
+| AOM2 | https://specifications.openehr.org/releases/AM/Release-2.3.0/AOM2.html |
+| OPT2 | https://specifications.openehr.org/releases/AM/Release-2.3.0/OPT2.html |
+| ODIN | https://specifications.openehr.org/releases/LANG/Release-1.0.0/odin.html |
+| BMM | https://specifications.openehr.org/releases/LANG/Release-1.0.0/bmm.html |
+
+**Repositories:**
+
+- ITS-BMM schemas: https://github.com/openEHR/specifications-ITS-BMM
+- adl-antlr grammars: https://github.com/openEHR/adl-antlr
+- adl-tools (reference impl): https://github.com/openEHR/adl-tools
+- CKM (archetypes): https://ckm.openehr.org/ckm/
+- Discourse (community): https://discourse.openehr.org/

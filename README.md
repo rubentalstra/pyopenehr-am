@@ -63,11 +63,11 @@ Documentation entry points:
 - [docs/architecture.md](docs/architecture.md)
 - [docs/compatibility.md](docs/compatibility.md)
 
-Planned milestones and tasks live in:
+Project status and planned milestones:
 
-- [openehr_am_toolkit_todo_checklist.md](openehr_am_toolkit_todo_checklist.md)
-- [docs/issue-codes.md](docs/issue-codes.md) and
-  [docs/validation-rule-template.md](docs/validation-rule-template.md)
+- [CHECKLIST.md](CHECKLIST.md) — continuation plan and next tasks
+- [docs/issue-codes.md](docs/issue-codes.md) — validation diagnostic codes
+- [docs/roadmap.md](docs/roadmap.md) — version roadmap
 
 ---
 
