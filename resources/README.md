@@ -28,11 +28,11 @@ considerations. Use the canonical links in `openehr_am_resources.md`.
 
 | Resource | Canonical URL | Notes |
 |----------|---------------|-------|
-| ADL2 Spec | https://specifications.openehr.org/releases/AM/Release-2.3.0/ADL2.html | HTML spec |
-| AOM2 Spec | https://specifications.openehr.org/releases/AM/Release-2.3.0/AOM2.html | HTML spec |
-| OPT2 Spec | https://specifications.openehr.org/releases/AM/Release-2.3.0/OPT2.html | HTML spec |
-| ODIN Spec | https://specifications.openehr.org/releases/LANG/Release-1.0.0/odin.html | HTML spec |
-| BMM Spec | https://specifications.openehr.org/releases/LANG/Release-1.0.0/bmm.html | HTML spec |
+| ADL2 Spec | https://specifications.openehr.org/releases/AM/Release-2.3.0/ADL2.html | Pinned release (see `SPEC_BASELINE.md`) |
+| AOM2 Spec | https://specifications.openehr.org/releases/AM/Release-2.3.0/AOM2.html | Pinned release |
+| OPT2 Spec | https://specifications.openehr.org/releases/AM/Release-2.3.0/OPT2.html | Pinned release |
+| ODIN Spec | https://specifications.openehr.org/releases/LANG/Release-1.0.0/odin.html | Pinned release |
+| BMM Spec | https://specifications.openehr.org/releases/LANG/Release-1.0.0/bmm.html | Pinned release |
 
 ### Git Repositories (External Links Only)
 

@@ -62,6 +62,7 @@ Documentation entry points:
 - [docs/quickstart.md](docs/quickstart.md)
 - [docs/architecture.md](docs/architecture.md)
 - [docs/compatibility.md](docs/compatibility.md)
+- [docs/README.md](docs/README.md) — documentation map and reading order
 
 Project status and planned milestones:
 

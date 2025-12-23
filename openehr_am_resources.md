@@ -35,44 +35,44 @@ validation rule references.
 
 ### 1.1 Archetype Modeling (AM)
 
-- **ADL2 (Archetype Definition Language 2)** — latest:\
-  https://specifications.openehr.org/releases/AM/latest/ADL2.html
-- **OPT2 (Operational Template 2)** — released (AM 2.3.0):\
+- **ADL2 (Archetype Definition Language 2)** — Release-2.3.0 (pinned):\
+  https://specifications.openehr.org/releases/AM/Release-2.3.0/ADL2.html
+- **OPT2 (Operational Template 2)** — Release-2.3.0 (pinned):\
   https://specifications.openehr.org/releases/AM/Release-2.3.0/OPT2.html
-- **Archetype Identification** — released (AM 2.3.0):\
-  https://specifications.openehr.org/releases/AM/latest/Identification.html
+- **Archetype Identification** — Release-2.3.0:\
+  https://specifications.openehr.org/releases/AM/Release-2.3.0/Identification.html
 - **Archetype Technology Overview** (conceptual + implementer guidance):\
-  https://specifications.openehr.org/releases/AM/latest/Overview.html
+  https://specifications.openehr.org/releases/AM/Release-2.3.0/Overview.html
 - **AM release index (shows released vs development versions):**\
   https://specifications.openehr.org/releases/AM/Release-2.3.0
 
 ### 1.2 AOM2 (Archetype Object Model 2 — the semantic “truth”)
 
-- **AOM2 (Release 2.1.0 HTML)** (stable reference for semantics + validity
+- **AOM2 (Release 2.3.0 HTML)** (pinned reference for semantics + validity
   rules):\
-  https://specifications.openehr.org/releases/AM/Release-2.1.0/AOM2.html
+  https://specifications.openehr.org/releases/AM/Release-2.3.0/AOM2.html
 
 > Note: the openEHR spec site also publishes “development” views of AOM2 via the
 > `classes/` pages, but for implementation baselines it’s best to pin a released
-> spec.
+> spec (see `SPEC_BASELINE.md`).
 
 ### 1.3 Generic Languages (LANG)
 
-- **ODIN (Object Data Instance Notation)** — latest:\
-  https://specifications.openehr.org/releases/LANG/latest/odin.html
-- **BMM (Basic Meta-Model)** — latest:\
-  https://specifications.openehr.org/releases/LANG/latest/bmm.html
+- **ODIN (Object Data Instance Notation)** — Release-1.0.0 (pinned):\
+  https://specifications.openehr.org/releases/LANG/Release-1.0.0/odin.html
+- **BMM (Basic Meta-Model)** — Release-1.0.0 (pinned):\
+  https://specifications.openehr.org/releases/LANG/Release-1.0.0/bmm.html
 - **P_BMM / BMM Persistence Model and Syntax** (ODIN-like save format used in
   practice):\
   https://specifications.openehr.org/releases/BASE/Release-1.0.4/bmm_persistence.html
-- **Expression Language (EL)** — latest:\
+- **Expression Language (EL)** — latest (not pinned in baseline):\
   https://specifications.openehr.org/releases/LANG/latest/expression_language.html
-- **BEL (Basic Expression Language)** — latest:\
+- **BEL (Basic Expression Language)** — latest (not pinned in baseline):\
   https://specifications.openehr.org/releases/LANG/latest/BEL.html
 
 ### 1.4 Query (Useful for path semantics and testing)
 
-- **AQL (Archetype Query Language)** — latest:\
+- **AQL (Archetype Query Language)** — latest (not pinned in baseline):\
   https://specifications.openehr.org/releases/QUERY/latest/AQL.html
 - **AQL Examples** (handy for understanding path usage in queries):\
   https://specifications.openehr.org/releases/QUERY/Release-1.1.0/AQL_examples.html
