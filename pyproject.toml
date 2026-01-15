@@ -39,7 +39,7 @@ dev = [
     "pytest-cov>=7.0.0",
     "ruff>=0.14.10",
 ]
-release = ["build==1.3.0", "twine==6.2.0"]
+release = ["build==1.4.0", "twine==6.2.0"]
 
 [project.scripts]
 openehr-am = "openehr_am.cli.main:main"
